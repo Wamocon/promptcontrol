@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--
+    HANDBOOK META - updated by Copilot on every relevant change
+    APP_NAME        : [APP_NAME]
+    APP_VERSION     : 0.1.0
+    LAST_UPDATED    : [LAST_UPDATED]
+    PRIMARY_COLOR   : [PRIMARY_COLOR]   e.g. #3b82f6
+    PRIMARY_DARK    : [PRIMARY_DARK]    e.g. #2563eb
+    LOGO_EMOJI      : [LOGO_EMOJI]      e.g. &#128230;
+  -->
+  <title>[APP_NAME] &ndash; Produkthandbuch | WAMOCON</title>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Brand colors - Copilot updates these to match the app */
+      --primary:      #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-glow: rgba(59,130,246,0.18);
+      --success:      #10b981;
+      --warning:      #f59e0b;
+      --danger:       #ef4444;
+
+      /* Dark-theme background layers */
+      --bg-page:   #0d1526;
+      --bg-card:   rgba(255,255,255,0.03);
+      --bg-code:   rgba(255,255,255,0.06);
+
+      /* Text hierarchy */
+      --text:       #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim:   #475569;
+
+      /* Borders */
+      --border: rgba(255,255,255,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── No-print utility ─────────────────────────────────────────── */
+    @media print {
+      .no-print { display: none !important; }
+      #toc-sidebar { display: none !important; }
+      .layout { display: block !important; }
+      main { padding: 2rem !important; max-width: 100% !important; }
+      .page-header { position: static !important; }
+      body { background: #fff !important; color: #000 !important; }
+      :root {
+        --text: #000; --text-muted: #333; --bg-page: #fff;
+        --bg-card: #f5f5f5; --border: #ddd; --primary: #1d4ed8;
+      }
+      .cover { background: #f0f4ff !important; border-color: #1d4ed8 !important; }
+      h2 { color: #1d4ed8 !important; border-color: #1d4ed8 !important; }
+      .page-footer { position: static !important; border-top: 1px solid #ddd; }
+    }
+
+    /* ── Header ───────────────────────────────────────────────────── */
+    .page-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 70px;
+      background: rgba(13,21,38,0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      gap: 1rem;
+    }
+
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+
+    .logo-mark {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 900; color: #fff;
+      box-shadow: 0 4px 12px var(--primary-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-name { color: #fff; font-weight: 800; font-size: 1.1rem; }
+    .brand-sub  { color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.05em; font-weight: 600; }
+    .header-meta { color: var(--text-dim); font-size: 0.75rem; text-align: right; }
+
+    /* ── Header actions ───────────────────────────────────────────── */
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem;
+      font-weight: 700; cursor: pointer; border: none; transition: 0.2s;
+      text-decoration: none; white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--primary); color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-dark); text-decoration: none; }
+
+    .btn-outline {
+      background: transparent; color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); text-decoration: none; }
+
+    /* ── PDF download / OneDrive buttons ─────────────────────────── */
+    .download-bar {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: rgba(59,130,246,0.06);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 10px; padding: 0.5rem 1rem;
+      font-size: 0.8rem; color: var(--text-muted);
+    }
+    .download-bar strong { color: var(--text); }
+
+    /* ── Layout ───────────────────────────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 70px);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Sidebar TOC ──────────────────────────────────────────────── */
+    #toc-sidebar {
+      position: sticky;
+      top: 70px;
+      height: calc(100vh - 70px);
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+      border-right: 1px solid var(--border);
+      background: rgba(13,21,38,0.4);
+    }
+
+    .toc-title {
+      font-size: 0.7rem; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--text-dim); margin-bottom: 1rem;
+    }
+
+    .toc-link {
+      display: block; padding: 0.5rem 0;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.85rem; transition: 0.2s;
+    }
+    .toc-link:hover { color: var(--primary); transform: translateX(4px); text-decoration: none; }
+    .toc-link.l1 {
+      font-weight: 700; color: var(--text);
+      border-top: 1px solid var(--border);
+      margin-top: 1rem; padding-top: 1rem;
+    }
+    .toc-link.l2 { padding-left: 1rem; font-size: 0.8rem; }
+    .toc-link.l1:first-of-type { border-top: none; margin-top: 0; }
+
+    /* ── Main content ─────────────────────────────────────────────── */
+    main { padding: 3rem 4rem 6rem; max-width: 900px; }
+
+    /* ── Cover page ───────────────────────────────────────────────── */
+    .cover {
+      background: linear-gradient(160deg, rgba(30,60,130,0.2) 0%, rgba(13,21,38,0.9) 100%);
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 24px; padding: 4rem;
+      margin-bottom: 4rem; position: relative; overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .doc-type {
+      font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.2em; color: var(--primary); margin-bottom: 1rem;
+    }
+    .cover h1 { font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+    .cover-sub { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 3rem; }
+    .cover-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2rem; }
+    .meta-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.3rem; }
+    .meta-value { font-weight: 700; font-size: 1rem; }
+
+    /* ── Typography ───────────────────────────────────────────────── */
+    h2 {
+      font-size: 2rem; font-weight: 900; margin: 4rem 0 1.5rem;
+      border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    h2 .num { color: var(--primary); opacity: 0.5; font-size: 1.2rem; }
+    h3 { font-size: 1.3rem; font-weight: 800; margin: 2.5rem 0 1rem; color: var(--primary); }
+    p { margin-bottom: 1.2rem; }
+    ul, ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.52rem; }
+    li::marker { color: var(--primary); }
+    strong { color: #fff; }
+    code {
+      background: var(--bg-code); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0.15em 0.45em;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.88em; color: var(--primary);
+    }
+
+    /* ── Cards & Blocks ───────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0;
+    }
+
+    .badge {
+      display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-success { background: rgba(16,185,129,0.1); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+    .badge-primary { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(59,130,246,0.2); }
+    .badge-warning { background: rgba(245,158,11,0.1); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+    .badge-danger  { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+
+    .info-box {
+      padding: 1.2rem 1.5rem; border-radius: 12px; margin: 2rem 0;
+      border-left: 4px solid var(--primary); background: rgba(59,130,246,0.05);
+    }
+    .info-box-title { font-weight: 900; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 0.5rem; }
+
+    .warn-box {
+      padding: 1.2rem 1.5rem; border-radius: 12px; margin: 2rem 0;
+      border-left: 4px solid var(--danger); background: rgba(239,68,68,0.05);
+    }
+    .warn-box-title { font-weight: 900; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--danger); margin-bottom: 0.5rem; }
+
+    /* ── Feature Grid ─────────────────────────────────────────────── */
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; }
+    .feature-icon { font-size: 1.8rem; margin-bottom: 0.7rem; }
+    .feature-title { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.4rem; color: #fff; }
+    .feature-desc { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* ── Table ────────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; margin: 2rem 0; border-radius: 12px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th {
+      text-align: left; padding: 1rem;
+      background: rgba(255,255,255,0.02); color: var(--text-muted);
+      font-weight: 800; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.1em;
+    }
+    td { padding: 1rem; border-top: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: rgba(59,130,246,0.02); }
+
+    .yes { color: var(--success); font-weight: 700; }
+    .no  { color: var(--text-dim); }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    .page-footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 4rem;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 1000px) {
+      .layout { grid-template-columns: 1fr; }
+      #toc-sidebar { display: none; }
+      main { padding: 2rem 1.5rem 4rem; }
+      .cover { padding: 2rem; }
+      .cover h1 { font-size: 2rem; }
+      .page-footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 1.5rem; }
+      .header-actions .download-bar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────── -->
+<header class="page-header no-print">
+  <div class="brand">
+    <!-- LOGO: Copilot updates the emoji/letter and gradient to match the app -->
+    <div class="logo-mark" aria-label="App logo">&#128230;</div>
+    <div>
+      <div class="brand-name">[APP_NAME]</div>
+      <div class="brand-sub">WAMOCON &middot; Produkthandbuch</div>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <div class="download-bar">
+      <strong>PDF &amp; OneDrive:</strong>&nbsp;Drucken &rarr; Als PDF speichern &rarr; In OneDrive ablegen
+    </div>
+    <!-- PDF Download button - uses browser print dialog (Save as PDF) -->
+    <button class="btn btn-primary" onclick="window.print()" title="Als PDF speichern (Drucken &rarr; Als PDF speichern)">
+      &#128196; PDF speichern
+    </button>
+    <!-- OneDrive save - opens instructions modal -->
+    <button class="btn btn-outline" onclick="document.getElementById('onedrive-modal').style.display='flex'" title="In OneDrive speichern">
+      &#9729; OneDrive
+    </button>
+  </div>
+</header>
+
+<!-- ── OneDrive instructions modal ─────────────────────────────────── -->
+<div id="onedrive-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#1e2a42; border:1px solid var(--border); border-radius:20px; padding:2.5rem; max-width:480px; width:90%;">
+    <h3 style="color:var(--primary); margin-bottom:1rem;">&#9729; In OneDrive speichern</h3>
+    <ol style="color:var(--text-muted); font-size:0.9rem; line-height:1.8;">
+      <li>Klicke auf <strong style="color:#fff;">&#128196; PDF speichern</strong></li>
+      <li>Im Druckdialog: Drucker auf <strong style="color:#fff;">"Als PDF speichern"</strong> stellen</li>
+      <li>Speicherort: <strong style="color:#fff;">OneDrive-Ordner</strong> ausw&auml;hlen</li>
+      <li><strong style="color:#fff;">Speichern</strong> klicken &mdash; fertig</li>
+    </ol>
+    <p style="color:var(--text-dim); font-size:0.8rem; margin-top:1.5rem;">
+      Alternativ: Datei herunterladen und per <strong>OneDrive Sync-Client</strong>
+      oder <strong>onedrive.live.com</strong> hochladen.
+    </p>
+    <button class="btn btn-primary" style="margin-top:1.5rem; width:100%;" onclick="document.getElementById('onedrive-modal').style.display='none'">
+      Verstanden
+    </button>
+  </div>
+</div>
+
+<!-- ── Main layout ──────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- ── Sidebar TOC ─────────────────────────────────────────────── -->
+  <nav id="toc-sidebar" class="no-print" aria-label="Inhaltsverzeichnis">
+    <div class="toc-title">Inhalt</div>
+    <a class="toc-link l1" href="#uebersicht">01 &Uuml;bersicht</a>
+    <a class="toc-link l1" href="#features">02 Funktionen</a>
+    <a class="toc-link l2" href="#feature-list">2.1 Feature-Liste</a>
+    <a class="toc-link l2" href="#plaene">2.2 Pl&auml;ne &amp; Preise</a>
+    <a class="toc-link l1" href="#tutorials">03 Erste Schritte</a>
+    <a class="toc-link l2" href="#tut-konto">3.1 Konto erstellen</a>
+    <a class="toc-link l2" href="#tut-start">3.2 Loslegen</a>
+    <a class="toc-link l2" href="#tut-upgrade">3.3 Upgrade</a>
+    <a class="toc-link l1" href="#howto">04 How-to Guides</a>
+    <a class="toc-link l2" href="#ht-profil">4.1 Profil verwalten</a>
+    <a class="toc-link l2" href="#ht-loeschen">4.2 Konto l&ouml;schen</a>
+    <a class="toc-link l1" href="#referenz">05 Funktionsreferenz</a>
+    <a class="toc-link l2" href="#routen">5.1 Routen</a>
+    <a class="toc-link l2" href="#api">5.2 API &amp; Hooks</a>
+    <a class="toc-link l1" href="#tech">06 Technische Architektur</a>
+    <a class="toc-link l2" href="#tech-stack">6.1 Stack</a>
+    <a class="toc-link l2" href="#tech-schema">6.2 Datenbank-Schema</a>
+    <a class="toc-link l1" href="#ci-cd">07 CI/CD &amp; Tests</a>
+    <a class="toc-link l1" href="#compliance">08 DSGVO &amp; Compliance</a>
+    <a class="toc-link l1" href="#glossar">09 Glossar</a>
+  </nav>
+
+  <!-- ── Main ────────────────────────────────────────────────────── -->
+  <main>
+
+    <!-- ── Cover ─────────────────────────────────────────────────── -->
+    <div class="cover">
+      <div class="doc-type">Offizielles Produkthandbuch &middot; WAMOCON GmbH</div>
+      <h1>[APP_NAME]</h1>
+      <div class="cover-sub">[APP_TAGLINE]</div>
+      <div class="cover-meta">
+        <div><div class="meta-label">Version</div><div class="meta-value">[APP_VERSION]</div></div>
+        <div><div class="meta-label">Status</div><div class="meta-value"><span class="badge badge-success">Produktiv</span></div></div>
+        <div><div class="meta-label">Pl&auml;ne</div><div class="meta-value">[PLAN_NAMES]</div></div>
+        <div><div class="meta-label">Datum</div><div class="meta-value">[LAST_UPDATED]</div></div>
+      </div>
+    </div>
+
+    <!-- ── 1. Uebersicht ──────────────────────────────────────────── -->
+    <section id="uebersicht">
+      <h2><span class="num">01</span> &Uuml;bersicht</h2>
+      <p>
+        [APP_NAME] ist eine webbasierte SaaS-Plattform, die [APP_DESCRIPTION].
+      </p>
+      <div class="card">
+        <strong>Was [APP_NAME] l&ouml;st:</strong> [PROBLEM_STATEMENT]
+      </div>
+      <div class="feature-grid">
+        <!-- Copilot fills these cards based on actual implemented features -->
+        <div class="feature-card">
+          <div class="feature-icon">&#128269;</div>
+          <div class="feature-title">[FEATURE_1_TITLE]</div>
+          <div class="feature-desc">[FEATURE_1_DESC]</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9889;</div>
+          <div class="feature-title">[FEATURE_2_TITLE]</div>
+          <div class="feature-desc">[FEATURE_2_DESC]</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128202;</div>
+          <div class="feature-title">[FEATURE_3_TITLE]</div>
+          <div class="feature-desc">[FEATURE_3_DESC]</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#128276;</div>
+          <div class="feature-title">[FEATURE_4_TITLE]</div>
+          <div class="feature-desc">[FEATURE_4_DESC]</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nutzerrolle</th><th>Beschreibung</th></tr></thead>
+          <tbody>
+            <!-- Copilot updates rows to reflect actual roles -->
+            <tr><td><strong>Free-Nutzer</strong></td><td>[FREE_ROLE_DESC]</td></tr>
+            <tr><td><strong>Pro-Nutzer</strong></td><td>[PRO_ROLE_DESC]</td></tr>
+            <tr><td><strong>Admin (WAMOCON)</strong></td><td>Nutzerverwaltung, Systemkonfiguration, Monitoring</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 2. Funktionen ──────────────────────────────────────────── -->
+    <section id="features">
+      <h2><span class="num">02</span> Funktionen</h2>
+
+      <h3 id="feature-list">2.1 Feature-Liste</h3>
+      <p>[FEATURE_LIST_INTRO]</p>
+      <div class="info-box">
+        <div class="info-box-title">Hinweis</div>
+        <p>Diese Liste wird von Copilot automatisch aktualisiert, wenn neue Features implementiert werden.</p>
+      </div>
+
+      <h3 id="plaene">2.2 Pl&auml;ne &amp; Preise</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Free</th><th>Pro ([PRO_PRICE])</th></tr></thead>
+          <tbody>
+            <!-- Copilot updates this table when pricing/plans change -->
+            <tr><td>[FEATURE_A]</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+            <tr><td>[FEATURE_B]</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+            <tr><td>[FEATURE_C_PRO]</td><td class="no">&#10007;</td><td class="yes">&#10003;</td></tr>
+            <tr><td>[FEATURE_D_PRO]</td><td class="no">&#10007;</td><td class="yes">&#10003;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 3. Erste Schritte (Tutorials) ─────────────────────────── -->
+    <section id="tutorials">
+      <h2><span class="num">03</span> Erste Schritte</h2>
+
+      <h3 id="tut-konto">3.1 Konto erstellen</h3>
+      <ol>
+        <!-- Copilot updates steps to match actual auth flow and routes -->
+        <li><code>[APP_URL]/auth/registrieren</code> aufrufen</li>
+        <li>E-Mail-Adresse und Passwort (min. 8 Zeichen) eingeben</li>
+        <li>AGB und Datenschutzerkl&auml;rung akzeptieren</li>
+        <li><strong>&bdquo;Kostenlos starten&ldquo;</strong> klicken</li>
+        <li>Best&auml;tigungslink in der E-Mail anklicken</li>
+        <li>Weiterleitung zum Dashboard</li>
+      </ol>
+
+      <h3 id="tut-start">3.2 Loslegen</h3>
+      <ol>
+        <!-- Copilot fills this section with the actual first-run workflow -->
+        <li>[STEP_1]</li>
+        <li>[STEP_2]</li>
+        <li>[STEP_3]</li>
+      </ol>
+
+      <h3 id="tut-upgrade">3.3 Auf Pro upgraden</h3>
+      <ol>
+        <li>Im Dashboard auf <strong>&bdquo;Auf Pro upgraden&ldquo;</strong> klicken</li>
+        <li>Stripe Checkout &ouml;ffnet sich im selben Fenster</li>
+        <li>Zahlungsdaten eingeben (Kreditkarte, SEPA-Lastschrift)</li>
+        <li>Nach Zahlung: automatische R&uuml;ckleitung zum Dashboard mit aktiviertem Pro-Status</li>
+      </ol>
+    </section>
+
+    <!-- ── 4. How-to Guides ───────────────────────────────────────── -->
+    <section id="howto">
+      <h2><span class="num">04</span> How-to Guides</h2>
+
+      <h3 id="ht-profil">4.1 Profil &amp; Abonnement verwalten</h3>
+      <ol>
+        <li><code>/[locale]/profil</code> aufrufen</li>
+        <li>Stammdaten (Name, E-Mail) &auml;ndern &rarr; <strong>&bdquo;Speichern&ldquo;</strong></li>
+        <li>Passwort &auml;ndern &rarr; Best&auml;tigungs-E-Mail wird versandt</li>
+        <li>Abo-Status und n&auml;chstes Abrechnungsdatum einsehen</li>
+        <li>Zahlungsmethode &auml;ndern &rarr; Weiterleitung zum Stripe Customer Portal</li>
+        <li>Pro-Abo k&uuml;ndigen &rarr; Weiterleitung zum Stripe Customer Portal (K&uuml;ndigung zum Periodenende)</li>
+      </ol>
+
+      <h3 id="ht-loeschen">4.2 Konto l&ouml;schen (DSGVO)</h3>
+      <ol>
+        <li><code>/[locale]/profil</code> aufrufen &rarr; Abschnitt <strong>&bdquo;Konto l&ouml;schen&ldquo;</strong></li>
+        <li>Best&auml;tigungsdialog &ouml;ffnet sich &ndash; Vorgang ist <strong>nicht r&uuml;ckg&auml;ngig zu machen</strong></li>
+        <li>Best&auml;tigung eingeben und <strong>&bdquo;Konto unwiderruflich l&ouml;schen&ldquo;</strong> klicken</li>
+        <li>Alle personenbezogenen Daten werden gel&ouml;scht (DSGVO Art. 17)</li>
+        <li>Aktives Pro-Abo wird bei Stripe sofort gek&uuml;ndigt</li>
+      </ol>
+
+      <div class="warn-box">
+        <div class="warn-box-title">Unumkehrbarer Vorgang</div>
+        <p>Die Konto-L&ouml;schung kann nicht r&uuml;ckg&auml;ngig gemacht werden. Alle Daten werden dauerhaft entfernt.</p>
+      </div>
+    </section>
+
+    <!-- ── 5. Funktionsreferenz ───────────────────────────────────── -->
+    <section id="referenz">
+      <h2><span class="num">05</span> Funktionsreferenz</h2>
+
+      <h3 id="routen">5.1 Routen-&Uuml;bersicht</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Route</th><th>Beschreibung</th><th>Zugriff</th></tr></thead>
+          <tbody>
+            <!-- Copilot updates this table to match actual app routes from src/app/ -->
+            <tr><td><code>/[locale]</code></td><td>Startseite / Marketing</td><td>Alle</td></tr>
+            <tr><td><code>/[locale]/auth/anmelden</code></td><td>Login</td><td>&Ouml;ffentlich</td></tr>
+            <tr><td><code>/[locale]/auth/registrieren</code></td><td>Registrierung</td><td>&Ouml;ffentlich</td></tr>
+            <tr><td><code>/[locale]/dashboard</code></td><td>Nutzer-Dashboard</td><td>Eingeloggt</td></tr>
+            <tr><td><code>/[locale]/profil</code></td><td>Profil, Abo, Konto</td><td>Eingeloggt</td></tr>
+            <tr><td><code>/[locale]/admin</code></td><td>Admin-Dashboard</td><td>Admin only</td></tr>
+            <tr><td><code>/[locale]/impressum</code></td><td>Impressum</td><td>Alle</td></tr>
+            <tr><td><code>/[locale]/datenschutz</code></td><td>Datenschutzerkl&auml;rung</td><td>Alle</td></tr>
+            <tr><td><code>/[locale]/agb</code></td><td>AGB</td><td>Alle</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="api">5.2 API &amp; Hooks</h3>
+      <div class="info-box">
+        <div class="info-box-title">Lebende Dokumentation</div>
+        <p>Copilot erg&auml;nzt diese Tabelle automatisch, wenn neue API-Routen oder Hooks hinzugef&uuml;gt werden.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Endpunkt / Hook</th><th>Methode</th><th>Beschreibung</th><th>Zugriff</th></tr></thead>
+          <tbody>
+            <!-- Copilot updates rows when API routes are added/changed -->
+            <tr><td><code>/api/health</code></td><td>GET</td><td>Health-Check</td><td>Alle</td></tr>
+            <tr><td><code>/api/stripe/webhook</code></td><td>POST</td><td>Stripe-Webhook (intern)</td><td>Stripe only</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 6. Technische Architektur ──────────────────────────────── -->
+    <section id="tech">
+      <h2><span class="num">06</span> Technische Architektur</h2>
+
+      <h3 id="tech-stack">6.1 Stack</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Schicht</th><th>Technologie</th><th>Aufgabe</th></tr></thead>
+          <tbody>
+            <tr><td>Frontend &amp; Backend</td><td>Next.js 16 (App Router), TypeScript</td><td>SSR, API-Routen, Middleware</td></tr>
+            <tr><td>Styling</td><td>Tailwind CSS v4</td><td>Utility-First, Dark/Light Mode</td></tr>
+            <tr><td>Datenbank &amp; Auth</td><td>Supabase (PostgreSQL, RLS)</td><td>Schema <code>[DB_SCHEMA]</code></td></tr>
+            <tr><td>i18n</td><td>next-intl v4</td><td>Deutsch (prim&auml;r) &amp; Englisch</td></tr>
+            <tr><td>Payment</td><td>Stripe</td><td>Abonnement, Customer Portal</td></tr>
+            <tr><td>E-Mail</td><td>Resend</td><td>Transaktions-E-Mails, Benachrichtigungen</td></tr>
+            <tr><td>Tests</td><td>Vitest, Testing Library</td><td>Unit-Tests, Coverage-Threshold</td></tr>
+            <tr><td>CI/CD</td><td>GitHub Actions</td><td>Tests, Lint, Typecheck, Vercel Deploy</td></tr>
+            <tr><td>Hosting</td><td>Vercel (Frontend), Supabase EU-Frankfurt</td><td>DSGVO-konforme EU-Region</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="tech-schema">6.2 Datenbank-Schema</h3>
+      <p>Supabase-Schema: <code>[DB_SCHEMA_DEV]</code> (Entwicklung) / <code>[DB_SCHEMA_PROD]</code> (Produktion). Row Level Security (RLS) ist auf allen Tabellen aktiv.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tabelle</th><th>Inhalt</th><th>RLS</th></tr></thead>
+          <tbody>
+            <!-- Copilot updates this table when Supabase migrations are applied -->
+            <tr><td><code>profiles</code></td><td>Nutzerprofile, Plan (free/pro)</td><td>Nur eigener Datensatz</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 7. CI/CD & Tests ───────────────────────────────────────── -->
+    <section id="ci-cd">
+      <h2><span class="num">07</span> CI/CD &amp; Tests</h2>
+      <p>Jeder Code-Push durchl&auml;uft automatisch Qualit&auml;ts-Gates. Ein Vercel-Deployment erfolgt nur bei Pull Requests (Preview) oder Merge in <code>main</code> (Produktion).</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Workflow</th><th>Trigger</th><th>Befehl</th></tr></thead>
+          <tbody>
+            <!-- Copilot updates this table when GitHub Actions workflows change -->
+            <tr><td><code>deploy.yml</code></td><td>Manuell (workflow_dispatch)</td><td>Vercel Production/Preview Deploy</td></tr>
+            <tr><td><code>pr-pipeline.yml</code></td><td>Pull Request &rarr; main</td><td>Typecheck, Lint, Build, Tests</td></tr>
+            <tr><td><code>docs.yml</code></td><td>Push &rarr; main (docs/)</td><td>GitHub Pages (dieses Handbuch)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 8. DSGVO & Compliance ──────────────────────────────────── -->
+    <section id="compliance">
+      <h2><span class="num">08</span> DSGVO &amp; Compliance</h2>
+      <p>[APP_NAME] verarbeitet personenbezogene Daten ausschlie&szlig;lich in der EU (Supabase, Region Frankfurt). Alle Verarbeitungen sind nach DSGVO dokumentiert.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>DSGVO-Anforderung</th><th>Umsetzung</th></tr></thead>
+          <tbody>
+            <tr><td>Recht auf Auskunft (Art. 15)</td><td>Profil-Seite zeigt alle gespeicherten Daten</td></tr>
+            <tr><td>Recht auf L&ouml;schung (Art. 17)</td><td>Konto-L&ouml;schung im Profil, sofortige Datenlöschung inkl. Stripe-K&uuml;ndigung</td></tr>
+            <tr><td>Datenportabilit&auml;t (Art. 20)</td><td>Datenexport (JSON) im Profil</td></tr>
+            <tr><td>Cookie-Einwilligung</td><td>Cookie-Banner mit Opt-in bei erstem Besuch</td></tr>
+            <tr><td>Datensicherheit (Art. 32)</td><td>RLS auf allen Supabase-Tabellen, HTTPS, kein Client-seitiges Secret</td></tr>
+            <tr><td>Impressum &amp; Datenschutzerkl&auml;rung</td><td>Verf&uuml;gbar unter <code>/[locale]/impressum</code> und <code>/[locale]/datenschutz</code></td></tr>
+            <tr><td>AGB</td><td>Verf&uuml;gbar unter <code>/[locale]/agb</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── 9. Glossar ─────────────────────────────────────────────── -->
+    <section id="glossar">
+      <h2><span class="num">09</span> Glossar</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Begriff</th><th>Erkl&auml;rung</th></tr></thead>
+          <tbody>
+            <!-- Copilot extends this glossary with domain-specific terms as features are added -->
+            <tr><td><strong>RLS</strong></td><td>Row Level Security &ndash; Datenbankebenen-Zugriffsschutz in Supabase/PostgreSQL</td></tr>
+            <tr><td><strong>SSR</strong></td><td>Server-Side Rendering &ndash; Seitenrendering auf dem Server (Next.js App Router Standard)</td></tr>
+            <tr><td><strong>SaaS</strong></td><td>Software as a Service &ndash; webbasierte Software, die als Abonnement bereitgestellt wird</td></tr>
+            <tr><td><strong>WAMOCON</strong></td><td>WAMOCON GmbH &ndash; Betreiber und Entwickler von [APP_NAME]</td></tr>
+            <tr><td><strong>Feature-Gate</strong></td><td>Serverseitiger Mechanismus, der Pro-Funktionen f&uuml;r Free-Nutzer sperrt</td></tr>
+            <tr><td><strong>CAC</strong></td><td>Customer Acquisition Cost &ndash; Kosten zur Gewinnung eines neuen Kunden</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── Footer ───────────────────────────────────────────────────────── -->
+<footer class="page-footer">
+  <div>&copy; 2026 WAMOCON GmbH &ndash; Alle Rechte vorbehalten</div>
+  <div>[APP_NAME] Produkthandbuch v[APP_VERSION] &middot; Vertraulich &middot; [LAST_UPDATED]</div>
+</footer>
+
+<!-- ── Smooth active TOC highlighting ───────────────────────────────── -->
+<script>
+  (function () {
+    const links = document.querySelectorAll('.toc-link');
+    const sections = document.querySelectorAll('section[id], .cover');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            links.forEach((l) => l.style.removeProperty('color'));
+            const active = document.querySelector('.toc-link[href="#' + entry.target.id + '"]');
+            if (active) active.style.color = 'var(--primary)';
+          }
+        });
+      },
+      { rootMargin: '-20% 0px -70% 0px' }
+    );
+    sections.forEach((s) => observer.observe(s));
+  })();
+</script>
+
+</body>
+</html>
