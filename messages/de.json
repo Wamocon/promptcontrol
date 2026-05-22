@@ -1,0 +1,266 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projekte",
+    "logs": "Logs",
+    "team": "Team",
+    "settings": "Einstellungen",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "register": "Registrieren"
+  },
+  "landing": {
+    "hero": {
+      "badge": "KI-Prompt Management",
+      "title": "Prompts zentral verwalten,",
+      "titleHighlight": "KI-Power freisetzen",
+      "description": "ProCon ist die spezialisierte Management-Plattform für KI-Prompts in Ihrem Unternehmen. Versionieren, optimieren und teilen Sie System-Prompts ohne Entwickler-Eingriffe.",
+      "cta": "Kostenlos starten",
+      "ctaSecondary": "Demo ansehen"
+    },
+    "features": {
+      "title": "Alles was Ihr Team braucht",
+      "subtitle": "Von der Prompt-Erstellung bis zur IDE-Integration - ProCon deckt den gesamten KI-Workflow ab.",
+      "editor": {
+        "title": "Visueller Prompt-Editor",
+        "description": "Erstellen und bearbeiten Sie System-Prompts mit einem intuitiven Editor. Keine Programmierkenntnisse erforderlich."
+      },
+      "versioning": {
+        "title": "Versionierung & Rollback",
+        "description": "Jede Änderung wird versioniert. Mit einem Klick können Sie zu jeder vorherigen Version zurückkehren."
+      },
+      "api": {
+        "title": "REST-API Zugriff",
+        "description": "Ihre Applikationen rufen Prompts direkt über eine schnelle REST-API ab - keine Hardcoding mehr."
+      },
+      "export": {
+        "title": "Export als instruction.md",
+        "description": "Exportieren Sie Prompts direkt als vorkonfigurierte KI-Agenten-Dateien für GitHub Copilot."
+      },
+      "compliance": {
+        "title": "Compliance-Scanner",
+        "description": "Automatische Erkennung von DSGVO-kritischen Inhalten und PII-Daten in Ihren Prompts."
+      },
+      "ide": {
+        "title": "IDE-Integration (MCP)",
+        "description": "Direkter Zugriff auf Ihre Unternehmens-Prompts aus GitHub Copilot und anderen IDEs."
+      }
+    },
+    "pricing": {
+      "title": "Transparente Preise",
+      "subtitle": "Starten Sie kostenlos, wachsen Sie mit dem Pro-Plan.",
+      "free": {
+        "name": "Free",
+        "price": "0 €",
+        "period": "/Monat",
+        "features": [
+          "1 Projekt",
+          "Max. 5 Nutzer",
+          "Max. 10 Prompts",
+          "Einfache Versionierung",
+          "14 Tage Log-Retention"
+        ],
+        "cta": "Jetzt starten"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "20 €",
+        "period": "/Seat/Monat",
+        "badge": "Empfohlen",
+        "features": [
+          "Unbegrenzte Projekte",
+          "A/B-Testing",
+          "Unbegrenzte Log-Retention",
+          "Teamverwaltung",
+          "IDE-Integration (MCP)",
+          "Compliance-Scanner",
+          "KI-Analyse"
+        ],
+        "cta": "Pro starten"
+      }
+    },
+    "footer": {
+      "rights": "Alle Rechte vorbehalten.",
+      "legal": "Rechtliches",
+      "impressum": "Impressum",
+      "datenschutz": "Datenschutz",
+      "agb": "AGB"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melden Sie sich in Ihrem ProCon-Konto an",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "submit": "Anmelden",
+      "noAccount": "Noch kein Konto?",
+      "register": "Registrieren",
+      "forgotPassword": "Passwort vergessen?",
+      "error": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten."
+    },
+    "register": {
+      "title": "Konto erstellen",
+      "subtitle": "Starten Sie kostenlos mit ProCon",
+      "name": "Vollständiger Name",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "submit": "Konto erstellen",
+      "hasAccount": "Bereits ein Konto?",
+      "login": "Anmelden",
+      "terms": "Mit der Registrierung stimmen Sie unseren",
+      "termsLink": "Nutzungsbedingungen",
+      "and": "und der",
+      "privacy": "Datenschutzerklärung",
+      "agree": "zu.",
+      "error": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "success": "Registrierung erfolgreich! Bitte überprüfen Sie Ihre E-Mails."
+    }
+  },
+  "dashboard": {
+    "welcome": "Willkommen",
+    "overview": "Übersicht",
+    "totalPrompts": "Gesamt Prompts",
+    "totalProjects": "Projekte",
+    "apiCalls": "API-Aufrufe heute",
+    "teamMembers": "Teammitglieder",
+    "recentActivity": "Letzte Aktivitäten",
+    "quickActions": "Schnellaktionen",
+    "newPrompt": "Neuer Prompt",
+    "newProject": "Neues Projekt"
+  },
+  "projects": {
+    "title": "Projekte",
+    "subtitle": "Verwalten Sie Ihre Prompt-Kataloge nach Bereichen und Teams.",
+    "new": "Neues Projekt",
+    "empty": "Noch keine Projekte",
+    "emptyDescription": "Erstellen Sie Ihr erstes Projekt, um mit der Prompt-Verwaltung zu beginnen.",
+    "create": "Projekt erstellen",
+    "name": "Projektname",
+    "description": "Beschreibung",
+    "schema": "Schema",
+    "promptCount": "Prompts",
+    "lastUpdated": "Zuletzt bearbeitet",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "confirmDelete": "Sind Sie sicher, dass Sie dieses Projekt löschen möchten?",
+    "categories": "Kategorien",
+    "allCategories": "Alle Kategorien"
+  },
+  "prompts": {
+    "title": "Prompts",
+    "new": "Neuer Prompt",
+    "empty": "Noch keine Prompts",
+    "emptyDescription": "Erstellen Sie Ihren ersten Prompt in diesem Projekt.",
+    "name": "Name",
+    "slug": "Slug (API-Pfad)",
+    "content": "Prompt-Inhalt",
+    "category": "Kategorie",
+    "description": "Beschreibung",
+    "version": "Version",
+    "status": "Status",
+    "active": "Aktiv",
+    "draft": "Entwurf",
+    "archived": "Archiviert",
+    "save": "Speichern",
+    "saveVersion": "Als neue Version speichern",
+    "export": "Exportieren",
+    "exportInstruction": "Als instruction.md exportieren",
+    "exportSkill": "Als skill.md exportieren",
+    "versions": "Versionen",
+    "rollback": "Rollback auf diese Version",
+    "currentVersion": "Aktuelle Version",
+    "compliance": "Compliance-Check",
+    "complianceRunning": "Prüfe auf DSGVO-Inhalte...",
+    "complianceClean": "Keine kritischen Inhalte gefunden",
+    "complianceIssues": "Kritische Inhalte erkannt",
+    "aiAnalysis": "KI-Analyse starten",
+    "aiAnalysisRunning": "KI analysiert Prompt...",
+    "aiDisclaimer": "KI-generierte Analyse",
+    "copy": "Kopieren",
+    "copied": "Kopiert!"
+  },
+  "logs": {
+    "title": "Logs",
+    "subtitle": "Überwachen Sie API-Aufrufe, Latenzen und Token-Kosten.",
+    "date": "Datum",
+    "prompt": "Prompt",
+    "latency": "Latenz",
+    "tokens": "Tokens",
+    "cost": "Kosten",
+    "status": "Status",
+    "success": "Erfolgreich",
+    "error": "Fehler",
+    "empty": "Keine Logs vorhanden",
+    "retention": "Log-Retention: 14 Tage (Free) / Unbegrenzt (Pro)"
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Verwalten Sie Teammitglieder und Berechtigungen.",
+    "invite": "Mitglied einladen",
+    "email": "E-Mail-Adresse",
+    "role": "Rolle",
+    "name": "Name",
+    "joined": "Beigetreten",
+    "actions": "Aktionen",
+    "remove": "Entfernen",
+    "roles": {
+      "admin": "Admin",
+      "pm": "Produktmanager",
+      "developer": "Entwickler",
+      "trainee": "Trainee"
+    },
+    "inviteSent": "Einladung gesendet",
+    "inviteError": "Einladung fehlgeschlagen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "profile": "Profil",
+    "name": "Name",
+    "email": "E-Mail-Adresse",
+    "language": "Sprache",
+    "theme": "Design",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "apiKey": "API-Schlüssel",
+    "apiKeyDescription": "Verwenden Sie diesen Schlüssel, um Prompts über die REST-API abzurufen.",
+    "regenerate": "Neu generieren",
+    "subscription": "Abonnement",
+    "currentPlan": "Aktueller Plan",
+    "upgrade": "Auf Pro upgraden",
+    "manage": "Abonnement verwalten"
+  },
+  "gdpr": {
+    "title": "Cookie-Einstellungen",
+    "description": "Wir verwenden Cookies, um Ihnen die bestmögliche Erfahrung auf unserer Website zu bieten. Durch die Nutzung unserer Website stimmen Sie unserer Cookie-Richtlinie zu.",
+    "accept": "Alle akzeptieren",
+    "decline": "Ablehnen",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "loading": "Wird geladen...",
+    "error": "Ein Fehler ist aufgetreten",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "noResults": "Keine Ergebnisse",
+    "confirm": "Bestätigen",
+    "close": "Schließen",
+    "yes": "Ja",
+    "no": "Nein",
+    "or": "oder",
+    "and": "und",
+    "by": "von",
+    "proRequired": "Pro-Plan erforderlich",
+    "proRequiredDescription": "Diese Funktion ist nur im Pro-Plan verfügbar.",
+    "upgrade": "Jetzt upgraden"
+  }
+}
