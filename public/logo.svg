@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40">
+  <rect width="36" height="36" rx="8" fill="#4f46e5" y="2"/>
+  <text x="7" y="27" font-family="system-ui, sans-serif" font-weight="700" font-size="16" fill="white">PC</text>
+  <text x="44" y="22" font-family="system-ui, sans-serif" font-weight="700" font-size="18" fill="#18181b">Pro</text>
+  <text x="74" y="22" font-family="system-ui, sans-serif" font-weight="400" font-size="18" fill="#4f46e5">Con</text>
+</svg>

@@ -1,0 +1,266 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "logs": "Logs",
+    "team": "Team",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "login": "Sign in",
+    "register": "Sign up"
+  },
+  "landing": {
+    "hero": {
+      "badge": "AI Prompt Management",
+      "title": "Manage prompts centrally,",
+      "titleHighlight": "unleash AI power",
+      "description": "ProCon is the specialized AI prompt management platform for your company. Version, optimize and share system prompts without developer intervention.",
+      "cta": "Start for free",
+      "ctaSecondary": "View demo"
+    },
+    "features": {
+      "title": "Everything your team needs",
+      "subtitle": "From prompt creation to IDE integration - ProCon covers the entire AI workflow.",
+      "editor": {
+        "title": "Visual Prompt Editor",
+        "description": "Create and edit system prompts with an intuitive editor. No programming skills required."
+      },
+      "versioning": {
+        "title": "Versioning & Rollback",
+        "description": "Every change is versioned. Roll back to any previous version with one click."
+      },
+      "api": {
+        "title": "REST API Access",
+        "description": "Your applications fetch prompts directly via a fast REST API - no more hardcoding."
+      },
+      "export": {
+        "title": "Export as instruction.md",
+        "description": "Export prompts directly as pre-configured AI agent files for GitHub Copilot."
+      },
+      "compliance": {
+        "title": "Compliance Scanner",
+        "description": "Automatic detection of GDPR-critical content and PII data in your prompts."
+      },
+      "ide": {
+        "title": "IDE Integration (MCP)",
+        "description": "Direct access to your company prompts from GitHub Copilot and other IDEs."
+      }
+    },
+    "pricing": {
+      "title": "Transparent pricing",
+      "subtitle": "Start for free, grow with the Pro plan.",
+      "free": {
+        "name": "Free",
+        "price": "€0",
+        "period": "/month",
+        "features": [
+          "1 project",
+          "Max. 5 users",
+          "Max. 10 prompts",
+          "Basic versioning",
+          "14-day log retention"
+        ],
+        "cta": "Get started"
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "€20",
+        "period": "/seat/month",
+        "badge": "Recommended",
+        "features": [
+          "Unlimited projects",
+          "A/B testing",
+          "Unlimited log retention",
+          "Team management",
+          "IDE integration (MCP)",
+          "Compliance scanner",
+          "AI analysis"
+        ],
+        "cta": "Start Pro"
+      }
+    },
+    "footer": {
+      "rights": "All rights reserved.",
+      "legal": "Legal",
+      "impressum": "Imprint",
+      "datenschutz": "Privacy Policy",
+      "agb": "Terms of Service"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your ProCon account",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up",
+      "forgotPassword": "Forgot password?",
+      "error": "Sign in failed. Please check your credentials."
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start for free with ProCon",
+      "name": "Full name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in",
+      "terms": "By registering you agree to our",
+      "termsLink": "Terms of Service",
+      "and": "and",
+      "privacy": "Privacy Policy",
+      "agree": ".",
+      "error": "Registration failed. Please try again.",
+      "success": "Registration successful! Please check your emails."
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "overview": "Overview",
+    "totalPrompts": "Total Prompts",
+    "totalProjects": "Projects",
+    "apiCalls": "API calls today",
+    "teamMembers": "Team members",
+    "recentActivity": "Recent activity",
+    "quickActions": "Quick actions",
+    "newPrompt": "New prompt",
+    "newProject": "New project"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Manage your prompt catalogs by departments and teams.",
+    "new": "New project",
+    "empty": "No projects yet",
+    "emptyDescription": "Create your first project to start managing prompts.",
+    "create": "Create project",
+    "name": "Project name",
+    "description": "Description",
+    "schema": "Schema",
+    "promptCount": "Prompts",
+    "lastUpdated": "Last updated",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this project?",
+    "categories": "Categories",
+    "allCategories": "All categories"
+  },
+  "prompts": {
+    "title": "Prompts",
+    "new": "New prompt",
+    "empty": "No prompts yet",
+    "emptyDescription": "Create your first prompt in this project.",
+    "name": "Name",
+    "slug": "Slug (API path)",
+    "content": "Prompt content",
+    "category": "Category",
+    "description": "Description",
+    "version": "Version",
+    "status": "Status",
+    "active": "Active",
+    "draft": "Draft",
+    "archived": "Archived",
+    "save": "Save",
+    "saveVersion": "Save as new version",
+    "export": "Export",
+    "exportInstruction": "Export as instruction.md",
+    "exportSkill": "Export as skill.md",
+    "versions": "Versions",
+    "rollback": "Rollback to this version",
+    "currentVersion": "Current version",
+    "compliance": "Compliance check",
+    "complianceRunning": "Checking for GDPR content...",
+    "complianceClean": "No critical content found",
+    "complianceIssues": "Critical content detected",
+    "aiAnalysis": "Start AI analysis",
+    "aiAnalysisRunning": "AI is analyzing prompt...",
+    "aiDisclaimer": "AI-generated analysis",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "logs": {
+    "title": "Logs",
+    "subtitle": "Monitor API calls, latencies and token costs.",
+    "date": "Date",
+    "prompt": "Prompt",
+    "latency": "Latency",
+    "tokens": "Tokens",
+    "cost": "Cost",
+    "status": "Status",
+    "success": "Success",
+    "error": "Error",
+    "empty": "No logs available",
+    "retention": "Log retention: 14 days (Free) / Unlimited (Pro)"
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Manage team members and permissions.",
+    "invite": "Invite member",
+    "email": "Email address",
+    "role": "Role",
+    "name": "Name",
+    "joined": "Joined",
+    "actions": "Actions",
+    "remove": "Remove",
+    "roles": {
+      "admin": "Admin",
+      "pm": "Product Manager",
+      "developer": "Developer",
+      "trainee": "Trainee"
+    },
+    "inviteSent": "Invitation sent",
+    "inviteError": "Invitation failed"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "name": "Name",
+    "email": "Email address",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "save": "Save",
+    "saved": "Saved",
+    "apiKey": "API key",
+    "apiKeyDescription": "Use this key to fetch prompts via the REST API.",
+    "regenerate": "Regenerate",
+    "subscription": "Subscription",
+    "currentPlan": "Current plan",
+    "upgrade": "Upgrade to Pro",
+    "manage": "Manage subscription"
+  },
+  "gdpr": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to provide you with the best possible experience on our website. By using our website you agree to our cookie policy.",
+    "accept": "Accept all",
+    "decline": "Decline",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "search": "Search",
+    "filter": "Filter",
+    "noResults": "No results",
+    "confirm": "Confirm",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "and": "and",
+    "by": "by",
+    "proRequired": "Pro plan required",
+    "proRequiredDescription": "This feature is only available in the Pro plan.",
+    "upgrade": "Upgrade now"
+  }
+}
