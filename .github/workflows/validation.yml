@@ -12,6 +12,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
 concurrency:
   group: validation-${{ github.sha }}
   cancel-in-progress: true
