@@ -17,6 +17,12 @@ export default defineConfig({
         "src/app/**",
         "src/**/*.d.ts",
         "src/i18n/**",
+        // Infrastructure / server-side files - not unit-testable
+        "src/proxy.ts",
+        "src/lib/supabase/**",
+        "src/types/**",
+        // Complex layout component requiring full Next.js auth+intl stack
+        "src/components/layout/Header.tsx",
       ],
       thresholds: {
         lines: 80,
