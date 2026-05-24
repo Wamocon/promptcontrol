@@ -20,9 +20,6 @@ on:
 permissions:
   contents: read
 
-permissions:
-  contents: read
-
 jobs:
   unit-tests:
     name: Unit Tests (gate)

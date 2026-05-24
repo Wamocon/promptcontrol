@@ -1,8 +1,8 @@
+﻿# =============================================================================
+# Validation Workflow - TypeScript + ESLint + Build
 # =============================================================================
-# Validation Workflow - TypeScript + ESLint
-# =============================================================================
-# Trigger: Every push to any branch AND every pull_request event.
-#          Concurrency by SHA prevents double-runs on PR sync commits.
+# Trigger: push to any feature branch (NOT main/master).
+#          Same split as unit-tests.yml - no double-runs with deploy-preview.
 # =============================================================================
 
 name: Validation
@@ -12,17 +12,10 @@ permissions:
 
 on:
   push:
-permissions:
-  contents: read
-
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-permissions:
-  contents: read
+    branches-ignore: [main, master]
 
 concurrency:
-  group: validation-${{ github.sha }}
+  group: validation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

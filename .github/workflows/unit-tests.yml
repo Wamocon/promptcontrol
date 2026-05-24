@@ -1,9 +1,11 @@
 # =============================================================================
 # Unit Tests Workflow
 # =============================================================================
-# Trigger: Every push to any branch AND every pull_request event.
-#          Concurrency by SHA ensures no double-runs when a push also triggers
-#          a PR sync event for the same commit.
+# Trigger: push to any feature branch (NOT main/master).
+#   - Feature branch push (with open PR): push fires here, pull_request fires
+#     deploy-preview.yml - zero overlap, no double-run.
+#   - Merge to main: deploy-production.yml runs its own inline test gate;
+#     this workflow does NOT fire for main/master.
 # =============================================================================
 
 name: Unit Tests
@@ -13,12 +15,10 @@ permissions:
 
 on:
   push:
-  pull_request:
-    types: [opened, synchronize, reopened]
+    branches-ignore: [main, master]
 
-# One run per commit SHA - deduplicates push + PR-sync events for the same commit.
 concurrency:
-  group: unit-tests-${{ github.sha }}
+  group: unit-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

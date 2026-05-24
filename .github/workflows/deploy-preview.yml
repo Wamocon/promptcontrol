@@ -15,37 +15,27 @@ name: Deploy Preview (PR)
 
 permissions:
   contents: read
+  pull-requests: write
 
 on:
   pull_request:
     branches: [main, master]
     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: read
-  pull-requests: write
-
 concurrency:
   group: deploy-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  # Require tests and validation to pass before deploying preview
-  unit-tests:
-    name: Unit Tests (gate)
-    uses: ./.github/workflows/unit-tests.yml
-
-  validation:
-    name: Validation (gate)
-    uses: ./.github/workflows/validation.yml
-
+  # Note: unit-tests.yml and validation.yml run in parallel (triggered by the
+  # same push event). Configure branch protection to require those checks
+  # before merging. This workflow only handles the Vercel preview deployment.
   deploy-preview:
     name: Deploy Preview to Vercel
     permissions:
       contents: read
-      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
-    needs: [unit-tests, validation]
     environment:
       name: preview
       url: ${{ steps.deploy.outputs.preview_url }}
