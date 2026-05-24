@@ -1,0 +1,103 @@
+# =============================================================================
+# Vercel Deploy - Production (merge to main)
+# =============================================================================
+# Trigger: Every push/merge to the main branch.
+#          Runs full test + validation suite before deploying to production.
+#
+# Secrets required (repo level):
+#   VERCEL_PROJECT_ID - Vercel Project Settings > General > Project ID
+#
+# Secrets at organisation level (no action needed):
+#   VERCEL_TOKEN, VERCEL_ORG_ID
+# =============================================================================
+
+name: Deploy Production
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  unit-tests:
+    name: Unit Tests (gate)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+  validation:
+    name: Validation (gate)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint
+
+  deploy-production:
+    name: Deploy to Vercel Production
+    runs-on: ubuntu-latest
+    needs: [unit-tests, validation]
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.production_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build project
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel production
+        id: deploy
+        run: |
+          PROD_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "production_url=$PROD_URL" >> $GITHUB_OUTPUT
+          echo "Production deployed: $PROD_URL"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

@@ -5,6 +5,8 @@
     "logs": "Logs",
     "team": "Team",
     "settings": "Settings",
+    "profile": "My Profile",
+    "admin": "Administration",
     "logout": "Sign out",
     "login": "Sign in",
     "register": "Sign up"
@@ -262,5 +264,134 @@
     "proRequired": "Pro plan required",
     "proRequiredDescription": "This feature is only available in the Pro plan.",
     "upgrade": "Upgrade now"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal settings and security.",
+    "save": "Save",
+    "saved": "Saved",
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Update your name and profile information.",
+      "name": "Full name",
+      "namePlaceholder": "John Doe",
+      "email": "Email address",
+      "emailNote": "Email address cannot be changed. Contact support."
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Choose a secure password with at least 8 characters.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "change": "Change password",
+      "mismatch": "Passwords do not match.",
+      "tooShort": "Password must be at least 8 characters long."
+    },
+    "apiKey": {
+      "title": "API Key",
+      "description": "Use this key to access the REST API.",
+      "copy": "Copy",
+      "regenerate": "Regenerate",
+      "confirmRegenerate": "Are you sure? The old key will be invalidated.",
+      "warning": "Treat the API key like a password. Do not share it."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Control which email notifications you receive.",
+      "email": "Email notifications",
+      "emailDesc": "Receive important system messages via email.",
+      "promptUpdates": "Prompt updates",
+      "promptUpdatesDesc": "Notification when your prompts are changed.",
+      "teamInvites": "Team invitations",
+      "newsletter": "Newsletter & updates"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "description": "Irreversible actions. Proceed with caution.",
+      "deleteAccount": "Delete account",
+      "confirmDelete": "Are you absolutely sure? All data will be permanently deleted.",
+      "contactSupport": "Please contact support@procon.app for account deletion."
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "subtitle": "Platform-wide management and configuration.",
+    "recentUsers": "New users",
+    "recentOrgs": "New organizations",
+    "viewAll": "View all",
+    "stats": {
+      "users": "Registered users",
+      "organizations": "Organizations",
+      "prompts": "Total prompts"
+    },
+    "sections": {
+      "users": {
+        "title": "User management",
+        "description": "Manage users, assign roles"
+      },
+      "subscriptions": {
+        "title": "Subscription management",
+        "description": "Manage plans and subscriptions"
+      },
+      "settings": {
+        "title": "App settings",
+        "description": "Platform configuration and feature flags"
+      }
+    },
+    "users": {
+      "title": "User management",
+      "search": "Search users...",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "organization": "Organization",
+      "joined": "Joined",
+      "actions": "Actions",
+      "empty": "No users found.",
+      "confirmDelete": "Really delete this user?",
+      "of": "of",
+      "totalUsers": "users"
+    },
+    "subscriptions": {
+      "title": "Subscription management",
+      "search": "Search organization...",
+      "totalOrgs": "Total organizations",
+      "org": "Organization",
+      "plan": "Plan",
+      "status": "Status",
+      "stripeId": "Stripe ID",
+      "created": "Created",
+      "actions": "Actions",
+      "empty": "No organizations found."
+    },
+    "appSettings": {
+      "title": "App settings",
+      "general": "General",
+      "appName": "App name",
+      "supportEmail": "Support email",
+      "maxFreeUsers": "Max. free users",
+      "maxFreePrompts": "Max. free prompts",
+      "features": "Feature flags",
+      "registration": "Registration enabled",
+      "registrationDesc": "New users can register.",
+      "aiAnalysis": "AI analysis enabled",
+      "aiAnalysisDesc": "Enables AI-powered prompt analysis.",
+      "complianceScan": "Compliance scanner enabled",
+      "complianceScanDesc": "GDPR check for prompt content.",
+      "mcp": "MCP integration enabled",
+      "mcpDesc": "Enables IDE access via MCP protocol.",
+      "logRetention": "Log retention enabled",
+      "logRetentionDesc": "API calls are logged.",
+      "notifications": "Admin notifications",
+      "adminEmailNotifications": "Admin email notifications",
+      "newUserNotification": "New user notification",
+      "upgradeNotification": "Upgrade notification",
+      "maintenance": "Maintenance",
+      "maintenanceDesc": "Data management and maintenance tasks.",
+      "clearLogs": "Clear logs",
+      "exportData": "Export data",
+      "save": "Save settings",
+      "saved": "Saved"
+    }
   }
 }

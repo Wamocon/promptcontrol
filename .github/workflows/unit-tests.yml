@@ -1,0 +1,51 @@
+# =============================================================================
+# Unit Tests Workflow
+# =============================================================================
+# Trigger: Every push to any branch AND every pull_request event.
+#          Concurrency by SHA ensures no double-runs when a push also triggers
+#          a PR sync event for the same commit.
+# =============================================================================
+
+name: Unit Tests
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# One run per commit SHA - deduplicates push + PR-sync events for the same commit.
+concurrency:
+  group: unit-tests-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run coverage report
+        run: npm run test:coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

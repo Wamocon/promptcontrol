@@ -9,14 +9,17 @@ import {
   Users,
   Settings,
   Zap,
+  ShieldCheck,
+  UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
   plan: "free" | "pro";
+  isAdmin?: boolean;
 }
 
-export function Sidebar({ plan }: SidebarProps) {
+export function Sidebar({ plan, isAdmin = false }: SidebarProps) {
   const t = useTranslations("nav");
   const pathname = usePathname();
 
@@ -25,6 +28,7 @@ export function Sidebar({ plan }: SidebarProps) {
     { href: "/dashboard/projects" as const, label: t("projects"), icon: FolderOpen },
     { href: "/dashboard/logs" as const, label: t("logs"), icon: ScrollText },
     { href: "/dashboard/team" as const, label: t("team"), icon: Users },
+    { href: "/dashboard/profile" as const, label: t("profile"), icon: UserCircle },
     { href: "/dashboard/settings" as const, label: t("settings"), icon: Settings },
   ];
 
@@ -52,6 +56,24 @@ export function Sidebar({ plan }: SidebarProps) {
             </Link>
           );
         })}
+
+        {isAdmin && (
+          <>
+            <div className="my-2 border-t border-zinc-200 dark:border-zinc-800" />
+            <Link
+              href="/dashboard/admin"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname.startsWith("/dashboard/admin")
+                  ? "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                  : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+              )}
+            >
+              <ShieldCheck className="h-4 w-4 shrink-0" />
+              {t("admin")}
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* Plan badge */}

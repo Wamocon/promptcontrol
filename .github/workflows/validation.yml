@@ -1,0 +1,84 @@
+# =============================================================================
+# Validation Workflow - TypeScript + ESLint
+# =============================================================================
+# Trigger: Every push to any branch AND every pull_request event.
+#          Concurrency by SHA prevents double-runs on PR sync commits.
+# =============================================================================
+
+name: Validation
+
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: validation-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  build-check:
+    name: Next.js Build Check
+    runs-on: ubuntu-latest
+    needs: [typecheck, lint]
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key' }}
+      NEXT_PUBLIC_DB_SCHEMA: ${{ secrets.NEXT_PUBLIC_DB_SCHEMA || 'public' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
