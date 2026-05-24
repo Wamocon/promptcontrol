@@ -25,12 +25,13 @@ export default async function DashboardLayout({ children, params }: DashboardLay
     .single();
 
   const plan = (profile?.organizations as { plan?: string } | null)?.plan ?? "free";
+  const isAdmin = profile?.role === "admin";
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <Header userName={profile?.name || user.email?.split("@")[0]} locale={locale} />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar plan={plan as "free" | "pro"} />
+        <Sidebar plan={plan as "free" | "pro"} isAdmin={isAdmin} />
         <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950">
           {children}
         </main>

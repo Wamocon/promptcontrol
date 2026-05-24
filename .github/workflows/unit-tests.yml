@@ -1,0 +1,54 @@
+# =============================================================================
+# Unit Tests Workflow
+# =============================================================================
+# Trigger: push to any feature branch (NOT main/master).
+#   - Feature branch push (with open PR): push fires here, pull_request fires
+#     deploy-preview.yml - zero overlap, no double-run.
+#   - Merge to main: deploy-production.yml runs its own inline test gate;
+#     this workflow does NOT fire for main/master.
+# =============================================================================
+
+name: Unit Tests
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches-ignore: [main, master]
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run coverage report
+        run: npm run test:coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

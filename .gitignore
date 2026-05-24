@@ -38,4 +38,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# seed scripts with credentials (never commit)
+scripts/seed-users.mjs
 next-env.d.ts
