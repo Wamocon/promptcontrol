@@ -63,12 +63,12 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 animate-fade-in-up">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{t("title")}</h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("subtitle")}</p>
+          <h1 className="text-2xl font-bold text-white/90">{t("title")}</h1>
+          <p className="mt-1.5 text-sm text-white/35">{t("subtitle")}</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
           <Plus className="h-4 w-4" />
@@ -78,10 +78,18 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
 
       {/* Project grid */}
       {projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white py-20 dark:border-zinc-700 dark:bg-zinc-900">
-          <FolderOpen className="h-12 w-12 text-zinc-300 dark:text-zinc-600 mb-3" />
-          <p className="font-medium text-zinc-900 dark:text-zinc-100">{t("empty")}</p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">{t("emptyDescription")}</p>
+        <div
+          className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 py-24"
+          style={{ background: "rgba(12,17,32,0.40)" }}
+        >
+          <div
+            className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+            style={{ background: "rgba(99,102,241,0.12)", boxShadow: "0 0 30px rgba(99,102,241,0.20)" }}
+          >
+            <FolderOpen className="h-7 w-7 text-indigo-400" />
+          </div>
+          <p className="font-semibold text-white/70 mb-1">{t("empty")}</p>
+          <p className="text-sm text-white/30 mb-6">{t("emptyDescription")}</p>
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4" /> {t("create")}
           </Button>
@@ -89,44 +97,51 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <Card key={project.id} className="group hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
-                  <FolderOpen className="h-5 w-5" />
+            <div
+              key={project.id}
+              className="group card-hover rounded-2xl border border-white/7 p-5"
+              style={{ background: "rgba(12,17,32,0.60)", backdropFilter: "blur(16px)" }}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-xl"
+                  style={{ background: "rgba(99,102,241,0.12)", boxShadow: "0 0 16px rgba(99,102,241,0.20)" }}
+                >
+                  <FolderOpen className="h-5 w-5 text-indigo-400" />
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setEditProject(project)}
-                    className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                    className="rounded-lg p-1.5 text-white/30 hover:bg-white/6 hover:text-white/70 transition-colors"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setDeleteId(project.id)}
-                    className="rounded-lg p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    className="rounded-lg p-1.5 text-white/30 hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-1">{project.name}</h3>
+              <h3 className="font-semibold text-white/85 mb-1">{project.name}</h3>
               {project.description && (
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3 line-clamp-2">{project.description}</p>
+                <p className="text-sm text-white/35 mb-4 line-clamp-2">{project.description}</p>
               )}
 
-              <div className="flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500">
+              <div className="flex items-center justify-between text-xs text-white/25 mb-3">
                 <span>{project.prompt_count} Prompts</span>
                 <span>{formatDate(project.updated_at)}</span>
               </div>
 
               <Link
                 href={{ pathname: "/dashboard/projects/[id]", params: { id: project.id } }}
-                className="mt-3 flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                className="flex items-center gap-1 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 Prompts anzeigen <ChevronRight className="h-4 w-4" />
               </Link>
-            </Card>
+            </div>
           ))}
         </div>
       )}
@@ -134,7 +149,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
       {/* Create Dialog */}
       <Dialog open={showCreate} onClose={() => setShowCreate(false)} title={t("create")}>
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-rose-400">{error}</p>}
           <Input id="name" name="name" label={t("name")} placeholder="HR Prompts" required />
           <Textarea id="description" name="description" label={t("description")} placeholder="Beschreibung (optional)" rows={3} />
           <div className="flex justify-end gap-3">
@@ -147,7 +162,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
       {/* Edit Dialog */}
       <Dialog open={!!editProject} onClose={() => setEditProject(null)} title={t("edit")}>
         <form onSubmit={handleEdit} className="flex flex-col gap-4">
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-rose-400">{error}</p>}
           <Input id="edit-name" name="name" label={t("name")} defaultValue={editProject?.name} required />
           <Textarea id="edit-description" name="description" label={t("description")} defaultValue={editProject?.description ?? ""} rows={3} />
           <div className="flex justify-end gap-3">

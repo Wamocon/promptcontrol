@@ -9,17 +9,17 @@ interface BadgeProps {
 }
 
 const variants: Record<BadgeVariant, string> = {
-  default: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
-  success: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  warning: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
-  danger: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-  info: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
-  pro: "bg-gradient-to-r from-indigo-500 to-purple-600 text-white",
+  default: "bg-white/6 text-white/55 border border-white/8",
+  success: "bg-emerald-400/12 text-emerald-400 border border-emerald-400/20",
+  warning: "bg-amber-400/12 text-amber-400 border border-amber-400/20",
+  danger: "bg-rose-500/12 text-rose-400 border border-rose-500/20",
+  info: "bg-indigo-400/12 text-indigo-400 border border-indigo-400/20",
+  pro: "bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0",
 };
 
 export function Badge({ variant = "default", className, children }: BadgeProps) {
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", variants[variant], className)}>
+    <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold", variants[variant], className)}>
       {children}
     </span>
   );

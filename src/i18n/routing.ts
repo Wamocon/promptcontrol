@@ -21,5 +21,6 @@ export const routing = defineRouting({
     "/legal/datenschutz": "/legal/datenschutz",
     "/legal/agb": "/legal/agb",
     "/dashboard/projects/[id]": "/dashboard/projects/[id]",
+    "/dashboard/ab-tests": "/dashboard/ab-tests",
   },
 });

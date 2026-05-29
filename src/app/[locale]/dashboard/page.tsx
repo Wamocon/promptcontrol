@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
-import { Card } from "@/components/ui/Card";
 import {
   FileText,
   FolderOpen,
@@ -39,90 +38,109 @@ export default async function DashboardPage() {
     .limit(5);
 
   const stats = [
-    { label: t("totalPrompts"), value: totalPrompts, icon: FileText, color: "text-indigo-600" },
-    { label: t("totalProjects"), value: totalProjects, icon: FolderOpen, color: "text-purple-600" },
-    { label: t("apiCalls"), value: todayLogs, icon: Activity, color: "text-green-600" },
-    { label: t("teamMembers"), value: 1, icon: Users, color: "text-orange-600" },
+    { label: t("totalPrompts"), value: totalPrompts, icon: FileText, color: "text-indigo-400", bg: "rgba(99,102,241,0.12)", glow: "rgba(99,102,241,0.22)" },
+    { label: t("totalProjects"), value: totalProjects, icon: FolderOpen, color: "text-purple-400", bg: "rgba(168,85,247,0.12)", glow: "rgba(168,85,247,0.22)" },
+    { label: t("apiCalls"), value: todayLogs, icon: Activity, color: "text-emerald-400", bg: "rgba(16,185,129,0.12)", glow: "rgba(16,185,129,0.22)" },
+    { label: t("teamMembers"), value: 1, icon: Users, color: "text-amber-400", bg: "rgba(245,158,11,0.12)", glow: "rgba(245,158,11,0.22)" },
   ];
 
   const name = profile?.name || user?.email?.split("@")[0] || "there";
 
   return (
-    <div className="p-6">
+    <div className="p-6 animate-fade-in-up">
       {/* Welcome */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          {t("welcome")}, {name}!
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-white/90">
+          {t("welcome")}, <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">{name}</span>!
         </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("overview")}</p>
+        <p className="mt-1.5 text-sm text-white/35">{t("overview")}</p>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        {stats.map(({ label, value, icon: Icon, color }) => (
-          <Card key={label}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">{label}</p>
-                <p className="mt-1 text-3xl font-bold text-zinc-900 dark:text-zinc-100">{value}</p>
-              </div>
-              <div className={`rounded-lg bg-zinc-100 p-2 dark:bg-zinc-800 ${color}`}>
-                <Icon className="h-5 w-5" />
+        {stats.map(({ label, value, icon: Icon, color, bg, glow }) => (
+          <div
+            key={label}
+            className="card-hover glass-card p-5"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-white/35 uppercase tracking-wider">{label}</p>
+              <div
+                className={`rounded-xl p-2 ${color}`}
+                style={{ background: bg, boxShadow: `0 0 20px ${glow}` }}
+              >
+                <Icon className="h-4 w-4" />
               </div>
             </div>
-          </Card>
+            <p className="metric-number text-white">{value}</p>
+          </div>
         ))}
       </div>
 
       {/* Recent Activity */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <div className="mb-4 flex items-center gap-2">
-            <Clock className="h-4 w-4 text-zinc-500" />
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{t("recentActivity")}</h2>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div
+          className="glass-card p-6"
+        >
+          <div className="mb-5 flex items-center gap-2">
+            <Clock className="h-4 w-4 text-indigo-500" />
+            <h2 className="font-semibold text-white/85">{t("recentActivity")}</h2>
           </div>
           {recentPrompts && recentPrompts.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {recentPrompts.map((prompt) => (
-                <div key={prompt.id} className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                <div
+                  key={prompt.id}
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5"
+                  style={{ background: "var(--panel-bg-subtle)" }}
+                >
                   <div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{prompt.name}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {(prompt.projects as { name?: string } | null)?.name} - {formatDate(prompt.updated_at)}
+                    <p className="text-sm font-medium text-white/80">{prompt.name}</p>
+                    <p className="text-xs text-white/30 mt-0.5">
+                      {(prompt.projects as { name?: string } | null)?.name} &middot; {formatDate(prompt.updated_at)}
                     </p>
                   </div>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${prompt.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400"}`}>
+                  <span
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                      prompt.status === "active"
+                        ? "text-emerald-400 bg-emerald-400/12 border border-emerald-400/20"
+                        : "text-white/35 bg-white/5 border border-white/8"
+                    }`}
+                  >
                     {prompt.status}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Noch keine Aktivitäten.</p>
+            <p className="text-sm text-white/30">Noch keine Aktivitäten.</p>
           )}
-        </Card>
+        </div>
 
-        <Card>
-          <div className="mb-4 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-zinc-500" />
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{t("quickActions")}</h2>
+        <div
+          className="glass-card p-6"
+        >
+          <div className="mb-5 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-purple-400" />
+            <h2 className="font-semibold text-white/85">{t("quickActions")}</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: t("newPrompt"), href: "/dashboard/projects", icon: FileText },
-              { label: t("newProject"), href: "/dashboard/projects", icon: FolderOpen },
-            ].map(({ label, href, icon: Icon }) => (
+              { label: t("newPrompt"), href: "/dashboard/projects", icon: FileText, color: "text-indigo-400", bg: "rgba(99,102,241,0.10)" },
+              { label: t("newProject"), href: "/dashboard/projects", icon: FolderOpen, color: "text-purple-400", bg: "rgba(168,85,247,0.10)" },
+            ].map(({ label, href, icon: Icon, color, bg }) => (
               <a
                 key={label}
                 href={href}
-                className="flex flex-col items-center gap-2 rounded-lg border border-zinc-200 p-4 text-center hover:border-indigo-300 hover:bg-indigo-50 transition-colors dark:border-zinc-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/20"
+              className="card-hover flex flex-col items-center gap-3 rounded-xl border-[var(--panel-border)] p-5 text-center"
+              style={{ background: "var(--panel-bg-subtle)", border: "1px solid var(--panel-border)" }}
               >
-                <Icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}</span>
+                <Icon className={`h-7 w-7 ${color}`} />
+                <span className="text-sm font-medium text-white/65">{label}</span>
               </a>
             ))}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 interface DialogProps {
   open: boolean;
@@ -17,11 +17,19 @@ export function Dialog({ open, onClose, title, description, children, className 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className={cn("relative z-10 w-full max-w-lg rounded-xl border border-zinc-200 bg-white p-6 shadow-xl dark:border-zinc-800 dark:bg-zinc-900", className)}>
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
-        {description && <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>}
-        <div className="mt-4">{children}</div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className={cn("relative z-10 w-full max-w-lg rounded-2xl border border-white/8 p-6 shadow-2xl", className)}
+        style={{ background: "rgba(10,14,26,0.97)", backdropFilter: "blur(24px)" }}
+      >
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-lg font-bold text-white/90">{title}</h2>
+          <button onClick={onClose} className="text-white/30 hover:text-white/65 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {description && <p className="mt-1 text-sm text-white/40">{description}</p>}
+        <div className="mt-5">{children}</div>
       </div>
     </div>
   );
@@ -41,13 +49,16 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, description, co
   return (
     <Dialog open={open} onClose={onClose} title={title} description={description}>
       <div className="flex justify-end gap-3">
-        <button onClick={onClose} className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800">
+        <button
+          onClick={onClose}
+          className="rounded-xl px-4 py-2 text-sm font-medium text-white/55 border border-white/10 hover:bg-white/5 transition-colors"
+        >
           Abbrechen
         </button>
         <button
           onClick={onConfirm}
           disabled={loading}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+          className="rounded-xl bg-rose-500/15 border border-rose-500/25 px-4 py-2 text-sm font-semibold text-rose-400 hover:bg-rose-500/25 disabled:opacity-50 transition-colors"
         >
           {loading ? "..." : confirmLabel}
         </button>
@@ -56,4 +67,3 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, description, co
   );
 }
 
-export { useState };

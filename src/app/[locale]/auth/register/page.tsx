@@ -34,20 +34,28 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center bg-[#060a13] px-4 py-10">
+      <div className="aurora-bg" />
+
+      <div className="relative z-10 w-full max-w-sm animate-fade-in-up">
         <div className="mb-8 flex flex-col items-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold text-xl mb-3">
+          <div
+            className="flex h-14 w-14 items-center justify-center rounded-2xl text-white font-extrabold text-xl mb-4 shadow-2xl"
+            style={{ background: "linear-gradient(135deg, #6366f1, #a855f7)", boxShadow: "0 0 40px rgba(99,102,241,0.35)" }}
+          >
             PC
           </div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{t("title")}</h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{t("subtitle")}</p>
+          <h1 className="text-2xl font-bold text-white/90">{t("title")}</h1>
+          <p className="mt-1.5 text-sm text-white/40">{t("subtitle")}</p>
         </div>
 
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div
+          className="rounded-2xl border border-white/8 p-7 shadow-2xl"
+          style={{ background: "rgba(12,17,32,0.75)", backdropFilter: "blur(24px)" }}
+        >
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {error && (
-              <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
                 {error}
               </div>
             )}
@@ -94,9 +102,9 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <p className="mt-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-5 text-center text-sm text-white/35">
           {t("hasAccount")}{" "}
-          <Link href="/auth/login" className="font-medium text-indigo-600 hover:underline dark:text-indigo-400">
+          <Link href="/auth/login" className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
             {t("login")}
           </Link>
         </p>
@@ -104,3 +112,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

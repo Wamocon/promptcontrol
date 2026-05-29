@@ -236,24 +236,27 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
   return (
     <div className="flex h-full overflow-hidden">
       {/* Left panel: prompt list */}
-      <div className="w-72 shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col">
+      <div
+        className="w-72 shrink-0 border-r border-white/6 flex flex-col"
+        style={{ background: "rgba(6,10,19,0.80)", backdropFilter: "blur(16px)" }}
+      >
         {/* Project header */}
-        <div className="border-b border-zinc-200 dark:border-zinc-800 px-4 py-3">
+        <div className="border-b border-white/6 px-4 py-3.5">
           <Link
             href="/dashboard/projects"
-            className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 mb-2"
+            className="flex items-center gap-1 text-xs text-white/30 hover:text-white/60 mb-2 transition-colors"
           >
             <ChevronLeft className="h-3 w-3" /> Alle Projekte
           </Link>
-          <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">{project.name}</h2>
+          <h2 className="font-semibold text-white/85 truncate">{project.name}</h2>
         </div>
 
         {/* Category filter */}
-        <div className="px-3 py-2 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="px-3 py-2.5 border-b border-white/6">
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+            className="input-glass text-xs py-1.5 [&>option]:bg-[#0c1120]"
           >
             <option value="all">Alle Kategorien</option>
             {categories.map((cat) => (
@@ -263,7 +266,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         </div>
 
         {/* Add button */}
-        <div className="px-3 py-2 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="px-3 py-2.5 border-b border-white/6">
           <Button size="sm" onClick={() => setShowCreate(true)} className="w-full">
             <Plus className="h-3.5 w-3.5" /> Neuer Prompt
           </Button>
@@ -272,7 +275,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         {/* Prompt list */}
         <div className="flex-1 overflow-y-auto">
           {filteredPrompts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 text-zinc-400 dark:text-zinc-600 text-sm">
+            <div className="flex flex-col items-center justify-center h-32 text-white/25 text-sm">
               <FileText className="h-8 w-8 mb-2" />
               Noch keine Prompts
             </div>
@@ -281,18 +284,22 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               <button
                 key={prompt.id}
                 onClick={() => selectPrompt(prompt)}
-                className={`w-full text-left px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors ${selectedPrompt?.id === prompt.id ? "bg-indigo-50 dark:bg-indigo-900/20 border-l-2 border-l-indigo-600" : ""}`}
+                className={`w-full text-left px-4 py-3 border-b border-white/4 transition-all ${
+                  selectedPrompt?.id === prompt.id
+                    ? "bg-indigo-500/10 border-l-2 border-l-indigo-400"
+                    : "hover:bg-white/3"
+                }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{prompt.name}</span>
+                  <span className="text-sm font-medium text-white/80 truncate">{prompt.name}</span>
                   {statusBadge(prompt.status)}
                 </div>
                 {prompt.prompt_categories && (
-                  <span className="text-xs text-zinc-400" style={{ color: prompt.prompt_categories.color }}>
+                  <span className="text-xs" style={{ color: prompt.prompt_categories.color }}>
                     {prompt.prompt_categories.name}
                   </span>
                 )}
-                <p className="text-xs text-zinc-400 mt-1">{formatDate(prompt.updated_at)}</p>
+                <p className="text-xs text-white/25 mt-0.5">{formatDate(prompt.updated_at)}</p>
               </button>
             ))
           )}
@@ -300,25 +307,28 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
       </div>
 
       {/* Right panel: editor */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#060a13" }}>
         {selectedPrompt ? (
           <>
             {/* Toolbar */}
-            <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-2">
-              <span className="flex-1 text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{editName}</span>
+            <div
+              className="flex items-center gap-1.5 border-b border-white/6 px-4 py-2.5"
+              style={{ background: "rgba(4,7,14,0.85)", backdropFilter: "blur(16px)" }}
+            >
+              <span className="flex-1 text-sm font-semibold text-white/75 truncate">{editName}</span>
 
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-white/40 hover:bg-white/6 hover:text-white/70 transition-colors"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Kopiert" : "Kopieren"}
               </button>
 
               <button
                 onClick={handleComplianceCheck}
                 disabled={complianceLoading}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-amber-400/70 hover:bg-amber-400/8 hover:text-amber-400 transition-colors"
               >
                 <Shield className="h-3.5 w-3.5" />
                 {complianceLoading ? "Prüfe..." : "Compliance"}
@@ -327,7 +337,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               <button
                 onClick={handleAiAnalysis}
                 disabled={aiLoading}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-indigo-400/70 hover:bg-indigo-400/8 hover:text-indigo-400 transition-colors"
               >
                 <Brain className="h-3.5 w-3.5" />
                 {aiLoading ? "Analysiert..." : "KI-Analyse"}
@@ -335,24 +345,27 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
 
               <button
                 onClick={handleShowVersions}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-white/40 hover:bg-white/6 hover:text-white/70 transition-colors"
               >
                 <GitBranch className="h-3.5 w-3.5" /> Versionen
               </button>
 
               <div className="relative group">
-                <button className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                <button className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-white/40 hover:bg-white/6 hover:text-white/70 transition-colors">
                   <Download className="h-3.5 w-3.5" /> Export
                 </button>
-                <div className="absolute right-0 top-8 z-10 hidden group-hover:block w-48 rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-                  <button onClick={() => handleExport("instruction")} className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800">Als instruction.md</button>
-                  <button onClick={() => handleExport("skill")} className="w-full text-left px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800">Als skill.md</button>
+                <div
+                  className="absolute right-0 top-9 z-10 hidden group-hover:block w-48 rounded-xl border border-white/8 p-1 shadow-2xl"
+                  style={{ background: "rgba(10,14,26,0.97)", backdropFilter: "blur(20px)" }}
+                >
+                  <button onClick={() => handleExport("instruction")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white/85 transition-colors">Als instruction.md</button>
+                  <button onClick={() => handleExport("skill")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white/85 transition-colors">Als skill.md</button>
                 </div>
               </div>
 
               <button
                 onClick={() => setDeleteId(selectedPrompt.id)}
-                className="rounded-lg p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                className="rounded-lg p-1.5 text-white/25 hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -367,25 +380,31 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
 
             {/* Compliance result */}
             {complianceResult && (
-              <div className={`mx-4 mt-3 rounded-lg px-3 py-2 text-sm flex items-start gap-2 ${complianceResult.clean ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
+              <div
+                className={`mx-4 mt-3 rounded-xl px-4 py-3 text-sm flex items-start gap-2 border ${
+                  complianceResult.clean
+                    ? "border-emerald-500/25 bg-emerald-500/8 text-emerald-400"
+                    : "border-rose-500/25 bg-rose-500/8 text-rose-400"
+                }`}
+              >
                 {complianceResult.clean ? (
                   <><Check className="h-4 w-4 mt-0.5 shrink-0" /> {t("complianceClean")}</>
                 ) : (
                   <><AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" /> {t("complianceIssues")}: {complianceResult.issues.join(", ")}</>
                 )}
-                <button onClick={() => setComplianceResult(null)} className="ml-auto"><X className="h-3.5 w-3.5" /></button>
+                <button onClick={() => setComplianceResult(null)} className="ml-auto opacity-50 hover:opacity-100"><X className="h-3.5 w-3.5" /></button>
               </div>
             )}
 
             {/* AI analysis result */}
             {aiAnalysis && (
-              <div className="mx-4 mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-800 dark:bg-indigo-900/20">
+              <div className="mx-4 mt-3 rounded-xl border border-indigo-500/20 p-4" style={{ background: "rgba(99,102,241,0.07)" }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{t("aiDisclaimer")}</span>
-                  <button onClick={() => setAiAnalysis(null)} className="ml-auto text-indigo-400"><X className="h-3.5 w-3.5" /></button>
+                  <Brain className="h-4 w-4 text-indigo-400" />
+                  <span className="text-sm font-semibold text-indigo-400">{t("aiDisclaimer")}</span>
+                  <button onClick={() => setAiAnalysis(null)} className="ml-auto text-white/30 hover:text-white/60"><X className="h-3.5 w-3.5" /></button>
                 </div>
-                <p className="text-sm text-indigo-700 dark:text-indigo-300 whitespace-pre-wrap">{aiAnalysis}</p>
+                <p className="text-sm text-white/65 whitespace-pre-wrap leading-relaxed">{aiAnalysis}</p>
               </div>
             )}
 
@@ -428,14 +447,14 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-white/50 uppercase tracking-wide mb-1.5">
                   Prompt-Inhalt
                 </label>
                 <textarea
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   rows={16}
-                  className="w-full rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm font-mono text-zinc-900 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="input-glass font-mono text-sm resize-y min-h-[280px]"
                   placeholder="Sie sind ein hilfreicher KI-Assistent..."
                 />
               </div>
@@ -448,19 +467,24 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               />
 
               {/* API usage */}
-              <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-3">
-                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">REST API Endpunkt</p>
-                <code className="text-xs text-indigo-600 dark:text-indigo-400 break-all">
+              <div className="rounded-xl border border-white/7 p-4" style={{ background: "rgba(12,17,32,0.55)" }}>
+                <p className="text-xs font-semibold text-white/35 uppercase tracking-wider mb-2">REST API Endpunkt</p>
+                <code className="text-xs text-indigo-400 break-all font-mono">
                   GET {process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/v1/prompts/{selectedPrompt.slug}
                 </code>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600">
-            <FileText className="h-16 w-16 mb-4" />
-            <p className="text-lg font-medium">Wählen Sie einen Prompt aus</p>
-            <p className="text-sm">oder erstellen Sie einen neuen Prompt</p>
+          <div className="flex-1 flex flex-col items-center justify-center text-white/20">
+            <div
+              className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl"
+              style={{ background: "rgba(99,102,241,0.10)", boxShadow: "0 0 40px rgba(99,102,241,0.15)" }}
+            >
+              <FileText className="h-9 w-9 text-indigo-400" />
+            </div>
+            <p className="text-base font-semibold text-white/50">Wählen Sie einen Prompt aus</p>
+            <p className="text-sm text-white/25 mt-1">oder erstellen Sie einen neuen Prompt</p>
           </div>
         )}
       </div>
@@ -474,12 +498,16 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         ) : (
           <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
             {versions.map((v) => (
-              <div key={v.id} className="flex items-center gap-3 rounded-lg border border-zinc-200 dark:border-zinc-700 p-3">
-                <GitBranch className="h-4 w-4 text-indigo-600 shrink-0" />
+              <div
+                key={v.id}
+                className="flex items-center gap-3 rounded-xl border border-white/7 p-3"
+                style={{ background: "rgba(255,255,255,0.03)" }}
+              >
+                <GitBranch className="h-4 w-4 text-indigo-400 shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Version {v.version}</p>
-                  {v.change_note && <p className="text-xs text-zinc-500">{v.change_note}</p>}
-                  <p className="text-xs text-zinc-400">{formatDate(v.created_at)}</p>
+                  <p className="text-sm font-semibold text-white/80">Version {v.version}</p>
+                  {v.change_note && <p className="text-xs text-white/40">{v.change_note}</p>}
+                  <p className="text-xs text-white/25">{formatDate(v.created_at)}</p>
                 </div>
                 <Button size="sm" variant="secondary" onClick={() => handleRollback(v.id)}>
                   <RotateCcw className="h-3.5 w-3.5" /> Rollback
