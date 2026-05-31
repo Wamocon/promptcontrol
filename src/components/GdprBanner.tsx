@@ -1,27 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { Button } from "./ui/Button";
 
+const STORAGE_KEY = "pc-gdpr-consent";
+
+function subscribe(cb: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", cb);
+  return () => window.removeEventListener("storage", cb);
+}
+
+function readConsent(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export function GdprBanner() {
-  const [visible, setVisible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return !localStorage.getItem("pc-gdpr-consent");
-  });
+  // SSR snapshot is always "consented" (banner hidden) to keep server HTML
+  // stable; the client snapshot reads the real value after hydration.
+  const consent = useSyncExternalStore(
+    subscribe,
+    readConsent,
+    () => "ssr-consented"
+  );
+
+  // Local override so accept/decline hide immediately even before storage event.
+  const [dismissed, setDismissed] = useState(false);
 
   function accept() {
-    localStorage.setItem("pc-gdpr-consent", "accepted");
-    setVisible(false);
+    try { localStorage.setItem(STORAGE_KEY, "accepted"); } catch {}
+    setDismissed(true);
   }
 
   function decline() {
-    localStorage.setItem("pc-gdpr-consent", "declined");
-    setVisible(false);
+    try { localStorage.setItem(STORAGE_KEY, "declined"); } catch {}
+    setDismissed(true);
   }
 
-  if (!visible) return null;
+  if (consent || dismissed) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 sm:left-auto sm:right-4 sm:max-w-sm">

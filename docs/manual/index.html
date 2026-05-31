@@ -108,6 +108,7 @@
     <a class="toc-link l2" href="#ht-mcp">4.6 MCP-Integration</a>
     <a class="toc-link l2" href="#ht-admin">4.7 Adminbereich</a>
     <a class="toc-link l2" href="#ht-profile">4.8 Profileinstellungen</a>
+    <a class="toc-link l2" href="#ht-ui">4.9 Premium-UI &amp; Gamification</a>
     <a class="toc-link l1" href="#referenz">5. Funktionsreferenz</a>
     <a class="toc-link l2" href="#routen">5.1 Routen</a>
     <a class="toc-link l2" href="#rollen">5.2 Rollen</a>
@@ -125,7 +126,7 @@
       <h1>ProCon</h1>
       <div class="cover-sub">KI-Prompt-Management fuer Teams - Free &amp; Pro</div>
       <div class="cover-meta">
-        <div><div class="meta-label">Version</div><div class="meta-value">0.1.0</div></div>
+        <div><div class="meta-label">Version</div><div class="meta-value">0.2.0</div></div>
         <div><div class="meta-label">Status</div><div class="meta-value"><span class="badge badge-warning">Beta</span></div></div>
         <div><div class="meta-label">Plaene</div><div class="meta-value">Free &middot; Pro</div></div>
         <div><div class="meta-label">Datum</div><div class="meta-value">Mai 2026</div></div>
@@ -262,6 +263,17 @@ X-Schema: promptcontrol_prod</code></pre>
         <li><strong>Benachrichtigungen</strong> - E-Mail-Praeferenzen</li>
         <li><strong>Gefahrenzone</strong> - Konto loeschen</li>
       </ul>
+      <h3 id="ht-ui">4.9 Premium-UI &amp; Gamification</h3>
+      <p>Seit Version 0.2.0 stellt ProCon eine moderne, hochwertige UI-Schicht bereit, die ueber alle Dashboard-Seiten verteilt aktiv ist:</p>
+      <ul>
+        <li><strong>Befehlspalette</strong> - <code>Strg/Cmd + K</code> oeffnet eine Spotlight-Suche fuer Routen, Aktionen und Einstellungen. Auch ueber das Suchfeld im Header erreichbar.</li>
+        <li><strong>Gamification</strong> - Im Header werden Level, XP-Fortschrittsbalken und Streak-Flamme angezeigt. Achievements erscheinen als animierte Toast-Benachrichtigungen oben rechts.</li>
+        <li><strong>Hell- und Dunkelmodus</strong> - Umschaltbar ueber das Sonnen/Mond-Icon im Header. Theme wird in <code>localStorage</code> persistiert und vor Hydration angewendet (FOUC-frei).</li>
+        <li><strong>KI-Guide</strong> - Schwebendes ProCon-Logo unten rechts. Zwei Tabs: thematische Anleitungen und interaktiver Chat (Anbieter konfigurierbar in der Admin-Konsole).</li>
+        <li><strong>Cursor-Spotlight</strong> - Sanfter Glow folgt dem Mauszeiger ueber dem gesamten Dashboard-Hintergrund.</li>
+        <li><strong>Animationen</strong> - Magnetic-Hover, Tilt-Karten, Stagger-Reveal, Shimmer und Gradient-Border stehen als CSS-Utilities bereit.</li>
+      </ul>
+      <div class="info-box"><div class="info-box-title">Barrierefreiheit</div><p>Alle Animationen respektieren <code>prefers-reduced-motion</code>. Der Cursor-Spotlight ist auf Touch-Geraeten deaktiviert.</p></div>
     </section>
     <section id="referenz">
       <h2><span class="num">05</span> Funktionsreferenz</h2>

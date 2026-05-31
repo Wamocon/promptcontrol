@@ -12,8 +12,10 @@ import {
   Globe,
   Sun,
   Moon,
+  Search,
 } from "lucide-react";
 import { useState } from "react";
+import { XpDisplay } from "@/components/gamification/XpDisplay";
 
 interface HeaderProps {
   userName?: string;
@@ -61,7 +63,26 @@ export function Header({ userName, locale }: HeaderProps) {
         </span>
       </Link>
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-3">
+        {/* Command palette trigger */}
+        <button
+          onClick={() => {
+            const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: true });
+            window.dispatchEvent(evt);
+          }}
+          className="hidden md:flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/6 magnetic"
+          style={{ background: "var(--panel-bg-subtle)", color: "var(--text-3)" }}
+          title="Befehlspalette offnen"
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span>Suchen...</span>
+          <span className="kbd ml-2">⌘K</span>
+        </button>
+
+        {/* Gamification XP/Level/Streak */}
+        <XpDisplay />
+
+        <div className="flex items-center gap-1">
         {/* Language switcher */}
         <button
           onClick={switchLocale}
@@ -130,6 +151,7 @@ export function Header({ userName, locale }: HeaderProps) {
             )}
           </div>
         )}
+        </div>
       </div>
     </header>
   );

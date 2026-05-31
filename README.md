@@ -8,6 +8,19 @@
 
 ---
 
+## Highlights (v0.2.0)
+
+- **Premium-UI** mit Befehlspalette (Strg/Cmd+K), Cursor-Spotlight, Magnetic-Hover und Tilt-Karten
+- **Gamification** mit XP, Levels, Streaks und Achievement-Toasts direkt im Header
+- **Hell- und Dunkelmodus** mit FOUC-freiem ThemeBootstrap und `localStorage`-Persistenz
+- **KI-Guide** unten rechts: Themen-Tutorials plus interaktiver Chat ueber konfigurierbare Provider (SOKRATES, OpenRouter, GroQ)
+- **Adminbereich** fuer Provider-Wahl, Nutzerverwaltung und Abos
+- **DSGVO-Banner** ohne SSR/CSR-Hydration-Mismatch (`useSyncExternalStore`)
+- **Mehrsprachig** (Deutsch + Englisch) ueber next-intl
+- **137 Unit-Tests** mit Vitest, Coverage >= 80% Statements/Functions/Lines
+
+---
+
 ## Tech-Stack
 
 | Schicht | Technologie |
@@ -116,7 +129,15 @@ src/
     api/
       v1/prompts/       # REST-API (slug-basiert)
       mcp/              # MCP-Endpunkt
-  components/           # Wiederverwendbare UI-Komponenten
+  components/
+    effects/            # CursorSpotlight (Premium-Interaction-Layer)
+    gamification/       # XP/Level/Streak/Achievements + Toasts
+    layout/             # Header, Sidebar
+    ui/                 # Button, Input, Card, Dialog, Badge
+    CommandPalette.tsx  # Strg/Cmd+K Spotlight-Suche
+    AiGuideChat.tsx     # Floating KI-Guide mit Chat
+    ThemeBootstrap.tsx  # FOUC-Schutz vor Hydration
+    GdprBanner.tsx      # DSGVO-Cookie-Banner
   i18n/                 # next-intl Konfiguration
   lib/supabase/         # Supabase-Clients (client/server/middleware)
   __tests__/            # Unit-Tests
@@ -135,7 +156,7 @@ docs/manual/            # Produkthandbuch (GitHub Pages)
 
 | Workflow | Trigger | Aufgabe |
 |---|---|---|
-| `unit-tests.yml` | Jeder Push / PR | 72+ Unit-Tests + Coverage |
+| `unit-tests.yml` | Jeder Push / PR | 137 Unit-Tests + Coverage |
 | `validation.yml` | Jeder Push / PR | TypeScript, ESLint, Build |
 | `deploy-preview.yml` | PR -> main | Vercel Preview-Deployment |
 | `deploy-production.yml` | Merge -> main | Vercel Produktions-Deployment |
