@@ -1,18 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { Button } from "./ui/Button";
 
 export function GdprBanner() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (!localStorage.getItem("pc-gdpr-consent")) {
-      setVisible(true);
-    }
-  }, []);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !localStorage.getItem("pc-gdpr-consent");
+  });
 
   function accept() {
     localStorage.setItem("pc-gdpr-consent", "accepted");

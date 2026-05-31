@@ -31,7 +31,7 @@ describe("Input", () => {
   it("applies error styling when error is set", () => {
     render(<Input id="field" error="Error" />);
     const input = screen.getByRole("textbox");
-    expect(input.className).toMatch(/red/);
+    expect(input.className).toMatch(/rose/);
   });
 
   it("is disabled when disabled prop is set", () => {
@@ -93,7 +93,7 @@ describe("Textarea", () => {
 
   it("applies error styling when error is set", () => {
     render(<Textarea id="area" error="Error" />);
-    expect(screen.getByRole("textbox").className).toMatch(/red/);
+    expect(screen.getByRole("textbox").className).toMatch(/rose/);
   });
 
   it("is disabled when disabled prop is set", () => {
@@ -138,7 +138,7 @@ describe("Select", () => {
 
   it("applies error styling when error is set", () => {
     render(<Select id="sel" error="Error"><option value="">-</option></Select>);
-    expect(screen.getByRole("combobox").className).toMatch(/red/);
+    expect(screen.getByRole("combobox").className).toMatch(/rose/);
   });
 
   it("is disabled when disabled prop is set", () => {
