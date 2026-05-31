@@ -126,9 +126,9 @@ export default async function DashboardPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: t("newPrompt"), href: "/dashboard/projects", icon: FileText, color: "text-indigo-500", bg: "rgba(99,102,241,0.10)" },
-              { label: t("newProject"), href: "/dashboard/projects", icon: FolderOpen, color: "text-purple-500", bg: "rgba(168,85,247,0.10)" },
-            ].map(({ label, href, icon: Icon, color, bg }) => (
+              { label: t("newPrompt"), href: "/dashboard/projects", icon: FileText, color: "text-indigo-500" },
+              { label: t("newProject"), href: "/dashboard/projects", icon: FolderOpen, color: "text-purple-500" },
+            ].map(({ label, href, icon: Icon, color }) => (
               <a
                 key={label}
                 href={href}

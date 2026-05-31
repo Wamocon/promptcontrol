@@ -11,22 +11,22 @@ describe("Badge", () => {
   it("applies default variant by default", () => {
     render(<Badge>Default</Badge>);
     const badge = screen.getByText("Default");
-    expect(badge.className).toMatch(/zinc/);
+    expect(badge.className).toMatch(/white\/6|border-white/);
   });
 
   it("applies success variant", () => {
     render(<Badge variant="success">Success</Badge>);
-    expect(screen.getByText("Success").className).toMatch(/green/);
+    expect(screen.getByText("Success").className).toMatch(/emerald/);
   });
 
   it("applies warning variant", () => {
     render(<Badge variant="warning">Warning</Badge>);
-    expect(screen.getByText("Warning").className).toMatch(/yellow/);
+    expect(screen.getByText("Warning").className).toMatch(/amber/);
   });
 
   it("applies danger variant", () => {
     render(<Badge variant="danger">Error</Badge>);
-    expect(screen.getByText("Error").className).toMatch(/red/);
+    expect(screen.getByText("Error").className).toMatch(/rose/);
   });
 
   it("applies info variant", () => {

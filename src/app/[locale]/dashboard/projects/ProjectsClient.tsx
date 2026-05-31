@@ -6,7 +6,6 @@ import { useState, useTransition } from "react";
 import { Plus, FolderOpen, Pencil, Trash2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
-import { Card } from "@/components/ui/Card";
 import { Dialog, ConfirmDialog } from "@/components/ui/Dialog";
 import { createProject, deleteProject, updateProject } from "./actions";
 import { formatDate } from "@/lib/utils";

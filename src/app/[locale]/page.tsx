@@ -11,8 +11,6 @@ import {
   ArrowRight,
   Star,
   Code2,
-  FlaskConical,
-  BarChart2,
 } from "lucide-react";
 
 export default function HomePage() {

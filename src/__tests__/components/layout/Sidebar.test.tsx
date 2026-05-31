@@ -82,6 +82,6 @@ describe("Sidebar", () => {
     mockUsePathname.mockReturnValue("/dashboard/admin");
     render(<Sidebar plan="free" isAdmin={true} />);
     const adminLink = screen.getByRole("link", { name: "admin" });
-    expect(adminLink.className).toMatch(/red/);
+    expect(adminLink.className).toMatch(/rose/);
   });
 });

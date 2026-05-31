@@ -6,7 +6,6 @@ import { UserPlus, Crown, Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Card } from "@/components/ui/Card";
 import { Dialog } from "@/components/ui/Dialog";
 import { formatDate } from "@/lib/utils";
 import type { Profile, TeamInvitation, UserRole } from "@/types";

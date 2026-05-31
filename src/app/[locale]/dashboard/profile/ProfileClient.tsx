@@ -98,7 +98,7 @@ export function ProfileClient({ profile, userEmail }: ProfileClientProps) {
 
   // Password state
   const [passwordSaved, setPasswordSaved] = useState(false);
-  const [currentPw, setCurrentPw] = useState("");
+  const [, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -114,10 +114,7 @@ export function ProfileClient({ profile, userEmail }: ProfileClientProps) {
   const [notifTeamInvites, setNotifTeamInvites] = useState(true);
   const [notifNewsletter, setNotifNewsletter] = useState(false);
 
-  // Security state
-  const [activity, setActivity] = useState<{ date: string; action: string }[]>([
-    { date: new Date().toISOString(), action: "Login" },
-  ]);
+  // Security state (reserved for future use)
 
   const plan = profile?.organizations?.plan ?? "free";
 
