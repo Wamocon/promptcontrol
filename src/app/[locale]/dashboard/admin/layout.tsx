@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClientSafe } from "@/lib/supabase/server";
+import { AdminTabs } from "./AdminTabs";
 
 export default async function AdminLayout({
   children,
@@ -9,7 +10,11 @@ export default async function AdminLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const supabase = await createClient();
+  const supabase = await createClientSafe();
+  if (!supabase) {
+    redirect(`/${locale}/auth/login`);
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -28,5 +33,10 @@ export default async function AdminLayout({
     redirect(`/${locale}/dashboard`);
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex h-full flex-col">
+      <AdminTabs />
+      <div className="flex-1 overflow-y-auto">{children}</div>
+    </div>
+  );
 }

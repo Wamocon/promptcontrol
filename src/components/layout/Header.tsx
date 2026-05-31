@@ -131,13 +131,13 @@ export function Header({ userName, locale }: HeaderProps) {
                   }}
                 >
                   <Link
-                    href="/dashboard/settings"
+                    href="/dashboard/profile"
                     onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{ color: "var(--text-2)" }}
                   >
                     <Settings className="h-4 w-4" />
-                    {t("settings")}
+                    {t("profileSettings")}
                   </Link>
                   <button
                     onClick={handleLogout}

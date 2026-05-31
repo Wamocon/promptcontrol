@@ -45,17 +45,14 @@ export default function RegisterPage() {
           >
             PC
           </div>
-          <h1 className="text-2xl font-bold text-white/90">{t("title")}</h1>
-          <p className="mt-1.5 text-sm text-white/40">{t("subtitle")}</p>
+          <h1 className="text-2xl font-bold text-t1">{t("title")}</h1>
+          <p className="mt-1.5 text-sm text-t3">{t("subtitle")}</p>
         </div>
 
-        <div
-          className="rounded-2xl border border-white/8 p-7 shadow-2xl"
-          style={{ background: "rgba(12,17,32,0.75)", backdropFilter: "blur(24px)" }}
-        >
+        <div className="panel p-7 shadow-2xl">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {error && (
-              <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+              <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-500">
                 {error}
               </div>
             )}
@@ -102,9 +99,9 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <p className="mt-5 text-center text-sm text-white/35">
+        <p className="mt-5 text-center text-sm text-t3">
           {t("hasAccount")}{" "}
-          <Link href="/auth/login" className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
+          <Link href="/auth/login" className="font-semibold text-indigo-500 hover:text-indigo-400 transition-colors">
             {t("login")}
           </Link>
         </p>

@@ -66,8 +66,8 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white/90">{t("title")}</h1>
-          <p className="mt-1.5 text-sm text-white/35">{t("subtitle")}</p>
+          <h1 className="text-2xl font-bold text-t1">{t("title")}</h1>
+          <p className="mt-1.5 text-sm text-t3">{t("subtitle")}</p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
           <Plus className="h-4 w-4" />
@@ -77,18 +77,15 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
 
       {/* Project grid */}
       {projects.length === 0 ? (
-        <div
-          className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 py-24"
-          style={{ background: "rgba(12,17,32,0.40)" }}
-        >
+        <div className="panel-subtle flex flex-col items-center justify-center border-dashed py-24">
           <div
             className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
             style={{ background: "rgba(99,102,241,0.12)", boxShadow: "0 0 30px rgba(99,102,241,0.20)" }}
           >
             <FolderOpen className="h-7 w-7 text-indigo-400" />
           </div>
-          <p className="font-semibold text-white/70 mb-1">{t("empty")}</p>
-          <p className="text-sm text-white/30 mb-6">{t("emptyDescription")}</p>
+          <p className="font-semibold text-t2 mb-1">{t("empty")}</p>
+          <p className="text-sm text-t3 mb-6">{t("emptyDescription")}</p>
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4" /> {t("create")}
           </Button>
@@ -96,11 +93,7 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <div
-              key={project.id}
-              className="group card-hover rounded-2xl border border-white/7 p-5"
-              style={{ background: "rgba(12,17,32,0.60)", backdropFilter: "blur(16px)" }}
-            >
+            <div key={project.id} className="group card-hover panel p-5">
               <div className="flex items-start justify-between mb-4">
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-xl"
@@ -111,32 +104,32 @@ export function ProjectsClient({ projects }: ProjectsClientProps) {
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => setEditProject(project)}
-                    className="rounded-lg p-1.5 text-white/30 hover:bg-white/6 hover:text-white/70 transition-colors"
+                    className="rounded-lg p-1.5 text-t3 hover:bg-black/5 dark:hover:bg-white/6 hover:text-t1 transition-colors"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setDeleteId(project.id)}
-                    className="rounded-lg p-1.5 text-white/30 hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
+                    className="rounded-lg p-1.5 text-t3 hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              <h3 className="font-semibold text-white/85 mb-1">{project.name}</h3>
+              <h3 className="font-semibold text-t1 mb-1">{project.name}</h3>
               {project.description && (
-                <p className="text-sm text-white/35 mb-4 line-clamp-2">{project.description}</p>
+                <p className="text-sm text-t3 mb-4 line-clamp-2">{project.description}</p>
               )}
 
-              <div className="flex items-center justify-between text-xs text-white/25 mb-3">
+              <div className="flex items-center justify-between text-xs text-t4 mb-3">
                 <span>{project.prompt_count} Prompts</span>
                 <span>{formatDate(project.updated_at)}</span>
               </div>
 
               <Link
                 href={{ pathname: "/dashboard/projects/[id]", params: { id: project.id } }}
-                className="flex items-center gap-1 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="flex items-center gap-1 text-sm font-medium text-indigo-500 hover:text-indigo-400 transition-colors"
               >
                 Prompts anzeigen <ChevronRight className="h-4 w-4" />
               </Link>

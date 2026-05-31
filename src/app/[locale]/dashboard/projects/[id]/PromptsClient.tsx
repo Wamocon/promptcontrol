@@ -237,22 +237,22 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     <div className="flex h-full overflow-hidden">
       {/* Left panel: prompt list */}
       <div
-        className="w-72 shrink-0 border-r border-white/6 flex flex-col"
-        style={{ background: "rgba(6,10,19,0.80)", backdropFilter: "blur(16px)" }}
+        className="w-72 shrink-0 border-r flex flex-col"
+        style={{ background: "var(--panel-bg)", borderColor: "var(--panel-border)", backdropFilter: "blur(16px)" }}
       >
         {/* Project header */}
-        <div className="border-b border-white/6 px-4 py-3.5">
+        <div className="border-b px-4 py-3.5" style={{ borderColor: "var(--panel-border)" }}>
           <Link
             href="/dashboard/projects"
-            className="flex items-center gap-1 text-xs text-white/30 hover:text-white/60 mb-2 transition-colors"
+            className="flex items-center gap-1 text-xs text-t3 hover:text-t1 mb-2 transition-colors"
           >
             <ChevronLeft className="h-3 w-3" /> Alle Projekte
           </Link>
-          <h2 className="font-semibold text-white/85 truncate">{project.name}</h2>
+          <h2 className="font-semibold text-t1 truncate">{project.name}</h2>
         </div>
 
         {/* Category filter */}
-        <div className="px-3 py-2.5 border-b border-white/6">
+        <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--panel-border)" }}>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
@@ -266,7 +266,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         </div>
 
         {/* Add button */}
-        <div className="px-3 py-2.5 border-b border-white/6">
+        <div className="px-3 py-2.5 border-b" style={{ borderColor: "var(--panel-border)" }}>
           <Button size="sm" onClick={() => setShowCreate(true)} className="w-full">
             <Plus className="h-3.5 w-3.5" /> Neuer Prompt
           </Button>
@@ -275,7 +275,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         {/* Prompt list */}
         <div className="flex-1 overflow-y-auto">
           {filteredPrompts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 text-white/25 text-sm">
+            <div className="flex flex-col items-center justify-center h-32 text-t4 text-sm">
               <FileText className="h-8 w-8 mb-2" />
               Noch keine Prompts
             </div>
@@ -284,14 +284,15 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               <button
                 key={prompt.id}
                 onClick={() => selectPrompt(prompt)}
-                className={`w-full text-left px-4 py-3 border-b border-white/4 transition-all ${
+                className={`w-full text-left px-4 py-3 border-b transition-all ${
                   selectedPrompt?.id === prompt.id
-                    ? "bg-indigo-500/10 border-l-2 border-l-indigo-400"
-                    : "hover:bg-white/3"
+                    ? "bg-indigo-500/10 border-l-2 border-l-indigo-500"
+                    : "hover:bg-black/3 dark:hover:bg-white/3"
                 }`}
+                style={{ borderBottomColor: "var(--panel-border)" }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-white/80 truncate">{prompt.name}</span>
+                  <span className="text-sm font-medium text-t1 truncate">{prompt.name}</span>
                   {statusBadge(prompt.status)}
                 </div>
                 {prompt.prompt_categories && (
@@ -299,7 +300,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
                     {prompt.prompt_categories.name}
                   </span>
                 )}
-                <p className="text-xs text-white/25 mt-0.5">{formatDate(prompt.updated_at)}</p>
+                <p className="text-xs text-t4 mt-0.5">{formatDate(prompt.updated_at)}</p>
               </button>
             ))
           )}
@@ -307,28 +308,28 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
       </div>
 
       {/* Right panel: editor */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#060a13" }}>
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "var(--background)" }}>
         {selectedPrompt ? (
           <>
             {/* Toolbar */}
             <div
-              className="flex items-center gap-1.5 border-b border-white/6 px-4 py-2.5"
-              style={{ background: "rgba(4,7,14,0.85)", backdropFilter: "blur(16px)" }}
+              className="flex items-center gap-1.5 border-b px-4 py-2.5"
+              style={{ background: "var(--panel-bg-subtle)", borderColor: "var(--panel-border)", backdropFilter: "blur(16px)" }}
             >
-              <span className="flex-1 text-sm font-semibold text-white/75 truncate">{editName}</span>
+              <span className="flex-1 text-sm font-semibold text-t1 truncate">{editName}</span>
 
               <button
                 onClick={handleCopy}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-white/40 hover:bg-white/6 hover:text-white/70 transition-colors"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/6 hover:text-t1 transition-colors"
               >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Kopiert" : "Kopieren"}
               </button>
 
               <button
                 onClick={handleComplianceCheck}
                 disabled={complianceLoading}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-amber-400/70 hover:bg-amber-400/8 hover:text-amber-400 transition-colors"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-amber-500 hover:bg-amber-400/8 hover:text-amber-600 transition-colors"
               >
                 <Shield className="h-3.5 w-3.5" />
                 {complianceLoading ? "Prüfe..." : "Compliance"}
@@ -337,7 +338,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               <button
                 onClick={handleAiAnalysis}
                 disabled={aiLoading}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-indigo-400/70 hover:bg-indigo-400/8 hover:text-indigo-400 transition-colors"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-indigo-500 hover:bg-indigo-400/8 hover:text-indigo-600 transition-colors"
               >
                 <Brain className="h-3.5 w-3.5" />
                 {aiLoading ? "Analysiert..." : "KI-Analyse"}
@@ -345,27 +346,24 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
 
               <button
                 onClick={handleShowVersions}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-white/40 hover:bg-white/6 hover:text-white/70 transition-colors"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/6 hover:text-t1 transition-colors"
               >
                 <GitBranch className="h-3.5 w-3.5" /> Versionen
               </button>
 
               <div className="relative group">
-                <button className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-white/40 hover:bg-white/6 hover:text-white/70 transition-colors">
+                <button className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/6 hover:text-t1 transition-colors">
                   <Download className="h-3.5 w-3.5" /> Export
                 </button>
-                <div
-                  className="absolute right-0 top-9 z-10 hidden group-hover:block w-48 rounded-xl border border-white/8 p-1 shadow-2xl"
-                  style={{ background: "rgba(10,14,26,0.97)", backdropFilter: "blur(20px)" }}
-                >
-                  <button onClick={() => handleExport("instruction")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white/85 transition-colors">Als instruction.md</button>
-                  <button onClick={() => handleExport("skill")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-white/60 hover:bg-white/5 hover:text-white/85 transition-colors">Als skill.md</button>
+                <div className="absolute right-0 top-9 z-10 hidden group-hover:block w-48 panel p-1 shadow-2xl">
+                  <button onClick={() => handleExport("instruction")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors">Als instruction.md</button>
+                  <button onClick={() => handleExport("skill")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors">Als skill.md</button>
                 </div>
               </div>
 
               <button
                 onClick={() => setDeleteId(selectedPrompt.id)}
-                className="rounded-lg p-1.5 text-white/25 hover:bg-rose-500/10 hover:text-rose-400 transition-colors"
+                className="rounded-lg p-1.5 text-t4 hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -383,8 +381,8 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               <div
                 className={`mx-4 mt-3 rounded-xl px-4 py-3 text-sm flex items-start gap-2 border ${
                   complianceResult.clean
-                    ? "border-emerald-500/25 bg-emerald-500/8 text-emerald-400"
-                    : "border-rose-500/25 bg-rose-500/8 text-rose-400"
+                    ? "border-emerald-500/25 bg-emerald-500/8 text-emerald-500"
+                    : "border-rose-500/25 bg-rose-500/8 text-rose-500"
                 }`}
               >
                 {complianceResult.clean ? (
@@ -400,11 +398,11 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
             {aiAnalysis && (
               <div className="mx-4 mt-3 rounded-xl border border-indigo-500/20 p-4" style={{ background: "rgba(99,102,241,0.07)" }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Brain className="h-4 w-4 text-indigo-400" />
-                  <span className="text-sm font-semibold text-indigo-400">{t("aiDisclaimer")}</span>
-                  <button onClick={() => setAiAnalysis(null)} className="ml-auto text-white/30 hover:text-white/60"><X className="h-3.5 w-3.5" /></button>
+                  <Brain className="h-4 w-4 text-indigo-500" />
+                  <span className="text-sm font-semibold text-indigo-500">{t("aiDisclaimer")}</span>
+                  <button onClick={() => setAiAnalysis(null)} className="ml-auto text-t3 hover:text-t1"><X className="h-3.5 w-3.5" /></button>
                 </div>
-                <p className="text-sm text-white/65 whitespace-pre-wrap leading-relaxed">{aiAnalysis}</p>
+                <p className="text-sm text-t2 whitespace-pre-wrap leading-relaxed">{aiAnalysis}</p>
               </div>
             )}
 
@@ -447,7 +445,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-white/50 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-medium text-t2 uppercase tracking-wide mb-1.5">
                   Prompt-Inhalt
                 </label>
                 <textarea
@@ -467,24 +465,24 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
               />
 
               {/* API usage */}
-              <div className="rounded-xl border border-white/7 p-4" style={{ background: "rgba(12,17,32,0.55)" }}>
-                <p className="text-xs font-semibold text-white/35 uppercase tracking-wider mb-2">REST API Endpunkt</p>
-                <code className="text-xs text-indigo-400 break-all font-mono">
+              <div className="panel p-4">
+                <p className="text-xs font-semibold text-t3 uppercase tracking-wider mb-2">REST API Endpunkt</p>
+                <code className="text-xs text-indigo-500 break-all font-mono">
                   GET {process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/v1/prompts/{selectedPrompt.slug}
                 </code>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-white/20">
+          <div className="flex-1 flex flex-col items-center justify-center text-t4">
             <div
               className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl"
               style={{ background: "rgba(99,102,241,0.10)", boxShadow: "0 0 40px rgba(99,102,241,0.15)" }}
             >
-              <FileText className="h-9 w-9 text-indigo-400" />
+              <FileText className="h-9 w-9 text-indigo-500" />
             </div>
-            <p className="text-base font-semibold text-white/50">Wählen Sie einen Prompt aus</p>
-            <p className="text-sm text-white/25 mt-1">oder erstellen Sie einen neuen Prompt</p>
+            <p className="text-base font-semibold text-t2">Wählen Sie einen Prompt aus</p>
+            <p className="text-sm text-t4 mt-1">oder erstellen Sie einen neuen Prompt</p>
           </div>
         )}
       </div>
@@ -498,16 +496,12 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         ) : (
           <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
             {versions.map((v) => (
-              <div
-                key={v.id}
-                className="flex items-center gap-3 rounded-xl border border-white/7 p-3"
-                style={{ background: "rgba(255,255,255,0.03)" }}
-              >
-                <GitBranch className="h-4 w-4 text-indigo-400 shrink-0" />
+              <div key={v.id} className="flex items-center gap-3 panel-subtle p-3">
+                <GitBranch className="h-4 w-4 text-indigo-500 shrink-0" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-white/80">Version {v.version}</p>
-                  {v.change_note && <p className="text-xs text-white/40">{v.change_note}</p>}
-                  <p className="text-xs text-white/25">{formatDate(v.created_at)}</p>
+                  <p className="text-sm font-semibold text-t1">Version {v.version}</p>
+                  {v.change_note && <p className="text-xs text-t3">{v.change_note}</p>}
+                  <p className="text-xs text-t4">{formatDate(v.created_at)}</p>
                 </div>
                 <Button size="sm" variant="secondary" onClick={() => handleRollback(v.id)}>
                   <RotateCcw className="h-3.5 w-3.5" /> Rollback

@@ -1,15 +1,15 @@
-import { createClient } from "@/lib/supabase/server";
-import { SettingsClient } from "./SettingsClient";
+import { redirect } from "next/navigation";
 
-export default async function SettingsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*, organizations(*)")
-    .eq("user_id", user!.id)
-    .single();
-
-  return <SettingsClient profile={profile} />;
+/**
+ * Settings has been merged into the unified Profile cockpit.
+ * The "Abrechnung" tab inside /dashboard/profile now hosts the
+ * subscription/billing settings the old page used to expose.
+ */
+export default async function SettingsRedirectPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect(`/${locale}/dashboard/profile?tab=billing`);
 }

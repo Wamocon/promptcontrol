@@ -11,7 +11,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={id} className="text-xs font-medium text-white/50 uppercase tracking-wide">
+          <label htmlFor={id} className="text-xs font-medium text-t3 uppercase tracking-wide">
             {label}
           </label>
         )}
@@ -42,7 +42,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={id} className="text-xs font-medium text-white/50 uppercase tracking-wide">
+          <label htmlFor={id} className="text-xs font-medium text-t3 uppercase tracking-wide">
             {label}
           </label>
         )}

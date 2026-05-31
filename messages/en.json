@@ -6,6 +6,7 @@
     "team": "Team",
     "settings": "Settings",
     "profile": "My Profile",
+    "profileSettings": "Profile & Settings",
     "admin": "Administration",
     "logout": "Sign out",
     "login": "Sign in",
@@ -270,13 +271,72 @@
     "subtitle": "Manage your personal settings and security.",
     "save": "Save",
     "saved": "Saved",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "apiKeys": "API Keys",
+      "notifications": "Notifications",
+      "billing": "Billing",
+      "team": "Team",
+      "integrations": "Integrations",
+      "gdpr": "Data & GDPR",
+      "danger": "Danger Zone"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Protect your account with a strong password and two-factor authentication.",
+      "twoFactor": "Two-Factor Authentication (2FA)",
+      "twoFactorDesc": "Use an authenticator app to sign in. Currently available as a preview.",
+      "twoFactorStatus": "Status",
+      "twoFactorDisabled": "Not enabled",
+      "twoFactorEnable": "Set up 2FA (preview)",
+      "sessions": "Active sessions",
+      "sessionsDesc": "See all devices currently signed in to your account.",
+      "signOutAll": "Sign out of all other sessions"
+    },
+    "billing": {
+      "title": "Subscription & Billing",
+      "description": "Manage your plan and payment methods.",
+      "currentPlan": "Current plan",
+      "plan": "Plan",
+      "upgrade": "Upgrade to Pro",
+      "manage": "Manage in Stripe portal",
+      "invoices": "Invoices",
+      "invoicesEmpty": "No invoices yet."
+    },
+    "team": {
+      "title": "Team",
+      "description": "Manage members and invitations for your organization.",
+      "manage": "Go to team management"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "description": "Connect ProCon with GitHub Copilot, Slack and other tools.",
+      "github": "GitHub Copilot (MCP)",
+      "githubDesc": "Access your prompts directly from your IDE.",
+      "slack": "Slack",
+      "slackDesc": "Send notifications to your Slack channel.",
+      "webhook": "Webhooks",
+      "webhookDesc": "Call your own endpoints on prompt updates.",
+      "comingSoon": "Coming soon"
+    },
+    "gdpr": {
+      "title": "Data & GDPR",
+      "description": "Export or delete your personal data according to GDPR articles 15 and 17.",
+      "export": "Request data export",
+      "exportDesc": "Get a JSON file with all the data we store about you.",
+      "download": "Download data",
+      "requests": "Previous requests"
+    },
     "personalInfo": {
       "title": "Personal Information",
       "description": "Update your name and profile information.",
       "name": "Full name",
       "namePlaceholder": "John Doe",
       "email": "Email address",
-      "emailNote": "Email address cannot be changed. Contact support."
+      "emailNote": "Email address cannot be changed. Contact support.",
+      "avatar": "Profile picture",
+      "avatarUpload": "Upload image (preview)"
     },
     "password": {
       "title": "Change Password",
@@ -293,7 +353,8 @@
       "copy": "Copy",
       "regenerate": "Regenerate",
       "confirmRegenerate": "Are you sure? The old key will be invalidated.",
-      "warning": "Treat the API key like a password. Do not share it."
+      "warning": "Treat the API key like a password. Do not share it.",
+      "createNew": "Create additional key (preview)"
     },
     "notifications": {
       "title": "Notifications",
@@ -336,7 +397,47 @@
       "settings": {
         "title": "App settings",
         "description": "Platform configuration and feature flags"
+      },
+      "aiProviders": {
+        "title": "AI Providers",
+        "description": "Configure SOKRATES, OpenRouter and GroQ"
+      },
+      "stats": {
+        "title": "Statistics",
+        "description": "KPIs, usage and growth"
       }
+    },
+    "tabs": {
+      "overview": "Overview",
+      "subscriptions": "Subscriptions",
+      "users": "Users",
+      "settings": "App Settings",
+      "aiProviders": "AI Providers",
+      "stats": "Statistics"
+    },
+    "aiProviders": {
+      "title": "AI Providers",
+      "description": "Choose the default AI provider and model for the app.",
+      "active": "Active",
+      "select": "Select",
+      "selected": "Selected",
+      "model": "Model",
+      "save": "Save selection",
+      "saved": "Saved"
+    },
+    "stats": {
+      "title": "Statistics",
+      "description": "Key metrics on usage and growth.",
+      "totalUsers": "Total users",
+      "totalOrgs": "Total organizations",
+      "totalPrompts": "Total prompts",
+      "totalLogs": "Total API calls",
+      "proOrgs": "Pro organizations",
+      "freeOrgs": "Free organizations",
+      "growth7d": "New users (7d)",
+      "growth30d": "New users (30d)",
+      "roleBreakdown": "Role breakdown",
+      "planBreakdown": "Plan breakdown"
     },
     "users": {
       "title": "User management",
@@ -348,6 +449,10 @@
       "joined": "Joined",
       "actions": "Actions",
       "empty": "No users found.",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "resetPassword": "Reset password",
+      "resetSent": "Reset link sent",
       "confirmDelete": "Really delete this user?",
       "of": "of",
       "totalUsers": "users"

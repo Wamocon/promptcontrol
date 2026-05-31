@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createClientSafe, createServiceClientSafe } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { AiGuideChat } from "@/components/AiGuideChat";
@@ -15,22 +15,44 @@ interface DashboardLayoutProps {
 
 export default async function DashboardLayout({ children, params }: DashboardLayoutProps) {
   const { locale } = await params;
-  const supabase = await createClient();
+  const supabase = await createClientSafe();
+
+  // If Supabase is not configured at all (missing ENV on Vercel) we
+  // bounce the user to the login page rather than 500. The login page
+  // itself surfaces the misconfiguration in a controlled way.
+  if (!supabase) {
+    redirect(`/${locale}/auth/login`);
+  }
 
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) {
     redirect(`/${locale}/auth/login`);
   }
 
-  // Use service client to bypass RLS for the profile lookup
-  // (we have already verified authentication above)
-  const serviceSupabase = await createServiceClient();
-  const { data: profile } = await serviceSupabase
-    .from("profiles")
-    .select("*, organizations(*)")
-    .eq("user_id", user.id)
-    .single();
+  // Profile lookup tolerates missing service-role key (degrades to anon).
+  let profile:
+    | {
+        id?: string;
+        name?: string | null;
+        role?: string | null;
+        organizations?: { plan?: string } | null;
+      }
+    | null = null;
+
+  try {
+    const serviceSupabase = await createServiceClientSafe();
+    const client = serviceSupabase ?? supabase;
+    const { data } = await client
+      .from("profiles")
+      .select("*, organizations(*)")
+      .eq("user_id", user.id)
+      .single();
+    profile = data;
+  } catch {
+    // Profile lookup failed (RLS, schema mismatch, ...). We render the
+    // dashboard with a sensible default so the user is not blocked.
+    profile = null;
+  }
 
   const plan = (profile?.organizations as { plan?: string } | null)?.plan ?? "free";
   const isAdmin = profile?.role === "admin";

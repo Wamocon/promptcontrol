@@ -17,18 +17,17 @@ export function Dialog({ open, onClose, title, description, children, className 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div
-        className={cn("relative z-10 w-full max-w-lg rounded-2xl border border-white/8 p-6 shadow-2xl", className)}
-        style={{ background: "rgba(10,14,26,0.97)", backdropFilter: "blur(24px)" }}
+        className={cn("panel relative z-10 w-full max-w-lg p-6 shadow-2xl", className)}
       >
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-bold text-white/90">{title}</h2>
-          <button onClick={onClose} className="text-white/30 hover:text-white/65 transition-colors">
+          <h2 className="text-lg font-bold text-t1">{title}</h2>
+          <button onClick={onClose} className="text-t4 hover:text-t1 transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
-        {description && <p className="mt-1 text-sm text-white/40">{description}</p>}
+        {description && <p className="mt-1 text-sm text-t3">{description}</p>}
         <div className="mt-5">{children}</div>
       </div>
     </div>
@@ -51,7 +50,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, description, co
       <div className="flex justify-end gap-3">
         <button
           onClick={onClose}
-          className="rounded-xl px-4 py-2 text-sm font-medium text-white/55 border border-white/10 hover:bg-white/5 transition-colors"
+          className="rounded-xl px-4 py-2 text-sm font-medium text-t2 border border-[color:var(--panel-border)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
         >
           Abbrechen
         </button>

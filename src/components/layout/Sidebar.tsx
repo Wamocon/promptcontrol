@@ -7,10 +7,8 @@ import {
   FolderOpen,
   ScrollText,
   Users,
-  Settings,
   Zap,
   ShieldCheck,
-  UserCircle,
   FlaskConical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,8 +28,6 @@ export function Sidebar({ plan, isAdmin = false }: SidebarProps) {
     { href: "/dashboard/logs" as const, label: t("logs"), icon: ScrollText },
     { href: "/dashboard/ab-tests" as const, label: "A/B Tests", icon: FlaskConical },
     { href: "/dashboard/team" as const, label: t("team"), icon: Users },
-    { href: "/dashboard/profile" as const, label: t("profile"), icon: UserCircle },
-    { href: "/dashboard/settings" as const, label: t("settings"), icon: Settings },
   ];
 
   return (
@@ -93,7 +89,7 @@ export function Sidebar({ plan, isAdmin = false }: SidebarProps) {
       <div className="p-3 border-t" style={{ borderColor: "var(--panel-border)" }}>
         {plan === "free" ? (
           <Link
-            href="/dashboard/settings"
+            href={{ pathname: "/dashboard/profile", query: { tab: "billing" } }}
             className="flex items-center gap-2.5 rounded-xl border border-indigo-500/20 px-3 py-2.5 text-sm transition-all hover:border-indigo-500/35"
             style={{ background: "rgba(99,102,241,0.07)" }}
           >

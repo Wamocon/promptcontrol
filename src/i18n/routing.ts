@@ -15,6 +15,8 @@ export const routing = defineRouting({
     "/dashboard/admin/users": "/dashboard/admin/users",
     "/dashboard/admin/subscriptions": "/dashboard/admin/subscriptions",
     "/dashboard/admin/settings": "/dashboard/admin/settings",
+    "/dashboard/admin/ai-providers": "/dashboard/admin/ai-providers",
+    "/dashboard/admin/stats": "/dashboard/admin/stats",
     "/auth/login": "/auth/login",
     "/auth/register": "/auth/register",
     "/legal/impressum": "/legal/impressum",
