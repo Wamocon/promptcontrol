@@ -8,8 +8,7 @@ interface CardProps {
 export function Card({ className, children }: CardProps) {
   return (
     <div
-      className={cn("card-hover rounded-2xl border border-white/7 p-6", className)}
-      style={{ background: "rgba(12,17,32,0.60)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+      className={cn("card-hover glass-card p-6", className)}
     >
       {children}
     </div>
@@ -21,11 +20,11 @@ export function CardHeader({ className, children }: CardProps) {
 }
 
 export function CardTitle({ className, children }: CardProps) {
-  return <h3 className={cn("text-lg font-semibold text-white/90", className)}>{children}</h3>;
+  return <h3 className={cn("text-lg font-semibold text-t1", className)}>{children}</h3>;
 }
 
 export function CardDescription({ className, children }: CardProps) {
-  return <p className={cn("text-sm text-white/40", className)}>{children}</p>;
+  return <p className={cn("text-sm text-t3", className)}>{children}</p>;
 }
 
 export function CardContent({ className, children }: CardProps) {

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { AiGuideChat } from "@/components/AiGuideChat";
@@ -19,7 +19,10 @@ export default async function DashboardLayout({ children, params }: DashboardLay
     redirect(`/${locale}/auth/login`);
   }
 
-  const { data: profile } = await supabase
+  // Use service client to bypass RLS for the profile lookup
+  // (we have already verified authentication above)
+  const serviceSupabase = await createServiceClient();
+  const { data: profile } = await serviceSupabase
     .from("profiles")
     .select("*, organizations(*)")
     .eq("user_id", user.id)

@@ -256,7 +256,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="input-glass text-xs py-1.5 [&>option]:bg-[#0c1120]"
+            className="input-glass text-xs py-1.5 [&>option]:bg-[--input] [&>option]:text-[--foreground]"
           >
             <option value="all">Alle Kategorien</option>
             {categories.map((cat) => (

@@ -34,7 +34,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#060a13] px-4 py-10">
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-10" style={{ background: "var(--background)" }}>
       <div className="aurora-bg" />
 
       <div className="relative z-10 w-full max-w-sm animate-fade-in-up">

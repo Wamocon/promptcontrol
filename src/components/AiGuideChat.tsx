@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, ChevronRight, ArrowLeft, MessageSquare } from "lucide-react";
+import { X, ChevronRight, ArrowLeft, MessageSquare, Send, Sparkles, BookOpen, Loader2 } from "lucide-react";
 
 interface GuideSection {
   id: string;
@@ -11,6 +11,20 @@ interface GuideSection {
   summary: string;
   content: string;
 }
+
+interface ChatMsg {
+  role: "user" | "assistant";
+  content: string;
+}
+
+type Tab = "topics" | "chat";
+
+const SUGGESTIONS = [
+  "Wie erstelle ich ein Projekt?",
+  "Wie funktioniert ein A/B Test?",
+  "Wie binde ich Prompts per API ein?",
+  "Welche Rollen gibt es im Team?",
+];
 
 const GUIDE_SECTIONS: GuideSection[] = [
   {
@@ -225,15 +239,29 @@ MCP erlaubt es KI-Assistenten wie GitHub Copilot, direkt auf Ihre ProCon-Prompts
 
 export function AiGuideChat() {
   const [isOpen, setIsOpen] = useState(false);
+  const [tab, setTab] = useState<Tab>("topics");
   const [activeSection, setActiveSection] = useState<GuideSection | null>(null);
   const [pulsing, setPulsing] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   // Stop pulsing after 5 seconds
   useEffect(() => {
     const timer = setTimeout(() => setPulsing(false), 5000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Auto-scroll chat
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages, chatLoading]);
 
   // Click outside to close
   useEffect(() => {
@@ -251,7 +279,34 @@ export function AiGuideChat() {
   function openPanel() {
     setIsOpen(true);
     setPulsing(false);
-    setActiveSection(null);
+  }
+
+  async function sendChat(text: string) {
+    const trimmed = text.trim();
+    if (!trimmed || chatLoading) return;
+
+    const userMsg: ChatMsg = { role: "user", content: trimmed };
+    const newMessages = [...chatMessages, userMsg];
+    setChatMessages(newMessages);
+    setChatInput("");
+    setChatLoading(true);
+
+    try {
+      const res = await fetch("/api/ai/guide-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+      const data = await res.json();
+      setChatMessages([...newMessages, { role: "assistant", content: data.reply ?? "Keine Antwort." }]);
+    } catch {
+      setChatMessages([
+        ...newMessages,
+        { role: "assistant", content: "Verbindung zum KI-Assistenten fehlgeschlagen." },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
   }
 
   return (
@@ -262,8 +317,8 @@ export function AiGuideChat() {
           ref={panelRef}
           className="guide-panel rounded-2xl shadow-2xl overflow-hidden flex flex-col"
           style={{
-            width: "380px",
-            maxHeight: "520px",
+            width: "min(440px, calc(100vw - 3rem))",
+            height: "min(640px, calc(100vh - 8rem))",
             animation: "slide-up 0.25s cubic-bezier(0.22, 1, 0.36, 1) both",
           }}
         >
@@ -272,46 +327,72 @@ export function AiGuideChat() {
             className="flex items-center justify-between px-4 py-3 border-b shrink-0"
             style={{ borderColor: "var(--panel-border)" }}
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               {activeSection ? (
                 <button
                   onClick={() => setActiveSection(null)}
-                  className="flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-black/6 dark:hover:bg-white/8"
+                  aria-label="Zurück"
+                  className="flex items-center justify-center h-8 w-8 rounded-lg transition-colors hover:bg-black/6 dark:hover:bg-white/8 shrink-0"
                   style={{ color: "var(--text-3)" }}
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               ) : (
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-xs shadow">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-xs shadow shrink-0">
                   PC
                 </div>
               )}
-              <div>
-                <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate" style={{ color: "var(--text-1)" }}>
                   {activeSection ? activeSection.title : "ProCon Guide"}
                 </p>
-                {!activeSection && (
-                  <p className="text-xs" style={{ color: "var(--text-4)" }}>
-                    Was möchten Sie wissen?
-                  </p>
-                )}
+                <p className="text-xs truncate" style={{ color: "var(--text-4)" }}>
+                  {activeSection ? activeSection.summary : "KI-Assistent & Themen-Übersicht"}
+                </p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center h-7 w-7 rounded-lg transition-colors hover:bg-black/6 dark:hover:bg-white/8"
+              aria-label="Schließen"
+              className="flex items-center justify-center h-8 w-8 rounded-lg transition-colors hover:bg-black/6 dark:hover:bg-white/8 shrink-0"
               style={{ color: "var(--text-3)" }}
             >
               <X className="h-4 w-4" />
             </button>
           </div>
 
+          {/* Tabs (only when no section detail) */}
+          {!activeSection && (
+            <div
+              className="flex items-center gap-1 px-3 pt-2 pb-1 border-b shrink-0"
+              style={{ borderColor: "var(--panel-border)" }}
+            >
+              <TabButton active={tab === "topics"} onClick={() => setTab("topics")} icon={<BookOpen className="h-3.5 w-3.5" />} label="Themen" />
+              <TabButton active={tab === "chat"} onClick={() => setTab("chat")} icon={<Sparkles className="h-3.5 w-3.5" />} label="KI-Chat" />
+            </div>
+          )}
+
           {/* Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
             {activeSection ? (
-              <SectionDetail section={activeSection} />
+              <div className="flex-1 overflow-y-auto">
+                <SectionDetail section={activeSection} />
+              </div>
+            ) : tab === "topics" ? (
+              <div className="flex-1 overflow-y-auto">
+                <SectionList onSelect={setActiveSection} onOpenChat={() => setTab("chat")} />
+              </div>
             ) : (
-              <SectionList onSelect={setActiveSection} />
+              <ChatView
+                messages={chatMessages}
+                input={chatInput}
+                loading={chatLoading}
+                scrollRef={chatScrollRef}
+                onInputChange={setChatInput}
+                onSend={() => sendChat(chatInput)}
+                onSuggestion={(s) => sendChat(s)}
+                onClear={() => setChatMessages([])}
+              />
             )}
           </div>
         </div>
@@ -323,7 +404,6 @@ export function AiGuideChat() {
         className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-2xl shadow-indigo-500/40 transition-all hover:scale-105 hover:shadow-indigo-500/60 active:scale-95"
         title="ProCon Guide öffnen"
       >
-        {/* Pulse ring */}
         {pulsing && (
           <span className="absolute inset-0 rounded-2xl bg-indigo-500 opacity-50 animate-ping" />
         )}
@@ -337,11 +417,191 @@ export function AiGuideChat() {
   );
 }
 
-function SectionList({ onSelect }: { onSelect: (s: GuideSection) => void }) {
+function TabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+        active
+          ? "bg-indigo-500/15 text-indigo-600 dark:text-indigo-300"
+          : "hover:bg-black/5 dark:hover:bg-white/5"
+      }`}
+      style={!active ? { color: "var(--text-3)" } : {}}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function ChatView({
+  messages,
+  input,
+  loading,
+  scrollRef,
+  onInputChange,
+  onSend,
+  onSuggestion,
+  onClear,
+}: {
+  messages: ChatMsg[];
+  input: string;
+  loading: boolean;
+  scrollRef: React.RefObject<HTMLDivElement | null>;
+  onInputChange: (v: string) => void;
+  onSend: () => void;
+  onSuggestion: (s: string) => void;
+  onClear: () => void;
+}) {
+  const isEmpty = messages.length === 0;
+
+  return (
+    <>
+      {/* Messages */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4">
+        {isEmpty ? (
+          <div className="flex flex-col items-center text-center pt-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30 mb-3">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <p className="font-semibold text-sm mb-1" style={{ color: "var(--text-1)" }}>
+              Fragen Sie mich alles
+            </p>
+            <p className="text-xs mb-5" style={{ color: "var(--text-3)" }}>
+              Ich erkläre Funktionen, gebe Tipps und helfe bei der Nutzung.
+            </p>
+            <div className="w-full flex flex-col gap-2">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => onSuggestion(s)}
+                  className="text-left rounded-xl px-3 py-2.5 text-xs transition-colors hover:bg-indigo-500/8"
+                  style={{ background: "var(--panel-bg-subtle)", border: "1px solid var(--panel-border)", color: "var(--text-2)" }}
+                >
+                  <span className="text-indigo-500 mr-1.5">›</span>
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {messages.map((m, i) => (
+              <ChatBubble key={i} message={m} />
+            ))}
+            {loading && (
+              <div className="flex items-start gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shrink-0">
+                  <Sparkles className="h-3.5 w-3.5" />
+                </div>
+                <div
+                  className="rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-xs flex items-center gap-2"
+                  style={{ background: "var(--panel-bg-subtle)", color: "var(--text-3)" }}
+                >
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Denke nach...
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <div className="border-t p-3 shrink-0" style={{ borderColor: "var(--panel-border)" }}>
+        {!isEmpty && (
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-4)" }}>
+              {messages.length} Nachricht{messages.length !== 1 ? "en" : ""}
+            </span>
+            <button
+              onClick={onClear}
+              className="text-[10px] uppercase tracking-wider hover:text-indigo-500 transition-colors"
+              style={{ color: "var(--text-4)" }}
+            >
+              Zurücksetzen
+            </button>
+          </div>
+        )}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSend();
+          }}
+          className="flex items-end gap-2 rounded-xl p-1.5"
+          style={{ background: "var(--panel-bg-subtle)", border: "1px solid var(--panel-border)" }}
+        >
+          <textarea
+            value={input}
+            onChange={(e) => onInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                onSend();
+              }
+            }}
+            placeholder="Frage an den ProCon Guide..."
+            rows={1}
+            disabled={loading}
+            className="flex-1 resize-none bg-transparent px-2 py-1.5 text-sm focus:outline-none disabled:opacity-50"
+            style={{ color: "var(--text-1)", maxHeight: "100px" }}
+          />
+          <button
+            type="submit"
+            disabled={!input.trim() || loading}
+            aria-label="Nachricht senden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/30 transition-all hover:shadow-indigo-500/50 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+          >
+            <Send className="h-3.5 w-3.5" />
+          </button>
+        </form>
+      </div>
+    </>
+  );
+}
+
+function ChatBubble({ message }: { message: ChatMsg }) {
+  const isUser = message.role === "user";
+  if (isUser) {
+    return (
+      <div className="flex justify-end">
+        <div className="rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-xs max-w-[85%] bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/20">
+          {message.content}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-2">
+      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shrink-0">
+        <Sparkles className="h-3.5 w-3.5" />
+      </div>
+      <div
+        className="rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-xs max-w-[85%] leading-relaxed"
+        style={{ background: "var(--panel-bg-subtle)", border: "1px solid var(--panel-border)", color: "var(--text-1)" }}
+        dangerouslySetInnerHTML={{ __html: formatChatContent(message.content) }}
+      />
+    </div>
+  );
+}
+
+function formatChatContent(text: string): string {
+  let html = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/`([^`]+)`/g, '<code style="background: rgba(99,102,241,0.12); padding: 1px 5px; border-radius: 4px; font-size: 11px;">$1</code>');
+  html = html.replace(/\n/g, "<br/>");
+  return html;
+}
+
+function SectionList({ onSelect, onOpenChat }: { onSelect: (s: GuideSection) => void; onOpenChat: () => void }) {
   return (
     <div className="p-3 flex flex-col gap-1.5">
-      <p className="text-xs px-2 pb-1" style={{ color: "var(--text-4)" }}>
-        Wählen Sie ein Thema, das Sie interessiert:
+      <p className="text-[10px] font-semibold uppercase tracking-widest px-2 pt-1 pb-1" style={{ color: "var(--text-4)" }}>
+        Themen-Übersicht
       </p>
       {GUIDE_SECTIONS.map((section) => (
         <button
@@ -365,16 +625,23 @@ function SectionList({ onSelect }: { onSelect: (s: GuideSection) => void }) {
         </button>
       ))}
 
-      {/* Footer hint */}
-      <div
-        className="mt-2 rounded-xl px-3 py-2.5 flex items-start gap-2.5"
-        style={{ background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)" }}
+      {/* Footer: switch to chat */}
+      <button
+        onClick={onOpenChat}
+        className="mt-2 rounded-xl px-3 py-3 flex items-start gap-2.5 text-left transition-all hover:scale-[1.01]"
+        style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.10), rgba(168,85,247,0.10))", border: "1px solid rgba(99,102,241,0.20)" }}
       >
         <MessageSquare className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
-        <p className="text-xs" style={{ color: "var(--text-3)" }}>
-          Der Guide erklärt jede Funktion von ProCon. Klicken Sie auf ein Thema, um Details zu sehen.
-        </p>
-      </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold" style={{ color: "var(--text-1)" }}>
+            Lieber eine Frage stellen?
+          </p>
+          <p className="text-[11px] mt-0.5" style={{ color: "var(--text-3)" }}>
+            Wechseln Sie zum KI-Chat und fragen Sie alles über ProCon.
+          </p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
+      </button>
     </div>
   );
 }

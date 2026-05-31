@@ -28,7 +28,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#060a13] px-4">
+    <div className="relative flex min-h-screen items-center justify-center px-4" style={{ background: "var(--background)" }}>
       {/* Aurora background */}
       <div className="aurora-bg" />
 
