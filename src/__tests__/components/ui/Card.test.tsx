@@ -11,8 +11,7 @@ describe("Card", () => {
   it("applies default styles", () => {
     const { container } = render(<Card>Card</Card>);
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toMatch(/rounded-xl/);
-    expect(card.className).toMatch(/border/);
+    expect(card.className).toMatch(/glass-card|card-hover/);
   });
 
   it("applies custom className", () => {
@@ -43,7 +42,7 @@ describe("CardDescription", () => {
 
   it("applies muted style", () => {
     render(<CardDescription>Desc</CardDescription>);
-    expect(screen.getByText("Desc").className).toMatch(/zinc/);
+    expect(screen.getByText("Desc").className).toMatch(/t3/);
   });
 });
 

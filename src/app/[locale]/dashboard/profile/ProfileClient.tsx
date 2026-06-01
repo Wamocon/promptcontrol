@@ -1,53 +1,178 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ComponentType } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
-  User,
-  Lock,
-  Bell,
-  Shield,
-  Trash2,
-  Check,
-  Copy,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  Camera,
+  User, Lock, Bell, Shield, Trash2, Check, Eye, EyeOff,
+  AlertTriangle, Camera, CreditCard, Users as UsersIcon, Plug, Download,
+  ChevronRight, Crown, KeyRound, Copy, RefreshCw, Terminal,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { createClient } from "@/lib/supabase/client";
+import { Link } from "@/i18n/navigation";
 import type { Profile } from "@/types";
+import {
+  updateProfileName,
+  changePassword,
+  exportUserData,
+  deleteAccount,
+  regenerateApiKey,
+} from "./actions";
+
+type ProfileWithOrg = Profile & {
+  organizations?: { name?: string | null; plan?: string | null } | null;
+};
 
 interface ProfileClientProps {
-  profile: (Profile & { organizations?: { name?: string; plan?: string } | null }) | null;
+  profile: ProfileWithOrg | null;
   userEmail: string;
+  apiKey?: string;
+}
+
+type TabKey =
+  | "profile" | "security" | "notifications"
+  | "billing" | "team" | "integrations" | "gdpr" | "danger";
+
+type Translator = ReturnType<typeof useTranslations<"profile">>;
+
+const TAB_DEFS: Array<{ key: TabKey; icon: ComponentType<{ className?: string }>; dangerous?: boolean }> = [
+  { key: "profile",       icon: User },
+  { key: "security",      icon: Lock },
+  { key: "notifications", icon: Bell },
+  { key: "billing",       icon: CreditCard },
+  { key: "team",          icon: UsersIcon },
+  { key: "integrations",  icon: Plug },
+  { key: "gdpr",          icon: Shield },
+  { key: "danger",        icon: AlertTriangle, dangerous: true },
+];
+
+export function ProfileClient({ profile, userEmail, apiKey }: ProfileClientProps) {
+  const t = useTranslations("profile");
+  const tTabs = useTranslations("profile.tabs");
+  const search = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const tabParam = (search.get("tab") ?? "profile") as TabKey;
+  const activeTab: TabKey = TAB_DEFS.find((entry) => entry.key === tabParam)?.key ?? "profile";
+
+  function setTab(next: TabKey) {
+    const sp = new URLSearchParams(search.toString());
+    sp.set("tab", next);
+    router.replace(`${pathname}?${sp.toString()}`, { scroll: false });
+  }
+
+  const name = profile?.name ?? "";
+  const plan = profile?.organizations?.plan ?? "free";
+  const initial = (name || userEmail).charAt(0).toUpperCase();
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-6 p-6 max-w-6xl">
+      <div className="lg:hidden">
+        <ProfileHeader name={name} email={userEmail} plan={plan} role={profile?.role ?? "developer"} initial={initial} />
+      </div>
+
+      <aside className="lg:w-64 shrink-0">
+        <div className="hidden lg:block mb-4">
+          <ProfileHeader name={name} email={userEmail} plan={plan} role={profile?.role ?? "developer"} initial={initial} compact />
+        </div>
+        <nav className="panel p-2 flex flex-row lg:flex-col gap-1 overflow-x-auto" aria-label="Profil-Bereiche">
+          {TAB_DEFS.map(({ key, icon: Icon, dangerous }) => {
+            const isActive = activeTab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all whitespace-nowrap ${
+                  isActive
+                    ? dangerous
+                      ? "bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300"
+                      : "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300"
+                    : "text-t3 hover:text-t1 hover:bg-[color:var(--panel-bg-subtle)]"
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">{tTabs(key)}</span>
+                {isActive && <ChevronRight className="hidden lg:block h-4 w-4 opacity-70" />}
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
+      <main className="flex-1 min-w-0">
+        {activeTab === "profile" && <PersonalInfoTab profile={profile} userEmail={userEmail} t={t} />}
+        {activeTab === "security" && <SecurityTab t={t} />}
+        {activeTab === "notifications" && <NotificationsTab t={t} />}
+        {activeTab === "billing" && <BillingTab plan={plan} t={t} />}
+        {activeTab === "team" && <TeamTab t={t} />}
+        {activeTab === "integrations" && <IntegrationsTab t={t} apiKey={apiKey} />}
+        {activeTab === "gdpr" && <GdprTab t={t} />}
+        {activeTab === "danger" && <DangerTab t={t} />}
+      </main>
+    </div>
+  );
+}
+
+function ProfileHeader({
+  name, email, plan, role, initial, compact = false,
+}: {
+  name: string; email: string; plan: string; role: string; initial: string; compact?: boolean;
+}) {
+  return (
+    <Card className={compact ? "flex items-center gap-3" : "flex items-center gap-5"}>
+      <div className="relative shrink-0">
+        <div className={`flex items-center justify-center rounded-full bg-indigo-100 text-indigo-700 font-bold dark:bg-indigo-900 dark:text-indigo-300 ${
+          compact ? "h-12 w-12 text-lg" : "h-20 w-20 text-3xl"
+        }`}>
+          {initial}
+        </div>
+        {!compact && (
+          <button className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-indigo-600 text-white dark:border-zinc-900">
+            <Camera className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className={`font-semibold text-t1 truncate ${compact ? "text-sm" : "text-lg"}`}>{name || email}</p>
+        <p className="text-xs text-t3 truncate">{email}</p>
+        <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+          {plan === "pro" ? <Badge variant="pro">Pro</Badge> : <Badge variant="default">Free</Badge>}
+          <Badge variant={role === "admin" ? "danger" : "info"}>{role}</Badge>
+        </div>
+      </div>
+    </Card>
+  );
 }
 
 function Section({
-  icon: Icon,
-  title,
-  description,
-  children,
+  icon: Icon, title, description, children, accent = "indigo",
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   description?: string;
   children: React.ReactNode;
+  accent?: "indigo" | "rose" | "amber" | "emerald" | "cyan";
 }) {
+  const accentMap = {
+    indigo:  "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300",
+    rose:    "bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300",
+    amber:   "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300",
+    emerald: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300",
+    cyan:    "bg-cyan-50 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-300",
+  };
   return (
-    <Card className="mb-6">
+    <Card>
       <div className="flex items-start gap-3 mb-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
-          <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${accentMap[accent]}`}>
+          <Icon className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
-          {description && <p className="text-sm text-zinc-500 dark:text-zinc-400">{description}</p>}
+          <h2 className="font-semibold text-t1">{title}</h2>
+          {description && <p className="text-sm text-t3">{description}</p>}
         </div>
       </div>
       {children}
@@ -56,296 +181,355 @@ function Section({
 }
 
 function Toggle({
-  enabled,
-  onChange,
-  label,
-  description,
+  enabled, onChange, label, description,
 }: {
-  enabled: boolean;
-  onChange: (v: boolean) => void;
-  label: string;
-  description?: string;
+  enabled: boolean; onChange: (v: boolean) => void; label: string; description?: string;
 }) {
   return (
     <div className="flex items-center justify-between py-3">
-      <div>
-        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{label}</p>
-        {description && <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>}
+      <div className="pr-4">
+        <p className="text-sm font-medium text-t1">{label}</p>
+        {description && <p className="text-xs text-t3">{description}</p>}
       </div>
       <button
         onClick={() => onChange(!enabled)}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          enabled ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-700"
+          enabled ? "bg-indigo-600" : "bg-zinc-300 dark:bg-zinc-700"
         }`}
       >
-        <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-            enabled ? "translate-x-6" : "translate-x-1"
-          }`}
-        />
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+          enabled ? "translate-x-6" : "translate-x-1"
+        }`} />
       </button>
     </div>
   );
 }
 
-export function ProfileClient({ profile, userEmail }: ProfileClientProps) {
-  const t = useTranslations("profile");
+function PersonalInfoTab({ profile, userEmail, t }: { profile: ProfileWithOrg | null; userEmail: string; t: Translator }) {
+  const [name, setName] = useState(profile?.name ?? "");
+  const [saved, setSaved] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Profile info state
-  const [profileSaved, setProfileSaved] = useState(false);
-  const [name, setName] = useState(profile?.name ?? "");
-
-  // Password state
-  const [passwordSaved, setPasswordSaved] = useState(false);
-  const [currentPw, setCurrentPw] = useState("");
-  const [newPw, setNewPw] = useState("");
-  const [confirmPw, setConfirmPw] = useState("");
-  const [showPw, setShowPw] = useState(false);
-  const [pwError, setPwError] = useState("");
-
-  // API key state
-  const [apiKey, setApiKey] = useState(profile?.api_key ?? "");
-  const [apiKeyCopied, setApiKeyCopied] = useState(false);
-
-  // Notification state
-  const [notifEmail, setNotifEmail] = useState(true);
-  const [notifPromptUpdates, setNotifPromptUpdates] = useState(true);
-  const [notifTeamInvites, setNotifTeamInvites] = useState(true);
-  const [notifNewsletter, setNotifNewsletter] = useState(false);
-
-  // Security state
-  const [activity, setActivity] = useState<{ date: string; action: string }[]>([
-    { date: new Date().toISOString(), action: "Login" },
-  ]);
-
-  const plan = profile?.organizations?.plan ?? "free";
-
-  // --- Handlers ---
-
-  function saveProfile(e: React.FormEvent) {
+  function save(e: React.FormEvent) {
     e.preventDefault();
+    setErr(null);
     startTransition(async () => {
-      const supabase = createClient();
-      await supabase.from("profiles").update({ name }).eq("id", profile!.id);
-      setProfileSaved(true);
-      setTimeout(() => setProfileSaved(false), 2000);
+      const r = await updateProfileName(name);
+      if (!r.success) { setErr(r.error ?? "Fehler"); return; }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
     });
-  }
-
-  function changePassword(e: React.FormEvent) {
-    e.preventDefault();
-    setPwError("");
-    if (newPw !== confirmPw) {
-      setPwError(t("password.mismatch"));
-      return;
-    }
-    if (newPw.length < 8) {
-      setPwError(t("password.tooShort"));
-      return;
-    }
-    startTransition(async () => {
-      const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({ password: newPw });
-      if (error) {
-        setPwError(error.message);
-      } else {
-        setPasswordSaved(true);
-        setCurrentPw("");
-        setNewPw("");
-        setConfirmPw("");
-        setTimeout(() => setPasswordSaved(false), 2000);
-      }
-    });
-  }
-
-  async function copyApiKey() {
-    await navigator.clipboard.writeText(apiKey);
-    setApiKeyCopied(true);
-    setTimeout(() => setApiKeyCopied(false), 2000);
-  }
-
-  async function regenerateApiKey() {
-    if (!confirm(t("apiKey.confirmRegenerate"))) return;
-    const supabase = createClient();
-    const newKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-    await supabase.from("profiles").update({ api_key: newKey }).eq("id", profile!.id);
-    setApiKey(newKey);
-  }
-
-  function handleDeleteAccount() {
-    if (!confirm(t("danger.confirmDelete"))) return;
-    // In a real app, this would call a server action to delete the account
-    alert(t("danger.contactSupport"));
   }
 
   return (
-    <div className="p-6 max-w-2xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{t("title")}</h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{t("subtitle")}</p>
-      </div>
-
-      {/* Avatar & plan info */}
-      <Card className="mb-6 flex items-center gap-5">
-        <div className="relative">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 text-3xl font-bold dark:bg-indigo-900 dark:text-indigo-300">
-            {(name || userEmail).charAt(0).toUpperCase()}
-          </div>
-          <button className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-indigo-600 text-white dark:border-zinc-900">
-            <Camera className="h-3.5 w-3.5" />
-          </button>
-        </div>
+    <Section icon={User} title={t("personalInfo.title")} description={t("personalInfo.description")}>
+      <form onSubmit={save} className="flex flex-col gap-4">
         <div>
-          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{name || userEmail}</p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">{userEmail}</p>
-          <div className="mt-2 flex items-center gap-2">
-            {plan === "pro" ? (
-              <Badge variant="pro">Pro Plan</Badge>
-            ) : (
-              <Badge variant="default">Free Plan</Badge>
-            )}
-            <Badge variant={profile?.role === "admin" ? "danger" : "info"}>
-              {profile?.role ?? "developer"}
-            </Badge>
-          </div>
+          <p className="text-sm font-medium text-t2 mb-2">{t("personalInfo.avatar")}</p>
+          <Button type="button" variant="secondary" disabled>
+            <Camera className="h-4 w-4" /> {t("personalInfo.avatarUpload")}
+          </Button>
         </div>
-      </Card>
+        <Input
+          id="profile-name"
+          label={t("personalInfo.name")}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t("personalInfo.namePlaceholder")}
+        />
+        <Input id="profile-email" label={t("personalInfo.email")} value={userEmail} disabled />
+        <p className="text-xs text-t4">{t("personalInfo.emailNote")}</p>
+        {err && <p className="text-sm text-rose-500">{err}</p>}
+        <div className="flex justify-end">
+          <Button type="submit" loading={isPending}>
+            {saved ? <><Check className="h-4 w-4" />{t("saved")}</> : t("save")}
+          </Button>
+        </div>
+      </form>
+    </Section>
+  );
+}
 
-      {/* Personal info */}
-      <Section icon={User} title={t("personalInfo.title")} description={t("personalInfo.description")}>
-        <form onSubmit={saveProfile} className="flex flex-col gap-4">
-          <Input
-            id="profile-name"
-            label={t("personalInfo.name")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder={t("personalInfo.namePlaceholder")}
-          />
-          <Input
-            id="profile-email"
-            label={t("personalInfo.email")}
-            value={userEmail}
-            disabled
-          />
-          <p className="text-xs text-zinc-400">{t("personalInfo.emailNote")}</p>
-          <div className="flex justify-end">
-            <Button type="submit" loading={isPending}>
-              {profileSaved ? <><Check className="h-4 w-4" />{t("saved")}</> : t("save")}
-            </Button>
-          </div>
-        </form>
-      </Section>
+function SecurityTab({ t }: { t: Translator }) {
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [err, setErr] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-      {/* Password */}
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setErr("");
+    if (newPw !== confirmPw) { setErr(t("password.mismatch")); return; }
+    if (newPw.length < 8) { setErr(t("password.tooShort")); return; }
+    startTransition(async () => {
+      const r = await changePassword(newPw);
+      if (!r.success) { setErr(r.error ?? "Fehler"); return; }
+      setSaved(true); setNewPw(""); setConfirmPw("");
+      setTimeout(() => setSaved(false), 2000);
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
       <Section icon={Lock} title={t("password.title")} description={t("password.description")}>
-        <form onSubmit={changePassword} className="flex flex-col gap-4">
+        <form onSubmit={submit} className="flex flex-col gap-4">
           <div className="relative">
-            <Input
-              id="new-password"
-              label={t("password.newPassword")}
-              type={showPw ? "text" : "password"}
-              value={newPw}
-              onChange={(e) => setNewPw(e.target.value)}
-              placeholder="••••••••"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-8 text-zinc-400 hover:text-zinc-600"
-            >
+            <Input id="new-pw" label={t("password.newPassword")} type={showPw ? "text" : "password"}
+              value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="********" />
+            <button type="button" onClick={() => setShowPw(!showPw)}
+              className="absolute right-3 top-8 text-t3 hover:text-t1">
               {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <Input
-            id="confirm-password"
-            label={t("password.confirmPassword")}
-            type={showPw ? "text" : "password"}
-            value={confirmPw}
-            onChange={(e) => setConfirmPw(e.target.value)}
-            placeholder="••••••••"
-          />
-          {pwError && <p className="text-sm text-red-600 dark:text-red-400">{pwError}</p>}
+          <Input id="confirm-pw" label={t("password.confirmPassword")} type={showPw ? "text" : "password"}
+            value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} placeholder="********" />
+          {err && <p className="text-sm text-rose-500">{err}</p>}
           <div className="flex justify-end">
             <Button type="submit" loading={isPending} disabled={!newPw || !confirmPw}>
-              {passwordSaved ? <><Check className="h-4 w-4" />{t("saved")}</> : t("password.change")}
+              {saved ? <><Check className="h-4 w-4" />{t("saved")}</> : t("password.change")}
             </Button>
           </div>
         </form>
       </Section>
 
-      {/* API Key */}
-      <Section icon={Shield} title={t("apiKey.title")} description={t("apiKey.description")}>
-        <div className="flex items-center gap-2 mb-3">
-          <code className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-mono text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 truncate">
-            {apiKey}
-          </code>
-          <button
-            onClick={copyApiKey}
-            title={t("apiKey.copy")}
-            className="rounded-lg border border-zinc-200 p-2 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
-            {apiKeyCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-zinc-500" />}
-          </button>
-          <button
-            onClick={regenerateApiKey}
-            title={t("apiKey.regenerate")}
-            className="rounded-lg border border-zinc-200 p-2 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
-            <RefreshCw className="h-4 w-4 text-zinc-500" />
-          </button>
-        </div>
-        <p className="text-xs text-amber-600 dark:text-amber-400">
-          {t("apiKey.warning")}
-        </p>
-      </Section>
-
-      {/* Notifications */}
-      <Section icon={Bell} title={t("notifications.title")} description={t("notifications.description")}>
-        <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          <Toggle
-            enabled={notifEmail}
-            onChange={setNotifEmail}
-            label={t("notifications.email")}
-            description={t("notifications.emailDesc")}
-          />
-          <Toggle
-            enabled={notifPromptUpdates}
-            onChange={setNotifPromptUpdates}
-            label={t("notifications.promptUpdates")}
-            description={t("notifications.promptUpdatesDesc")}
-          />
-          <Toggle
-            enabled={notifTeamInvites}
-            onChange={setNotifTeamInvites}
-            label={t("notifications.teamInvites")}
-          />
-          <Toggle
-            enabled={notifNewsletter}
-            onChange={setNotifNewsletter}
-            label={t("notifications.newsletter")}
-          />
-        </div>
-      </Section>
-
-      {/* Danger zone */}
-      <Card className="border-red-200 dark:border-red-900">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/20">
-            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
-          </div>
+      <Section icon={Shield} title={t("security.twoFactor")} description={t("security.twoFactorDesc")} accent="emerald">
+        <div className="flex items-center justify-between panel-subtle p-4 rounded-xl">
           <div>
-            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{t("danger.title")}</h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t("danger.description")}</p>
+            <p className="text-xs text-t3">{t("security.twoFactorStatus")}</p>
+            <p className="text-sm font-medium text-t1">{t("security.twoFactorDisabled")}</p>
+          </div>
+          <Button variant="secondary" disabled>{t("security.twoFactorEnable")}</Button>
+        </div>
+      </Section>
+
+      <Section icon={KeyRound} title={t("security.sessions")} description={t("security.sessionsDesc")} accent="cyan">
+        <Button variant="secondary" disabled>{t("security.signOutAll")}</Button>
+      </Section>
+    </div>
+  );
+}
+
+function NotificationsTab({ t }: { t: Translator }) {
+  const [email, setEmail] = useState(true);
+  const [pUpdates, setPUpdates] = useState(true);
+  const [invites, setInvites] = useState(true);
+  const [newsletter, setNewsletter] = useState(false);
+
+  return (
+    <Section icon={Bell} title={t("notifications.title")} description={t("notifications.description")}>
+      <div className="divide-y divide-[color:var(--panel-border)]">
+        <Toggle enabled={email} onChange={setEmail} label={t("notifications.email")} description={t("notifications.emailDesc")} />
+        <Toggle enabled={pUpdates} onChange={setPUpdates} label={t("notifications.promptUpdates")} description={t("notifications.promptUpdatesDesc")} />
+        <Toggle enabled={invites} onChange={setInvites} label={t("notifications.teamInvites")} />
+        <Toggle enabled={newsletter} onChange={setNewsletter} label={t("notifications.newsletter")} />
+      </div>
+    </Section>
+  );
+}
+
+function BillingTab({ plan, t }: { plan: string; t: Translator }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <Section icon={CreditCard} title={t("billing.title")} description={t("billing.description")} accent="amber">
+        <div className="flex items-center justify-between panel-subtle p-4 rounded-xl mb-4">
+          <div>
+            <p className="text-xs text-t3">{t("billing.currentPlan")}</p>
+            <div className="flex items-center gap-2 mt-1">
+              {plan === "pro" ? <Crown className="h-5 w-5 text-amber-500" /> : null}
+              <span className="text-lg font-semibold text-t1 capitalize">{plan}</span>
+            </div>
+          </div>
+          {plan === "pro" ? (
+            <Button variant="secondary" disabled>{t("billing.manage")}</Button>
+          ) : (
+            <Button>{t("billing.upgrade")}</Button>
+          )}
+        </div>
+      </Section>
+
+      <Section icon={CreditCard} title={t("billing.invoices")} accent="cyan">
+        <p className="text-sm text-t3">{t("billing.invoicesEmpty")}</p>
+      </Section>
+    </div>
+  );
+}
+
+function TeamTab({ t }: { t: Translator }) {
+  return (
+    <Section icon={UsersIcon} title={t("team.title")} description={t("team.description")}>
+      <Link href="/dashboard/team">
+        <Button variant="secondary">
+          <UsersIcon className="h-4 w-4" /> {t("team.manage")}
+        </Button>
+      </Link>
+    </Section>
+  );
+}
+
+function IntegrationsTab({ t, apiKey }: { t: Translator; apiKey?: string }) {
+  const [visibleKey, setVisibleKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [regeneratedKey, setRegeneratedKey] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const currentKey = regeneratedKey ?? apiKey ?? "";
+
+  async function handleCopy() {
+    if (!currentKey) return;
+    await navigator.clipboard.writeText(currentKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleRegenerate() {
+    if (!confirm("API-Schlüssel wirklich neu generieren? Alle bestehenden Integrationen müssen aktualisiert werden.")) return;
+    setErr(null);
+    setRegenerating(true);
+    const result = await regenerateApiKey();
+    if (result.success && result.data?.apiKey) {
+      setRegeneratedKey(result.data.apiKey as string);
+      setVisibleKey(result.data.apiKey as string);
+    } else {
+      setErr(result.error ?? "Fehler beim Regenerieren");
+    }
+    setRegenerating(false);
+  }
+
+  const comingSoon = [
+    { title: t("integrations.slack"),   desc: t("integrations.slackDesc") },
+    { title: t("integrations.webhook"), desc: t("integrations.webhookDesc") },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* API-Schlüssel */}
+      <Section icon={KeyRound} title="API-Schlüssel" description="Verwenden Sie diesen Schlüssel um ProCon per MCP oder REST-API in Ihre IDE einzubinden." accent="indigo">
+        <div className="flex flex-col gap-4">
+          <div className="panel-subtle rounded-xl p-4">
+            <p className="text-xs font-semibold text-t3 uppercase tracking-wide mb-2">Ihr persönlicher API-Schlüssel</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 min-w-0 truncate text-xs font-mono text-t1 bg-black/5 dark:bg-white/8 rounded-lg px-3 py-2">
+                {visibleKey ? currentKey : currentKey.replace(/./g, "•")}
+              </code>
+              <button
+                onClick={() => setVisibleKey(visibleKey ? null : currentKey)}
+                className="text-xs text-t3 hover:text-t1 px-2 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+              >
+                {visibleKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1 text-xs text-t2 hover:text-t1 px-2.5 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+              >
+                {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                {copied ? "Kopiert" : "Kopieren"}
+              </button>
+            </div>
+          </div>
+
+          {err && <p className="text-sm text-rose-500">{err}</p>}
+
+          <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/7 px-4 py-3">
+            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Behandeln Sie diesen Schlüssel wie ein Passwort. Nie in Git committen.
+              Fügen Sie ihn nur in sichere Konfigurationsdateien ein (z.B. <code>.vscode/mcp.json</code> per <code>.gitignore</code> ausgeschlossen).
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={handleRegenerate} loading={regenerating}>
+              <RefreshCw className="h-4 w-4" /> Neu generieren
+            </Button>
+            <Link href="/dashboard/mcp-guide">
+              <Button variant="ghost">
+                <Terminal className="h-4 w-4" /> MCP-Anleitung öffnen
+              </Button>
+            </Link>
           </div>
         </div>
-        <Button variant="danger" onClick={handleDeleteAccount}>
-          <Trash2 className="h-4 w-4" />
-          {t("danger.deleteAccount")}
-        </Button>
-      </Card>
+      </Section>
+
+      {/* Weitere Integrationen */}
+      <Section icon={Plug} title={t("integrations.title")} description={t("integrations.description")} accent="cyan">
+        <div className="grid gap-3">
+          {comingSoon.map((it) => (
+            <div key={it.title} className="panel-subtle p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-t1">{it.title}</p>
+                <p className="text-xs text-t3">{it.desc}</p>
+              </div>
+              <Badge variant="default">{t("integrations.comingSoon")}</Badge>
+            </div>
+          ))}
+        </div>
+      </Section>
     </div>
+  );
+}
+
+function GdprTab({ t }: { t: Translator }) {
+  const [isPending, startTransition] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+
+  function downloadExport() {
+    setErr(null);
+    startTransition(async () => {
+      const r = await exportUserData();
+      if (!r.success) { setErr(r.error ?? "Fehler"); return; }
+      const blob = new Blob([JSON.stringify(r.data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `procon-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  return (
+    <Section icon={Shield} title={t("gdpr.title")} description={t("gdpr.description")} accent="cyan">
+      <p className="text-sm text-t2 mb-4">{t("gdpr.exportDesc")}</p>
+      {err && <p className="text-sm text-rose-500 mb-3">{err}</p>}
+      <Button onClick={downloadExport} loading={isPending}>
+        <Download className="h-4 w-4" /> {t("gdpr.download")}
+      </Button>
+    </Section>
+  );
+}
+
+function DangerTab({ t }: { t: Translator }) {
+  const [isPending, startTransition] = useTransition();
+  const [err, setErr] = useState<string | null>(null);
+
+  function handle() {
+    if (!confirm(t("danger.confirmDelete"))) return;
+    setErr(null);
+    startTransition(async () => {
+      const r = await deleteAccount();
+      if (!r.success) { setErr(r.error ?? t("danger.contactSupport")); return; }
+      window.location.href = "/";
+    });
+  }
+
+  return (
+    <Card className="border-rose-300 dark:border-rose-500/40">
+      <div className="flex items-start gap-3 mb-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
+          <AlertTriangle className="h-5 w-5" />
+        </div>
+        <div>
+          <h2 className="font-semibold text-t1">{t("danger.title")}</h2>
+          <p className="text-sm text-t3">{t("danger.description")}</p>
+        </div>
+      </div>
+      {err && <p className="text-sm text-rose-500 mb-3">{err}</p>}
+      <Button variant="danger" onClick={handle} loading={isPending}>
+        <Trash2 className="h-4 w-4" /> {t("danger.deleteAccount")}
+      </Button>
+    </Card>
   );
 }

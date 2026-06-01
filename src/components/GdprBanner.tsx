@@ -1,40 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { Button } from "./ui/Button";
 
+const STORAGE_KEY = "pc-gdpr-consent";
+
+function subscribe(cb: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", cb);
+  return () => window.removeEventListener("storage", cb);
+}
+
+function readConsent(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export function GdprBanner() {
-  const [visible, setVisible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return !localStorage.getItem("pc-gdpr-consent");
-  });
+  // SSR snapshot is always "consented" (banner hidden) to keep server HTML
+  // stable; the client snapshot reads the real value after hydration.
+  const consent = useSyncExternalStore(
+    subscribe,
+    readConsent,
+    () => "ssr-consented"
+  );
+
+  // Local override so accept/decline hide immediately even before storage event.
+  const [dismissed, setDismissed] = useState(false);
 
   function accept() {
-    localStorage.setItem("pc-gdpr-consent", "accepted");
-    setVisible(false);
+    try { localStorage.setItem(STORAGE_KEY, "accepted"); } catch {}
+    setDismissed(true);
   }
 
   function decline() {
-    localStorage.setItem("pc-gdpr-consent", "declined");
-    setVisible(false);
+    try { localStorage.setItem(STORAGE_KEY, "declined"); } catch {}
+    setDismissed(true);
   }
 
-  if (!visible) return null;
+  if (consent || dismissed) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 sm:left-auto sm:right-4 sm:max-w-sm">
-      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="glass-card p-5 shadow-2xl">
         <div className="flex items-start justify-between mb-2">
-          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Cookie-Einstellungen</p>
-          <button onClick={decline} className="ml-2 text-zinc-400 hover:text-zinc-600">
+          <p className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>Cookie-Einstellungen</p>
+          <button onClick={decline} className="ml-2 transition-colors" style={{ color: "var(--text-4)" }}>
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4 leading-relaxed">
+        <p className="text-xs mb-5 leading-relaxed" style={{ color: "var(--text-3)" }}>
           Wir verwenden notwendige Cookies für den Betrieb dieser Plattform. Durch die Nutzung stimmen Sie unserer{" "}
-          <Link href="/legal/datenschutz" className="underline text-indigo-600">Datenschutzerklärung</Link> zu.
+          <Link href="/legal/datenschutz" className="text-indigo-500 underline hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300">Datenschutzerklärung</Link> zu.
         </p>
         <div className="flex gap-2">
           <Button size="sm" variant="secondary" onClick={decline} className="flex-1">

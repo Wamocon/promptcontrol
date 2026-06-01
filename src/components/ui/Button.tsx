@@ -15,11 +15,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       "inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:pointer-events-none disabled:opacity-50";
 
     const variants = {
-      primary: "bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600",
-      secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700",
-      ghost: "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800",
-      danger: "bg-red-600 text-white hover:bg-red-700",
-      outline: "border border-zinc-300 text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800",
+      primary: "btn-procon",
+      secondary: "bg-white/6 text-white/75 hover:bg-white/10 border border-white/8",
+      ghost: "text-white/55 hover:bg-white/6 hover:text-white/85",
+      danger: "bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 border border-rose-500/25",
+      outline: "border border-white/12 text-white/60 hover:bg-white/5 hover:text-white/85",
     };
 
     const sizes = {

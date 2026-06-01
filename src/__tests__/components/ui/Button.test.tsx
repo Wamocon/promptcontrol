@@ -18,19 +18,19 @@ describe("Button", () => {
   it("applies secondary variant", () => {
     render(<Button variant="secondary">Secondary</Button>);
     const btn = screen.getByRole("button");
-    expect(btn.className).toMatch(/zinc/);
+    expect(btn.className).toMatch(/white\/6|border-white/);
   });
 
   it("applies danger variant", () => {
     render(<Button variant="danger">Delete</Button>);
     const btn = screen.getByRole("button");
-    expect(btn.className).toMatch(/red/);
+    expect(btn.className).toMatch(/rose/);
   });
 
   it("applies ghost variant", () => {
     render(<Button variant="ghost">Ghost</Button>);
     const btn = screen.getByRole("button");
-    expect(btn.className).toMatch(/ghost|zinc/);
+    expect(btn.className).toMatch(/white\/55|white\/6/);
   });
 
   it("applies outline variant", () => {

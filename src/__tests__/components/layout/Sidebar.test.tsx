@@ -32,8 +32,11 @@ describe("Sidebar", () => {
     expect(screen.getByText("projects")).toBeInTheDocument();
     expect(screen.getByText("logs")).toBeInTheDocument();
     expect(screen.getByText("team")).toBeInTheDocument();
-    expect(screen.getByText("profile")).toBeInTheDocument();
-    expect(screen.getByText("settings")).toBeInTheDocument();
+  });
+
+  it("does not include 'Mein Profil' link in nav", () => {
+    render(<Sidebar plan="free" />);
+    expect(screen.queryByText("profile")).not.toBeInTheDocument();
   });
 
   it("shows Free Plan upgrade link for free plan", () => {
@@ -82,6 +85,6 @@ describe("Sidebar", () => {
     mockUsePathname.mockReturnValue("/dashboard/admin");
     render(<Sidebar plan="free" isAdmin={true} />);
     const adminLink = screen.getByRole("link", { name: "admin" });
-    expect(adminLink.className).toMatch(/red/);
+    expect(adminLink.className).toMatch(/rose/);
   });
 });

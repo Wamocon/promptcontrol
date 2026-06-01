@@ -1,26 +1,641 @@
 @import "tailwindcss";
 
+/* ── Class-based dark-mode variant (Tailwind v4) ─────────────── */
+@custom-variant dark (&:is(.dark, .dark *));
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT MODE — Default
+   ══════════════════════════════════════════════════════════════ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  /* Backgrounds */
+  --background:           #f0f4f8;
+  --foreground:           #0f172a;
+  --card:                 #ffffff;
+
+  /* Surfaces */
+  --surface-sidebar:      rgba(255, 255, 255, 0.97);
+  --surface-topbar:       rgba(255, 255, 255, 0.94);
+  --surface-overlay:      rgba(255, 255, 255, 0.90);
+
+  /* Panel / glass variables */
+  --panel-bg:             rgba(255, 255, 255, 0.85);
+  --panel-bg-subtle:      rgba(0, 0, 0, 0.03);
+  --panel-border:         rgba(0, 0, 0, 0.08);
+  --panel-border-strong:  rgba(0, 0, 0, 0.14);
+
+  /* Semantic text */
+  --text-1:               #0f172a;
+  --text-2:               #374151;
+  --text-3:               #6b7280;
+  --text-4:               #9ca3af;
+  --text-5:               #d1d5db;
+
+  /* Primary (same in both themes) */
+  --primary:              #6366f1;
+  --primary-light:        #818cf8;
+  --primary-dark:         #4f46e5;
+  --primary-foreground:   #ffffff;
+
+  /* State colors */
+  --destructive:          #f43f5e;
+  --success:              #10b981;
+  --warning:              #f59e0b;
+
+  /* Glow colors */
+  --glow-primary:         rgba(99, 102, 241, 0.18);
+  --glow-success:         rgba(16, 185, 129, 0.18);
+  --glow-danger:          rgba(244, 63, 94, 0.18);
+  --glow-amber:           rgba(245, 158, 11, 0.18);
+  --glow-cyan:            rgba(34, 211, 238, 0.18);
+
+  /* Misc */
+  --border:               #e2e8f0;
+  --input:                #ffffff;
+  --ring:                 #6366f1;
+  --radius:               0.875rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK MODE — .dark class override
+   ══════════════════════════════════════════════════════════════ */
+.dark {
+  color-scheme: dark;
+
+  --background:           #060a13;
+  --foreground:           #eef3f9;
+  --card:                 #0c1120;
+
+  --surface-sidebar:      rgba(4, 7, 14, 0.65);
+  --surface-topbar:       rgba(4, 7, 14, 0.85);
+  --surface-overlay:      rgba(4, 7, 14, 0.80);
+
+  --panel-bg:             rgba(12, 17, 32, 0.60);
+  --panel-bg-subtle:      rgba(255, 255, 255, 0.03);
+  --panel-border:         rgba(255, 255, 255, 0.07);
+  --panel-border-strong:  rgba(255, 255, 255, 0.12);
+
+  --text-1:               rgba(238, 243, 249, 0.92);
+  --text-2:               rgba(238, 243, 249, 0.65);
+  --text-3:               rgba(238, 243, 249, 0.40);
+  --text-4:               rgba(238, 243, 249, 0.25);
+  --text-5:               rgba(238, 243, 249, 0.12);
+
+  --border:               #182035;
+  --input:                #0c1120;
+
+  --glow-primary:         rgba(99, 102, 241, 0.22);
+  --glow-success:         rgba(16, 185, 129, 0.22);
+  --glow-danger:          rgba(244, 63, 94, 0.22);
+  --glow-amber:           rgba(245, 158, 11, 0.22);
+  --glow-cyan:            rgba(34, 211, 238, 0.22);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive:        var(--destructive);
+  --color-success:            var(--success);
+  --color-warning:            var(--warning);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --font-sans:                var(--font-geist-sans);
+  --font-mono:                var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Base ─────────────────────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+* { border-color: var(--border); }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.45); }
+
+/* ── Light-mode global text override ─────────────────────────── */
+/* Alle text-white/* Klassen in Hellmodus zu lesbaren Farben umwandeln */
+html:not(.dark) [class*="text-white"] {
+  color: var(--text-2);
+}
+/* Schutz: Gradient-Texte und transparente Texte bleiben unberührt */
+html:not(.dark) [class*="text-transparent"] {
+  color: transparent !important;
+}
+/* btn-procon hat !important in seiner eigenen Regel - wird nicht überschrieben */
+
+/* Border-Farben in Hellmodus anpassen */
+html:not(.dark) [class*="border-white"] {
+  border-color: var(--panel-border) !important;
+}
+/* Hover-Zustände die weißen Hintergrund nutzen */
+html:not(.dark) [class*="hover:bg-white"] {
+  /* Tailwind hover states - werden bei Bedarf nochmal per dark: prefix gesteuert */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMPONENT UTILITIES
+   ══════════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* ── Semantic text colors ──────────────────────────────────── */
+  .text-t1 { color: var(--text-1); }
+  .text-t2 { color: var(--text-2); }
+  .text-t3 { color: var(--text-3); }
+  .text-t4 { color: var(--text-4); }
+
+  /* ── Panel surfaces ────────────────────────────────────────── */
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--radius);
+  }
+
+  .panel-subtle {
+    background: var(--panel-bg-subtle);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+  }
+
+  /* ── Aurora background ─────────────────────────────────────── */
+  .aurora-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .aurora-bg::before {
+    content: '';
+    position: absolute;
+    width: 65vw;
+    height: 65vw;
+    top: -20vw;
+    left: -10vw;
+    background: radial-gradient(
+      ellipse at center,
+      hsla(245, 80%, 60%, 0.10) 0%,
+      hsla(265, 75%, 55%, 0.05) 40%,
+      transparent 70%
+    );
+    animation: aurora-drift-1 20s ease-in-out infinite;
+  }
+
+  .aurora-bg::after {
+    content: '';
+    position: absolute;
+    width: 50vw;
+    height: 50vw;
+    top: 10vw;
+    right: -15vw;
+    background: radial-gradient(
+      ellipse at center,
+      hsla(260, 80%, 55%, 0.08) 0%,
+      hsla(300, 70%, 50%, 0.03) 40%,
+      transparent 70%
+    );
+    animation: aurora-drift-2 25s ease-in-out infinite;
+  }
+
+  /* ── Glass card ────────────────────────────────────────────── */
+  .glass-card {
+    background: var(--panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+  }
+
+  /* ── Glow utilities ─────────────────────────────────────────── */
+  .glow-primary { box-shadow: 0 0 28px var(--glow-primary), 0 0 80px rgba(99, 102, 241, 0.04); }
+  .glow-success { box-shadow: 0 0 28px var(--glow-success), 0 0 80px rgba(16, 185, 129, 0.04); }
+  .glow-danger  { box-shadow: 0 0 28px var(--glow-danger),  0 0 80px rgba(244, 63, 94, 0.04); }
+  .glow-amber   { box-shadow: 0 0 28px var(--glow-amber),   0 0 80px rgba(245, 158, 11, 0.04); }
+  .glow-cyan    { box-shadow: 0 0 28px var(--glow-cyan),    0 0 80px rgba(34, 211, 238, 0.04); }
+
+  /* ── Nav active state ───────────────────────────────────────── */
+  .nav-active {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--primary-light);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15), inset 0 0 15px rgba(99, 102, 241, 0.05);
+  }
+  .dark .nav-active {
+    background: rgba(99, 102, 241, 0.13);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.18), inset 0 0 15px rgba(99, 102, 241, 0.06);
+  }
+
+  /* ── Glass input ────────────────────────────────────────────── */
+  .input-glass {
+    background: var(--panel-bg-subtle);
+    border: 1px solid var(--panel-border);
+    border-radius: 0.75rem;
+    color: var(--text-1);
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-glass::placeholder { color: var(--text-4); }
+
+  .input-glass:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.55);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.10);
+  }
+
+  /* ── Primary gradient button ────────────────────────────────── */
+  .btn-procon {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #ffffff !important;
+    font-weight: 700;
+    border: none;
+    border-radius: 0.75rem;
+    transition: all 0.25s ease;
+  }
+
+  .btn-procon:hover:not(:disabled) {
+    box-shadow: 0 0 35px rgba(99, 102, 241, 0.40), 0 4px 20px rgba(0, 0, 0, 0.20);
+    transform: translateY(-1px);
+  }
+
+  .btn-procon:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Metric card number ─────────────────────────────────────── */
+  .metric-number {
+    font-size: clamp(1.8rem, 3.5vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  /* ── Card hover lift ────────────────────────────────────────── */
+  .card-hover {
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border-color: rgba(99, 102, 241, 0.30);
+  }
+  .dark .card-hover:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
+  }
+
+  /* ── Paywall blur ───────────────────────────────────────────── */
+  .blur-paywall { filter: blur(6px); user-select: none; pointer-events: none; }
+
+  /* ── Ping dot ───────────────────────────────────────────────── */
+  .ping-dot {
+    position: relative;
+    display: inline-flex;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+  }
+  .ping-dot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    opacity: 0.75;
+    animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .ping-dot::after {
+    content: '';
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+
+  /* ── Fade in animation ──────────────────────────────────────── */
+  .animate-fade-in-up { animation: fade-in-up 0.4s ease-out both; }
+
+  /* ── AI Guide Widget ────────────────────────────────────────── */
+  .guide-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--panel-border);
+  }
+}
+
+/* ── Keyframes ────────────────────────────────────────────────── */
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(3%, 5%) scale(1.05); }
+  66%       { transform: translate(-2%, -3%) scale(0.97); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%       { transform: translate(-4%, 3%) scale(1.04); }
+  75%       { transform: translate(2%, -4%) scale(0.96); }
+}
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+
+/* --------------------------------------------------------------
+   PREMIUM INTERACTION LAYER
+   Magnetic hover, spotlight, tilt, shimmer, count-up reveal,
+   confetti, achievement glow - the wow-factor layer.
+   -------------------------------------------------------------- */
+@layer components {
+
+  /* -- Cursor Spotlight (parent needs --mx/--my CSS vars set by JS) -- */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(
+      400px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(99, 102, 241, 0.18),
+      transparent 45%
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .spotlight:hover::before { opacity: 1; }
+  .spotlight > * { position: relative; z-index: 1; }
+
+  /* -- Magnetic Button (3D tilt + glow on hover) -- */
+  .magnetic {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s ease;
+    will-change: transform;
+  }
+  .magnetic:hover {
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 18px 40px -12px rgba(99, 102, 241, 0.35);
+  }
+  .magnetic:active { transform: translateY(0) scale(0.99); }
+
+  /* -- Shimmer effect (for loading states & premium accents) -- */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.15) 50%,
+      transparent 60%
+    );
+    transform: translateX(-100%);
+    animation: shimmer-slide 2.5s ease-in-out infinite;
+  }
+
+  /* -- Gradient border (animated) -- */
+  .gradient-border {
+    position: relative;
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.5),
+      rgba(168, 85, 247, 0.3),
+      rgba(34, 211, 238, 0.4),
+      rgba(99, 102, 241, 0.5)
+    );
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    animation: gradient-flow 4s ease infinite;
+    pointer-events: none;
+  }
+
+  /* -- Tilt Card (3D on hover) -- */
+  .tilt-card {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-style: preserve-3d;
+  }
+  .tilt-card:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-4px);
+  }
+
+  /* -- Stagger reveal (children fade-in sequentially) -- */
+  .stagger-children > * {
+    opacity: 0;
+    animation: fade-in-up 0.5s ease-out forwards;
+  }
+  .stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger-children > *:nth-child(2) { animation-delay: 0.10s; }
+  .stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger-children > *:nth-child(4) { animation-delay: 0.20s; }
+  .stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger-children > *:nth-child(6) { animation-delay: 0.30s; }
+  .stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+  .stagger-children > *:nth-child(8) { animation-delay: 0.40s; }
+
+  /* -- Animated XP progress bar -- */
+  .xp-bar {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--panel-bg-subtle);
+    overflow: hidden;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    background-size: 200% 100%;
+    animation: gradient-flow 3s ease infinite;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+  }
+
+  /* -- Achievement glow pulse -- */
+  .achievement-glow {
+    animation: achievement-pulse 2s ease-in-out infinite;
+  }
+
+  /* -- Streak flame -- */
+  .streak-flame {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.15), rgba(239, 68, 68, 0.15));
+    border: 1px solid rgba(251, 146, 60, 0.3);
+    color: #f97316;
+    font-weight: 700;
+    font-size: 0.75rem;
+    box-shadow: 0 0 16px rgba(251, 146, 60, 0.25);
+  }
+  .streak-flame::before {
+    content: '??';
+    animation: flame-flicker 1.5s ease-in-out infinite;
+  }
+
+  /* -- Level badge -- */
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.5rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.875rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  }
+
+  /* -- Kbd key style -- */
+  .kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.375rem;
+    border-radius: 0.375rem;
+    background: var(--panel-bg-subtle);
+    border: 1px solid var(--panel-border);
+    border-bottom-width: 2px;
+    color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  /* -- Mesh gradient background (for hero sections) -- */
+  .mesh-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .mesh-bg::before,
+  .mesh-bg::after {
+    content: '';
+    position: absolute;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+  }
+  .mesh-bg::before {
+    top: -20%;
+    left: -10%;
+    background: radial-gradient(circle, #6366f1, transparent);
+    animation: mesh-drift-1 18s ease-in-out infinite;
+  }
+  .mesh-bg::after {
+    bottom: -20%;
+    right: -10%;
+    background: radial-gradient(circle, #a855f7, transparent);
+    animation: mesh-drift-2 22s ease-in-out infinite;
+  }
+}
+
+/* -- Premium keyframes --------------------------------------- */
+@keyframes shimmer-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes gradient-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+@keyframes achievement-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4),
+                0 0 40px rgba(168, 85, 247, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.7),
+                0 0 60px rgba(168, 85, 247, 0.4);
+  }
+}
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25%      { transform: scale(1.1) rotate(-3deg); }
+  75%      { transform: scale(1.05) rotate(3deg); }
+}
+@keyframes mesh-drift-1 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(10%, 15%); }
+}
+@keyframes mesh-drift-2 {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(-15%, -10%); }
+}
+@keyframes slide-down-toast {
+  from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes confetti-fall {
+  0%   { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after,
+  .achievement-glow,
+  .streak-flame::before,
+  .mesh-bg::before,
+  .mesh-bg::after,
+  .aurora-bg::before,
+  .aurora-bg::after,
+  .xp-bar-fill {
+    animation: none !important;
+  }
+  .magnetic, .tilt-card { transition: none !important; }
 }

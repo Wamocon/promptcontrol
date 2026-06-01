@@ -20,9 +20,12 @@ export default defineConfig({
         // Infrastructure / server-side files - not unit-testable
         "src/proxy.ts",
         "src/lib/supabase/**",
+        "src/lib/ai/**",
         "src/types/**",
-        // Complex layout component requiring full Next.js auth+intl stack
+        // Complex layout/router-dependent components
         "src/components/layout/Header.tsx",
+        "src/components/CommandPalette.tsx",
+        "src/components/AiGuideChat.tsx",
       ],
       thresholds: {
         lines: 80,

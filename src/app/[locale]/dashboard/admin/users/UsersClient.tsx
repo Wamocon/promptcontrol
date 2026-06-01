@@ -6,8 +6,6 @@ import { Users, Search, ChevronLeft, Trash2, Edit2, Check, X } from "lucide-reac
 import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { formatDate } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 

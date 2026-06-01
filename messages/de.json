@@ -6,10 +6,12 @@
     "team": "Team",
     "settings": "Einstellungen",
     "profile": "Mein Profil",
+    "profileSettings": "Profil & Einstellungen",
     "admin": "Administration",
     "logout": "Abmelden",
     "login": "Anmelden",
-    "register": "Registrieren"
+    "register": "Registrieren",
+    "mcpGuide": "MCP-Anleitung"
   },
   "landing": {
     "hero": {
@@ -181,7 +183,26 @@
     "aiAnalysisRunning": "KI analysiert Prompt...",
     "aiDisclaimer": "KI-generierte Analyse",
     "copy": "Kopieren",
-    "copied": "Kopiert!"
+    "copied": "Kopiert!",
+    "translateToDe": "Ins Deutsche übersetzen",
+    "translateToEn": "Translate to English",
+    "translating": "Übersetze...",
+    "translationDone": "Übersetzung fertig",
+    "translationError": "Übersetzung fehlgeschlagen",
+    "versionNote": "Versions-Notiz (für neue Version)",
+    "versionNotePlaceholder": "Was hat sich geändert?",
+    "allProjects": "Alle Projekte",
+    "selectPrompt": "Prompt auswählen",
+    "selectPromptHint": "oder neuen Prompt erstellen",
+    "noResults": "Keine Ergebnisse",
+    "noPrompts": "Noch keine Prompts",
+    "uncategorized": "Ohne Kategorie",
+    "total": "Gesamt",
+    "deleteConfirmTitle": "Prompt löschen",
+    "deleteConfirmDesc": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "restApi": "REST API Endpunkt",
+    "openEditor": "Editor öffnen",
+    "closeEditor": "Editor schließen"
   },
   "logs": {
     "title": "Logs",
@@ -270,13 +291,72 @@
     "subtitle": "Verwalten Sie Ihre persönlichen Einstellungen und Sicherheit.",
     "save": "Speichern",
     "saved": "Gespeichert",
+    "tabs": {
+      "profile": "Profil",
+      "security": "Sicherheit",
+      "apiKeys": "API-Schlüssel",
+      "notifications": "Benachrichtigungen",
+      "billing": "Abrechnung",
+      "team": "Team",
+      "integrations": "Integrationen",
+      "gdpr": "Daten & DSGVO",
+      "danger": "Gefahrenzone"
+    },
+    "security": {
+      "title": "Sicherheit",
+      "description": "Schützen Sie Ihr Konto mit einem starken Passwort und Zwei-Faktor-Authentifizierung.",
+      "twoFactor": "Zwei-Faktor-Authentifizierung (2FA)",
+      "twoFactorDesc": "Verwenden Sie eine Authenticator-App zur Anmeldung. Aktuell als Vorschau verfügbar.",
+      "twoFactorStatus": "Status",
+      "twoFactorDisabled": "Nicht aktiviert",
+      "twoFactorEnable": "2FA einrichten (Vorschau)",
+      "sessions": "Aktive Sitzungen",
+      "sessionsDesc": "Sehen Sie alle Geräte, die in Ihrem Konto angemeldet sind.",
+      "signOutAll": "Alle anderen Sitzungen abmelden"
+    },
+    "billing": {
+      "title": "Abonnement & Abrechnung",
+      "description": "Verwalten Sie Ihren Plan und Ihre Zahlungsmethoden.",
+      "currentPlan": "Aktueller Plan",
+      "plan": "Plan",
+      "upgrade": "Auf Pro upgraden",
+      "manage": "Im Stripe-Portal verwalten",
+      "invoices": "Rechnungen",
+      "invoicesEmpty": "Noch keine Rechnungen vorhanden."
+    },
+    "team": {
+      "title": "Team",
+      "description": "Verwalten Sie Mitglieder und Einladungen für Ihre Organisation.",
+      "manage": "Zur Teamverwaltung"
+    },
+    "integrations": {
+      "title": "Integrationen",
+      "description": "Verbinden Sie ProCon mit GitHub Copilot, Slack und weiteren Tools.",
+      "github": "GitHub Copilot (MCP)",
+      "githubDesc": "Greifen Sie aus Ihrer IDE direkt auf Ihre Prompts zu.",
+      "slack": "Slack",
+      "slackDesc": "Benachrichtigungen in Ihren Slack-Channel senden.",
+      "webhook": "Webhooks",
+      "webhookDesc": "Eigene Endpunkte bei Prompt-Aktualisierungen aufrufen.",
+      "comingSoon": "In Kürze verfügbar"
+    },
+    "gdpr": {
+      "title": "Daten & DSGVO",
+      "description": "Exportieren oder löschen Sie Ihre personenbezogenen Daten gemäß DSGVO Artikel 15 und 17.",
+      "export": "Datenexport anfordern",
+      "exportDesc": "Erhalten Sie eine JSON-Datei mit allen Daten, die wir über Sie speichern.",
+      "download": "Daten herunterladen",
+      "requests": "Bisherige Anfragen"
+    },
     "personalInfo": {
       "title": "Persönliche Informationen",
       "description": "Aktualisieren Sie Ihren Namen und Ihre Profilinformationen.",
       "name": "Vollständiger Name",
       "namePlaceholder": "Max Mustermann",
       "email": "E-Mail-Adresse",
-      "emailNote": "Die E-Mail-Adresse kann nicht geändert werden. Kontaktieren Sie den Support."
+      "emailNote": "Die E-Mail-Adresse kann nicht geändert werden. Kontaktieren Sie den Support.",
+      "avatar": "Profilbild",
+      "avatarUpload": "Bild hochladen (Vorschau)"
     },
     "password": {
       "title": "Passwort ändern",
@@ -293,7 +373,8 @@
       "copy": "Kopieren",
       "regenerate": "Neu generieren",
       "confirmRegenerate": "Sind Sie sicher? Der alte Schlüssel wird ungültig.",
-      "warning": "Behandeln Sie den API-Schlüssel wie ein Passwort. Teilen Sie ihn nicht."
+      "warning": "Behandeln Sie den API-Schlüssel wie ein Passwort. Teilen Sie ihn nicht.",
+      "createNew": "Weiteren Schlüssel erstellen (Vorschau)"
     },
     "notifications": {
       "title": "Benachrichtigungen",
@@ -319,7 +400,7 @@
     "recentUsers": "Neue Nutzer",
     "recentOrgs": "Neue Organisationen",
     "viewAll": "Alle anzeigen",
-    "stats": {
+    "overviewStats": {
       "users": "Registrierte Nutzer",
       "organizations": "Organisationen",
       "prompts": "Gesamt Prompts"
@@ -336,7 +417,47 @@
       "settings": {
         "title": "App-Einstellungen",
         "description": "Plattform-Konfiguration und Feature-Flags"
+      },
+      "aiProviders": {
+        "title": "KI-Anbieter",
+        "description": "SOKRATES, OpenRouter und GroQ konfigurieren"
+      },
+      "stats": {
+        "title": "Statistiken",
+        "description": "KPIs, Nutzung und Wachstum"
       }
+    },
+    "tabs": {
+      "overview": "Übersicht",
+      "subscriptions": "Aboverwaltung",
+      "users": "Nutzerverwaltung",
+      "settings": "App-Einstellungen",
+      "aiProviders": "KI-Anbieter",
+      "stats": "Statistiken"
+    },
+    "aiProviders": {
+      "title": "KI-Anbieter",
+      "description": "Wählen Sie den Standard-KI-Anbieter und das Modell für die App.",
+      "active": "Aktiv",
+      "select": "Auswählen",
+      "selected": "Ausgewählt",
+      "model": "Modell",
+      "save": "Auswahl speichern",
+      "saved": "Gespeichert"
+    },
+    "stats": {
+      "title": "Statistiken",
+      "description": "Wichtige Kennzahlen über Nutzung und Wachstum.",
+      "totalUsers": "Nutzer gesamt",
+      "totalOrgs": "Organisationen gesamt",
+      "totalPrompts": "Prompts gesamt",
+      "totalLogs": "API-Aufrufe gesamt",
+      "proOrgs": "Pro-Organisationen",
+      "freeOrgs": "Free-Organisationen",
+      "growth7d": "Neue Nutzer (7 Tage)",
+      "growth30d": "Neue Nutzer (30 Tage)",
+      "roleBreakdown": "Rollenverteilung",
+      "planBreakdown": "Planverteilung"
     },
     "users": {
       "title": "Nutzerverwaltung",
@@ -348,6 +469,10 @@
       "joined": "Beigetreten",
       "actions": "Aktionen",
       "empty": "Keine Nutzer gefunden.",
+      "deactivate": "Deaktivieren",
+      "activate": "Aktivieren",
+      "resetPassword": "Passwort zurücksetzen",
+      "resetSent": "Reset-Link gesendet",
       "confirmDelete": "Diesen Nutzer wirklich löschen?",
       "of": "von",
       "totalUsers": "Nutzern"

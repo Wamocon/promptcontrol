@@ -1,30 +1,30 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { createClient } from "@/lib/supabase/client";
 import {
-  Sun,
-  Moon,
-  Monitor,
   LogOut,
   Settings,
   ChevronDown,
   Globe,
+  Sun,
+  Moon,
+  Search,
 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   userName?: string;
   locale: string;
+  isAdmin?: boolean;
 }
 
-export function Header({ userName, locale }: HeaderProps) {
+export function Header({ userName, locale, isAdmin = false }: HeaderProps) {
   const t = useTranslations("nav");
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -41,61 +41,75 @@ export function Header({ userName, locale }: HeaderProps) {
     router.push(`/${newLocale}${pathname}`);
   }
 
-  const themeOptions = [
-    { value: "light", icon: Sun, label: "Hell" },
-    { value: "dark", icon: Moon, label: "Dunkel" },
-    { value: "system", icon: Monitor, label: "System" },
-  ] as const;
+  const isDark = resolvedTheme === "dark";
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b border-zinc-200 bg-white/80 px-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/80">
+    <header
+      className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b px-4 transition-colors"
+      style={{
+        background: "var(--surface-topbar)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderColor: "var(--panel-border)",
+      }}
+    >
       {/* Logo */}
-      <Link href="/dashboard" className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold text-sm">
+      <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-extrabold text-sm shadow-lg shadow-indigo-500/25">
           PC
         </div>
-        <span className="hidden font-semibold text-zinc-900 dark:text-zinc-100 sm:block">
-          ProCon
+        <span className="hidden font-bold sm:block" style={{ color: "var(--text-1)" }}>
+          <span className="text-indigo-500">Pro</span>Con
         </span>
       </Link>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-3">
+        {/* Command palette trigger */}
+        <button
+          onClick={() => {
+            const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: true });
+            window.dispatchEvent(evt);
+          }}
+          className="hidden md:flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/6 magnetic"
+          style={{ background: "var(--panel-bg-subtle)", color: "var(--text-3)" }}
+          title="Befehlspalette offnen"
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span>Suchen...</span>
+          <span className="kbd ml-2">⌘K</span>
+        </button>
+
+        <div className="flex items-center gap-1">
         {/* Language switcher */}
         <button
           onClick={switchLocale}
-          className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase transition-colors hover:bg-black/5 dark:hover:bg-white/6"
+          style={{ color: "var(--text-3)" }}
           title="Switch language"
         >
-          <Globe className="h-4 w-4" />
-          <span className="uppercase">{locale === "de" ? "EN" : "DE"}</span>
+          <Globe className="h-3.5 w-3.5" />
+          {locale === "de" ? "EN" : "DE"}
         </button>
 
-        {/* Theme switcher */}
-        <div className="flex rounded-lg border border-zinc-200 p-0.5 dark:border-zinc-700">
-          {themeOptions.map(({ value, icon: Icon }) => (
-            <button
-              key={value}
-              onClick={() => setTheme(value)}
-              className={cn(
-                "rounded-md p-1.5 transition-colors",
-                theme === value
-                  ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
-                  : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-              )}
-            >
-              <Icon className="h-3.5 w-3.5" />
-            </button>
-          ))}
-        </div>
+        {/* Theme toggle */}
+        <button
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          className="flex items-center justify-center rounded-lg p-2 transition-colors hover:bg-black/5 dark:hover:bg-white/6"
+          style={{ color: "var(--text-3)" }}
+          title={isDark ? "Hellmodus aktivieren" : "Dunkelmodus aktivieren"}
+        >
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
 
         {/* User menu */}
         {userName && (
-          <div className="relative">
+          <div className="relative ml-1">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/6"
+              style={{ color: "var(--text-2)" }}
             >
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold dark:bg-indigo-900 dark:text-indigo-300">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/25">
                 {userName.charAt(0).toUpperCase()}
               </div>
               <span className="hidden sm:block">{userName}</span>
@@ -105,18 +119,40 @@ export function Header({ userName, locale }: HeaderProps) {
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setUserMenuOpen(false)} />
-                <div className="absolute right-0 top-10 z-20 w-48 rounded-xl border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
+                <div
+                  className="absolute right-0 top-11 z-20 w-52 rounded-xl p-1.5 shadow-2xl"
+                  style={{
+                    background: "var(--surface-topbar)",
+                    backdropFilter: "blur(20px)",
+                    border: "1px solid var(--panel-border)",
+                  }}
+                >
+                  {isAdmin && (
+                    <>
+                      <Link
+                        href="/dashboard/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        style={{ color: "var(--text-2)" }}
+                      >
+                        <Settings className="h-4 w-4" />
+                        {t("admin")}
+                      </Link>
+                      <div className="my-1 h-px" style={{ background: "var(--panel-border)" }} />
+                    </>
+                  )}
                   <Link
-                    href="/dashboard/settings"
+                    href="/dashboard/profile"
                     onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    style={{ color: "var(--text-2)" }}
                   >
                     <Settings className="h-4 w-4" />
-                    {t("settings")}
+                    {t("profileSettings")}
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-rose-500 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10 transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                     {t("logout")}
@@ -126,7 +162,10 @@ export function Header({ userName, locale }: HeaderProps) {
             )}
           </div>
         )}
+        </div>
       </div>
     </header>
   );
 }
+
+
