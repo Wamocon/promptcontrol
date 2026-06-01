@@ -1,5 +1,6 @@
 ﻿import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   BookOpen,
   Terminal,
@@ -149,12 +150,12 @@ curl -H "X-Api-Key: IHR_API_SCHLÜSSEL" \\
 
           {/* CTA to integrations tab */}
           <div className="mt-3">
-            <a
+            <Link
               href="/dashboard/profile?tab=integrations"
               className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors"
             >
               <Key className="h-4 w-4" /> Zu Profil → Integrationen
-            </a>
+            </Link>
           </div>
 
           <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/7 px-4 py-3 mt-2">

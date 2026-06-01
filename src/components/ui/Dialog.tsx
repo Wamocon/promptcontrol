@@ -58,7 +58,6 @@ export function Dialog({ open, onClose, title, description, children, className,
         <div className={cn(
           isLg ? "flex-1 overflow-y-auto px-6 py-5" : "mt-5",
         )}>
-          {!isLg && description && <p className="mb-4 text-sm text-t3">{description}</p>}
           {children}
         </div>
       </div>
