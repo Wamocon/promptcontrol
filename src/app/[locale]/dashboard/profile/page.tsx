@@ -35,5 +35,5 @@ export default async function ProfilePage({
     };
   }
 
-  return <ProfileClient profile={profileWithOrg} userEmail={user.email ?? ""} />;
+  return <ProfileClient profile={profileWithOrg} userEmail={user.email ?? ""} apiKey={profileWithOrg?.api_key} />;
 }

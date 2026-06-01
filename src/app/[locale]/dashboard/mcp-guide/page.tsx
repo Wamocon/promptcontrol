@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+﻿import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import {
   BookOpen,
@@ -8,7 +8,7 @@ import {
   Code2,
   Zap,
   ExternalLink,
-  Copy,
+  AlertTriangle,
 } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -51,7 +51,7 @@ function Step({
 }
 
 export default async function McpGuidePage() {
-  const t = await getTranslations("nav");
+  await getTranslations("nav");
 
   const vscodeMcpConfig = `{
   "servers": {
@@ -59,7 +59,7 @@ export default async function McpGuidePage() {
       "type": "http",
       "url": "https://ihre-domain.vercel.app/api/mcp",
       "headers": {
-        "X-Api-Key": "IHR_API_SCHLUESSEL"
+        "X-Api-Key": "IHR_API_SCHLÜSSEL"
       }
     }
   }
@@ -70,7 +70,7 @@ export default async function McpGuidePage() {
     "procon": {
       "url": "https://ihre-domain.vercel.app/api/mcp",
       "headers": {
-        "X-Api-Key": "IHR_API_SCHLUESSEL"
+        "X-Api-Key": "IHR_API_SCHLÜSSEL"
       }
     }
   }
@@ -83,7 +83,7 @@ export default async function McpGuidePage() {
 @procon search_prompts onboarding`;
 
   const restExample = `# Prompt abrufen (kein MCP-Client erforderlich)
-curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
+curl -H "X-Api-Key: IHR_API_SCHLÜSSEL" \\
   https://ihre-domain.vercel.app/api/v1/prompts/SLUG
 
 # Antwort:
@@ -112,7 +112,7 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
         </h1>
         <p className="text-base text-t3 leading-relaxed">
           Greifen Sie direkt aus GitHub Copilot, Cursor, JetBrains IDEA oder Claude Desktop auf alle
-          Ihre Unternehmens-Prompts zu - ohne copy &amp; paste, immer mit der aktuellsten Version.
+          Ihre Unternehmens-Prompts zu - ohne Copy &amp; Paste, immer mit der aktuellsten Version.
         </p>
       </div>
 
@@ -131,7 +131,7 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
               Das <strong>Model Context Protocol (MCP)</strong> ist ein offener Standard von Anthropic,
               der es KI-Assistenten erlaubt, externe Datenquellen und Tools sicher zu nutzen.
               ProCon implementiert einen MCP-Server, der Ihre Prompts als abrufbare Ressourcen
-              bereitstellt - direkt in Ihrem KI-Assistenten verfuegbar.
+              bereitstellt - direkt in Ihrem KI-Assistenten verfügbar.
             </p>
           </div>
         </div>
@@ -140,38 +140,51 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
       {/* Steps */}
       <div>
         {/* Step 1: API Key */}
-        <Step number={1} title="API-Schluessel kopieren">
+        <Step number={1} title="API-Schlüssel kopieren">
           <p>
             Gehen Sie zu{" "}
-            <strong>Profil &rarr; API-Schluessel</strong> und kopieren Sie Ihren persoenlichen API-Schluessel.
+            <strong>Profil &rarr; Integrationen</strong> und kopieren Sie Ihren persönlichen API-Schlüssel.
+            Er wird automatisch für Ihr Konto generiert.
           </p>
-          <div className="flex items-center gap-2 panel rounded-xl p-3 mt-2">
-            <Key className="h-4 w-4 text-indigo-500 shrink-0" />
-            <code className="text-xs font-mono text-t2 flex-1">
-              procon_sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            </code>
-            <Copy className="h-4 w-4 text-t4" />
+
+          {/* CTA to integrations tab */}
+          <div className="mt-3">
+            <a
+              href="/dashboard/profile?tab=integrations"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors"
+            >
+              <Key className="h-4 w-4" /> Zu Profil → Integrationen
+            </a>
           </div>
-          <p className="text-xs text-t4 mt-1">
-            Behandeln Sie den API-Schluessel wie ein Passwort. Nie in Git committen.
-          </p>
+
+          <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/7 px-4 py-3 mt-2">
+            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Behandeln Sie den API-Schlüssel wie ein Passwort. Nie in Git committen.
+              Fügen Sie ihn in <code>.vscode/mcp.json</code> ein und schließen Sie die Datei per{" "}
+              <code>.gitignore</code> vom Repository aus.
+            </p>
+          </div>
         </Step>
 
         {/* Step 2: VS Code */}
         <Step number={2} title="VS Code / GitHub Copilot einrichten">
           <p>
-            Erstellen Sie die Datei <code className="text-xs bg-black/5 dark:bg-white/8 rounded px-1.5 py-0.5">.vscode/mcp.json</code> im Projekt-Root:
+            Erstellen Sie die Datei{" "}
+            <code className="text-xs bg-black/5 dark:bg-white/8 rounded px-1.5 py-0.5">.vscode/mcp.json</code>{" "}
+            im Projekt-Root und fügen Sie Ihren API-Schlüssel ein:
           </p>
           <CodeBlock code={vscodeMcpConfig} />
-          <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/7 px-4 py-3">
-            <CheckCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-600 dark:text-amber-400">
-              Fuer lokale Entwicklung verwenden Sie <code>http://localhost:3000/api/mcp</code> als URL.
-              Fuer Production tragen Sie Ihre Vercel-URL ein.
+          <div className="flex items-start gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/7 px-4 py-3">
+            <CheckCircle className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-indigo-600 dark:text-indigo-400">
+              Für lokale Entwicklung verwenden Sie{" "}
+              <code>http://localhost:3000/api/mcp</code> als URL.
+              Für Production tragen Sie Ihre Vercel-URL ein.
             </p>
           </div>
           <p className="mt-2">
-            Starten Sie VS Code neu. In GitHub Copilot Chat tippen Sie dann:
+            VS Code neu starten. In GitHub Copilot Chat tippen Sie dann:
           </p>
           <CodeBlock code={exampleQuery} lang="bash" />
         </Step>
@@ -183,24 +196,25 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
           </p>
           <ol className="list-decimal list-inside space-y-1.5 text-sm text-t2">
             <li>
-              <strong>Settings</strong> &rarr; <strong>Tools</strong> &rarr; <strong>AI Assistant</strong> &rarr; <strong>MCP Servers</strong>
+              <strong>Settings</strong> &rarr; <strong>Tools</strong> &rarr;{" "}
+              <strong>AI Assistant</strong> &rarr; <strong>MCP Servers</strong>
             </li>
-            <li>
-              Klicken Sie auf <strong>Add Server</strong> und waehlen Sie <strong>HTTP</strong>
-            </li>
-            <li>
-              Tragen Sie Ihre ProCon-URL und den API-Schluessel ein
-            </li>
+            <li>Klicken Sie auf <strong>Add Server</strong> und wählen Sie <strong>HTTP</strong></li>
+            <li>Tragen Sie Ihre ProCon-URL und den API-Schlüssel ein</li>
           </ol>
-          <p className="mt-3">Oder via <code className="text-xs bg-black/5 dark:bg-white/8 rounded px-1.5 py-0.5">~/.config/mcp/config.json</code>:</p>
+          <p className="mt-3">
+            Oder via{" "}
+            <code className="text-xs bg-black/5 dark:bg-white/8 rounded px-1.5 py-0.5">
+              ~/.config/mcp/config.json
+            </code>
+            :
+          </p>
           <CodeBlock code={ideaMcpConfig} />
         </Step>
 
         {/* Step 4: Claude Desktop */}
         <Step number={4} title="Claude Desktop einrichten">
-          <p>
-            Bearbeiten Sie die Claude-Konfigurationsdatei:
-          </p>
+          <p>Bearbeiten Sie die Claude-Konfigurationsdatei:</p>
           <ul className="list-disc list-inside space-y-1 text-sm text-t3">
             <li>
               <strong>macOS:</strong>{" "}
@@ -216,13 +230,13 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
             </li>
           </ul>
           <CodeBlock code={ideaMcpConfig} />
-          <p>Claude Desktop nach der Aenderung neu starten.</p>
+          <p>Claude Desktop nach der Änderung neu starten.</p>
         </Step>
 
-        {/* Step 5: REST API (no MCP) */}
+        {/* Step 5: REST API */}
         <Step number={5} title="Direkter REST-API-Zugriff (ohne MCP-Client)">
           <p>
-            Fuer Anwendungen ohne MCP-Unterstuetzung: Alle Prompts sind auch per einfacher REST-API
+            Für Anwendungen ohne MCP-Unterstützung: Alle Prompts sind auch per einfacher REST-API
             abrufbar - kein spezieller Client erforderlich.
           </p>
           <CodeBlock code={restExample} lang="bash" />
@@ -233,7 +247,7 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
       <div className="panel rounded-2xl p-6 mt-6">
         <div className="flex items-center gap-2 mb-4">
           <Terminal className="h-5 w-5 text-indigo-500" />
-          <h2 className="text-base font-bold text-t1">Verfuegbare MCP-Tools</h2>
+          <h2 className="text-base font-bold text-t1">Verfügbare MCP-Tools</h2>
         </div>
         <div className="space-y-3">
           {[
@@ -243,14 +257,17 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
             },
             {
               tool: "get_prompt",
-              desc: "Einen einzelnen Prompt per Slug abrufen. Gibt Inhalt, Version und Metadaten zurueck.",
+              desc: "Einen einzelnen Prompt per Slug abrufen. Gibt Inhalt, Version und Metadaten zurück.",
             },
             {
               tool: "search_prompts",
               desc: "Prompts nach Stichwort durchsuchen (Name, Beschreibung, Inhalt).",
             },
           ].map(({ tool, desc }) => (
-            <div key={tool} className="flex items-start gap-3 rounded-xl border border-indigo-500/15 bg-indigo-500/5 px-4 py-3">
+            <div
+              key={tool}
+              className="flex items-start gap-3 rounded-xl border border-indigo-500/15 bg-indigo-500/5 px-4 py-3"
+            >
               <Code2 className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
               <div>
                 <code className="text-sm font-mono font-bold text-indigo-500">{tool}</code>
@@ -265,9 +282,9 @@ curl -H "X-Api-Key: IHR_API_SCHLUESSEL" \\
       <div className="mt-6 flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/7 px-4 py-3">
         <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
         <div className="text-sm text-emerald-600 dark:text-emerald-400">
-          <strong>Sicherheit:</strong> Der MCP-Server gibt ausschliesslich Prompts mit Status{" "}
-          <strong>Aktiv</strong> zurueck, die der Organisation des API-Schluessel-Inhabers gehoeren.
-          Prompts anderer Organisationen sind nicht zugaenglich.
+          <strong>Sicherheit:</strong> Der MCP-Server gibt ausschließlich Prompts mit Status{" "}
+          <strong>Aktiv</strong> zurück, die der Organisation des API-Schlüssel-Inhabers gehören.
+          Prompts anderer Organisationen sind nicht zugänglich.
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   User, Lock, Bell, Shield, Trash2, Check, Eye, EyeOff,
   AlertTriangle, Camera, CreditCard, Users as UsersIcon, Plug, Download,
-  ChevronRight, Crown, KeyRound,
+  ChevronRight, Crown, KeyRound, Copy, RefreshCw, Terminal,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +19,7 @@ import {
   changePassword,
   exportUserData,
   deleteAccount,
+  regenerateApiKey,
 } from "./actions";
 
 type ProfileWithOrg = Profile & {
@@ -28,6 +29,7 @@ type ProfileWithOrg = Profile & {
 interface ProfileClientProps {
   profile: ProfileWithOrg | null;
   userEmail: string;
+  apiKey?: string;
 }
 
 type TabKey =
@@ -47,7 +49,7 @@ const TAB_DEFS: Array<{ key: TabKey; icon: ComponentType<{ className?: string }>
   { key: "danger",        icon: AlertTriangle, dangerous: true },
 ];
 
-export function ProfileClient({ profile, userEmail }: ProfileClientProps) {
+export function ProfileClient({ profile, userEmail, apiKey }: ProfileClientProps) {
   const t = useTranslations("profile");
   const tTabs = useTranslations("profile.tabs");
   const search = useSearchParams();
@@ -107,7 +109,7 @@ export function ProfileClient({ profile, userEmail }: ProfileClientProps) {
         {activeTab === "notifications" && <NotificationsTab t={t} />}
         {activeTab === "billing" && <BillingTab plan={plan} t={t} />}
         {activeTab === "team" && <TeamTab t={t} />}
-        {activeTab === "integrations" && <IntegrationsTab t={t} />}
+        {activeTab === "integrations" && <IntegrationsTab t={t} apiKey={apiKey} />}
         {activeTab === "gdpr" && <GdprTab t={t} />}
         {activeTab === "danger" && <DangerTab t={t} />}
       </main>
@@ -367,26 +369,105 @@ function TeamTab({ t }: { t: Translator }) {
   );
 }
 
-function IntegrationsTab({ t }: { t: Translator }) {
-  const items = [
-    { title: t("integrations.github"), desc: t("integrations.githubDesc") },
-    { title: t("integrations.slack"),  desc: t("integrations.slackDesc") },
+function IntegrationsTab({ t, apiKey }: { t: Translator; apiKey?: string }) {
+  const [visibleKey, setVisibleKey] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [regeneratedKey, setRegeneratedKey] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const currentKey = regeneratedKey ?? apiKey ?? "";
+
+  async function handleCopy() {
+    if (!currentKey) return;
+    await navigator.clipboard.writeText(currentKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleRegenerate() {
+    if (!confirm("API-Schlüssel wirklich neu generieren? Alle bestehenden Integrationen müssen aktualisiert werden.")) return;
+    setErr(null);
+    setRegenerating(true);
+    const result = await regenerateApiKey();
+    if (result.success && result.data?.apiKey) {
+      setRegeneratedKey(result.data.apiKey as string);
+      setVisibleKey(result.data.apiKey as string);
+    } else {
+      setErr(result.error ?? "Fehler beim Regenerieren");
+    }
+    setRegenerating(false);
+  }
+
+  const comingSoon = [
+    { title: t("integrations.slack"),   desc: t("integrations.slackDesc") },
     { title: t("integrations.webhook"), desc: t("integrations.webhookDesc") },
   ];
+
   return (
-    <Section icon={Plug} title={t("integrations.title")} description={t("integrations.description")}>
-      <div className="grid gap-3">
-        {items.map((it) => (
-          <div key={it.title} className="panel-subtle p-4 rounded-xl flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-t1">{it.title}</p>
-              <p className="text-xs text-t3">{it.desc}</p>
+    <div className="flex flex-col gap-6">
+      {/* API-Schlüssel */}
+      <Section icon={KeyRound} title="API-Schlüssel" description="Verwenden Sie diesen Schlüssel um ProCon per MCP oder REST-API in Ihre IDE einzubinden." accent="indigo">
+        <div className="flex flex-col gap-4">
+          <div className="panel-subtle rounded-xl p-4">
+            <p className="text-xs font-semibold text-t3 uppercase tracking-wide mb-2">Ihr persönlicher API-Schlüssel</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 min-w-0 truncate text-xs font-mono text-t1 bg-black/5 dark:bg-white/8 rounded-lg px-3 py-2">
+                {visibleKey ? currentKey : currentKey.replace(/./g, "•")}
+              </code>
+              <button
+                onClick={() => setVisibleKey(visibleKey ? null : currentKey)}
+                className="text-xs text-t3 hover:text-t1 px-2 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+              >
+                {visibleKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1 text-xs text-t2 hover:text-t1 px-2.5 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+              >
+                {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                {copied ? "Kopiert" : "Kopieren"}
+              </button>
             </div>
-            <Badge variant="default">{t("integrations.comingSoon")}</Badge>
           </div>
-        ))}
-      </div>
-    </Section>
+
+          {err && <p className="text-sm text-rose-500">{err}</p>}
+
+          <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/7 px-4 py-3">
+            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Behandeln Sie diesen Schlüssel wie ein Passwort. Nie in Git committen.
+              Fügen Sie ihn nur in sichere Konfigurationsdateien ein (z.B. <code>.vscode/mcp.json</code> per <code>.gitignore</code> ausgeschlossen).
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={handleRegenerate} loading={regenerating}>
+              <RefreshCw className="h-4 w-4" /> Neu generieren
+            </Button>
+            <Link href="/dashboard/mcp-guide">
+              <Button variant="ghost">
+                <Terminal className="h-4 w-4" /> MCP-Anleitung öffnen
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </Section>
+
+      {/* Weitere Integrationen */}
+      <Section icon={Plug} title={t("integrations.title")} description={t("integrations.description")} accent="cyan">
+        <div className="grid gap-3">
+          {comingSoon.map((it) => (
+            <div key={it.title} className="panel-subtle p-4 rounded-xl flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-t1">{it.title}</p>
+                <p className="text-xs text-t3">{it.desc}</p>
+              </div>
+              <Badge variant="default">{t("integrations.comingSoon")}</Badge>
+            </div>
+          ))}
+        </div>
+      </Section>
+    </div>
   );
 }
 

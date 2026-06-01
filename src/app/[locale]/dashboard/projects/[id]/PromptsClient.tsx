@@ -253,7 +253,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
       { pattern: /\b(?:IBAN|iban)[:\s]*[A-Z]{2}\d{2}[A-Z0-9]{1,30}\b/g, label: "IBAN" },
       { pattern: /\b\d{4}[-\s]\d{4}[-\s]\d{4}[-\s]\d{4}\b/g, label: "Kreditkartennummer" },
       { pattern: /\bpassword\s*[:=]\s*\S+/gi, label: "Passwort im Klartext" },
-      { pattern: /\bapi[_\s-]?key\s*[:=]\s*\S+/gi, label: "API-Schluessel" },
+      { pattern: /\bapi[_\s-]?key\s*[:=]\s*\S+/gi, label: "API-Schlüssel" },
     ];
     const issues: string[] = [];
     piiPatterns.forEach(({ pattern, label }) => {
@@ -276,7 +276,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         body: JSON.stringify({ prompt: editContent, name: editName }),
       });
       const data = await response.json();
-      setAiAnalysis(data.analysis ?? "Analyse nicht verfuegbar.");
+      setAiAnalysis(data.analysis ?? "Analyse nicht verfügbar.");
       if (data.provider) setAiProvider(`${data.provider}${data.model ? ` / ${data.model}` : ""}`);
     } catch {
       setAiAnalysis("Fehler bei der KI-Analyse.");
@@ -500,10 +500,10 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         open={!!selectedPrompt}
         onClose={closeEditor}
         title={editName}
-        className="max-w-5xl"
+        size="lg"
       >
         {selectedPrompt && (
-          <div className="flex flex-col gap-4 max-h-[76vh] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-4">
             {/* Toolbar */}
             <div className="flex items-center gap-1.5 flex-wrap">
               {selectedPrompt.prompt_categories && (
