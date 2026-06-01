@@ -51,6 +51,9 @@ export async function chatCompletion(
     throw new Error(`API key not configured for provider: ${provider.label}`);
   }
 
+  // Sokrates is a local-network server – use shorter timeout to fail fast
+  const timeoutMs = providerId === "sokrates" ? 10_000 : 30_000;
+
   const response = await fetch(`${provider.baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
@@ -64,8 +67,7 @@ export async function chatCompletion(
       max_tokens: options.maxTokens ?? 600,
       temperature: options.temperature ?? 0.3,
     }),
-    // 30 second timeout
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   if (!response.ok) {
@@ -79,13 +81,28 @@ export async function chatCompletion(
   return data.choices?.[0]?.message?.content ?? null;
 }
 
-/** Convenience: auto-selects active provider and runs chat */
+/** Convenience: auto-selects active provider and runs chat.
+ *  If the primary provider fails and it is sokrates (local network),
+ *  automatically retries with groq as a fallback. */
 export async function autoChat(
   messages: ChatMessage[],
   options?: ChatOptions
 ): Promise<{ text: string; provider: ProviderId; model: string }> {
   const { provider, model } = await getActiveProvider();
 
-  const text = await chatCompletion(provider, model, messages, options);
-  return { text: text ?? "Keine Antwort erhalten.", provider, model };
+  try {
+    const text = await chatCompletion(provider, model, messages, options);
+    return { text: text ?? "Keine Antwort erhalten.", provider, model };
+  } catch (primaryErr) {
+    // Fallback to groq when sokrates (local network) is unreachable
+    if (provider === "sokrates") {
+      const groqKey = process.env["GROQ_API_KEY"];
+      if (groqKey) {
+        const fallbackModel = PROVIDERS.groq.defaultModel;
+        const text = await chatCompletion("groq", fallbackModel, messages, options);
+        return { text: text ?? "Keine Antwort erhalten.", provider: "groq", model: fallbackModel };
+      }
+    }
+    throw primaryErr;
+  }
 }

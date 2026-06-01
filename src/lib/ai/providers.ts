@@ -48,7 +48,7 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
     apiKeyEnv: "OPENROUTER_API_KEY",
     extraHeaders: {
       "HTTP-Referer": "https://procon.wamocon.de",
-      "X-Title": "ProCon – Prompt Management",
+      "X-Title": "ProCon - Prompt Management",
     },
     models: [
       { id: "google/gemma-4-31b-it:free",          label: "Gemma 4 31B (Free)",  description: "Kostenlos" },

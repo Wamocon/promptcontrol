@@ -98,7 +98,7 @@ export function AdminOverviewClient({ stats, recentUsers, recentOrgs }: AdminOve
           </div>
           <div>
             <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.userCount}</p>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t("stats.users")}</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t("overviewStats.users")}</p>
           </div>
         </Card>
         <Card className="flex items-center gap-4">
@@ -107,7 +107,7 @@ export function AdminOverviewClient({ stats, recentUsers, recentOrgs }: AdminOve
           </div>
           <div>
             <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.orgCount}</p>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t("stats.organizations")}</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t("overviewStats.organizations")}</p>
           </div>
         </Card>
         <Card className="flex items-center gap-4">
@@ -116,7 +116,7 @@ export function AdminOverviewClient({ stats, recentUsers, recentOrgs }: AdminOve
           </div>
           <div>
             <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.promptCount}</p>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t("stats.prompts")}</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t("overviewStats.prompts")}</p>
           </div>
         </Card>
       </div>

@@ -380,7 +380,7 @@
     "recentUsers": "Neue Nutzer",
     "recentOrgs": "Neue Organisationen",
     "viewAll": "Alle anzeigen",
-    "stats": {
+    "overviewStats": {
       "users": "Registrierte Nutzer",
       "organizations": "Organisationen",
       "prompts": "Gesamt Prompts"
