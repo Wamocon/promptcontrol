@@ -4,9 +4,9 @@ import { useTranslations } from "next-intl";
 import { useState, useTransition, type ComponentType } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
-  User, Lock, Bell, Shield, Trash2, Check, Copy, RefreshCw, Eye, EyeOff,
+  User, Lock, Bell, Shield, Trash2, Check, Eye, EyeOff,
   AlertTriangle, Camera, CreditCard, Users as UsersIcon, Plug, Download,
-  ChevronRight, KeyRound, Crown,
+  ChevronRight, Crown, KeyRound,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -17,7 +17,6 @@ import type { Profile } from "@/types";
 import {
   updateProfileName,
   changePassword,
-  regenerateApiKey,
   exportUserData,
   deleteAccount,
 } from "./actions";
@@ -32,7 +31,7 @@ interface ProfileClientProps {
 }
 
 type TabKey =
-  | "profile" | "security" | "apiKeys" | "notifications"
+  | "profile" | "security" | "notifications"
   | "billing" | "team" | "integrations" | "gdpr" | "danger";
 
 type Translator = ReturnType<typeof useTranslations<"profile">>;
@@ -40,7 +39,6 @@ type Translator = ReturnType<typeof useTranslations<"profile">>;
 const TAB_DEFS: Array<{ key: TabKey; icon: ComponentType<{ className?: string }>; dangerous?: boolean }> = [
   { key: "profile",       icon: User },
   { key: "security",      icon: Lock },
-  { key: "apiKeys",       icon: KeyRound },
   { key: "notifications", icon: Bell },
   { key: "billing",       icon: CreditCard },
   { key: "team",          icon: UsersIcon },
@@ -106,7 +104,6 @@ export function ProfileClient({ profile, userEmail }: ProfileClientProps) {
       <main className="flex-1 min-w-0">
         {activeTab === "profile" && <PersonalInfoTab profile={profile} userEmail={userEmail} t={t} />}
         {activeTab === "security" && <SecurityTab t={t} />}
-        {activeTab === "apiKeys" && <ApiKeysTab initialKey={profile?.api_key ?? ""} t={t} />}
         {activeTab === "notifications" && <NotificationsTab t={t} />}
         {activeTab === "billing" && <BillingTab plan={plan} t={t} />}
         {activeTab === "team" && <TeamTab t={t} />}
@@ -310,50 +307,6 @@ function SecurityTab({ t }: { t: Translator }) {
         <Button variant="secondary" disabled>{t("security.signOutAll")}</Button>
       </Section>
     </div>
-  );
-}
-
-function ApiKeysTab({ initialKey, t }: { initialKey: string; t: Translator }) {
-  const [apiKey, setApiKey] = useState(initialKey);
-  const [copied, setCopied] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [err, setErr] = useState<string | null>(null);
-
-  async function copy() {
-    await navigator.clipboard.writeText(apiKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  function regenerate() {
-    if (!confirm(t("apiKey.confirmRegenerate"))) return;
-    setErr(null);
-    startTransition(async () => {
-      const r = await regenerateApiKey();
-      if (!r.success) { setErr(r.error ?? "Fehler"); return; }
-      if (r.data?.apiKey) setApiKey(r.data.apiKey as string);
-    });
-  }
-
-  return (
-    <Section icon={KeyRound} title={t("apiKey.title")} description={t("apiKey.description")}>
-      <div className="flex items-center gap-2 mb-3">
-        <code className="flex-1 rounded-lg px-3 py-2 text-xs font-mono truncate panel-subtle text-t2">
-          {apiKey || "********"}
-        </code>
-        <button onClick={copy} title={t("apiKey.copy")}
-          className="rounded-lg p-2 transition-colors panel-subtle hover:bg-[color:var(--panel-bg)]">
-          {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4 text-t3" />}
-        </button>
-        <button onClick={regenerate} disabled={isPending} title={t("apiKey.regenerate")}
-          className="rounded-lg p-2 transition-colors panel-subtle hover:bg-[color:var(--panel-bg)] disabled:opacity-50">
-          <RefreshCw className={`h-4 w-4 text-t3 ${isPending ? "animate-spin" : ""}`} />
-        </button>
-      </div>
-      <p className="text-xs text-amber-600 dark:text-amber-400 mb-4">{t("apiKey.warning")}</p>
-      {err && <p className="text-sm text-rose-500 mb-3">{err}</p>}
-      <Button variant="secondary" disabled>{t("apiKey.createNew")}</Button>
-    </Section>
   );
 }
 

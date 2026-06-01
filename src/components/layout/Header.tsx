@@ -20,9 +20,10 @@ import { XpDisplay } from "@/components/gamification/XpDisplay";
 interface HeaderProps {
   userName?: string;
   locale: string;
+  isAdmin?: boolean;
 }
 
-export function Header({ userName, locale }: HeaderProps) {
+export function Header({ userName, locale, isAdmin = false }: HeaderProps) {
   const t = useTranslations("nav");
   const { resolvedTheme, setTheme } = useTheme();
   const router = useRouter();
@@ -130,6 +131,20 @@ export function Header({ userName, locale }: HeaderProps) {
                     border: "1px solid var(--panel-border)",
                   }}
                 >
+                  {isAdmin && (
+                    <>
+                      <Link
+                        href="/dashboard/admin"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                        style={{ color: "var(--text-2)" }}
+                      >
+                        <Settings className="h-4 w-4" />
+                        {t("admin")}
+                      </Link>
+                      <div className="my-1 h-px" style={{ background: "var(--panel-border)" }} />
+                    </>
+                  )}
                   <Link
                     href="/dashboard/profile"
                     onClick={() => setUserMenuOpen(false)}

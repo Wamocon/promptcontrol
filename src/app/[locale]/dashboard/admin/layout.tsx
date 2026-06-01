@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClientSafe } from "@/lib/supabase/server";
+import { createClientSafe, createServiceClientSafe } from "@/lib/supabase/server";
 import { AdminTabs } from "./AdminTabs";
 
 export default async function AdminLayout({
@@ -23,13 +23,16 @@ export default async function AdminLayout({
     redirect(`/${locale}/auth/login`);
   }
 
-  const { data: profile } = await supabase
+  const service = await createServiceClientSafe();
+  const roleClient = service ?? supabase;
+
+  const { data: profile } = await roleClient
     .from("profiles")
     .select("role")
     .eq("user_id", user.id)
     .single();
 
-  if (profile?.role !== "admin") {
+  if ((profile?.role ?? "").toLowerCase() !== "admin") {
     redirect(`/${locale}/dashboard`);
   }
 

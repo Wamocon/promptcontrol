@@ -18,9 +18,22 @@ export default async function ProfilePage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*, organizations(name, plan)")
+    .select("*")
     .eq("user_id", user.id)
     .single();
 
-  return <ProfileClient profile={profile} userEmail={user.email ?? ""} />;
+  let profileWithOrg = profile as (typeof profile & { organizations?: { name?: string; plan?: string } | null }) | null;
+  if (profile?.org_id) {
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("name, plan")
+      .eq("id", profile.org_id)
+      .single();
+    profileWithOrg = {
+      ...profile,
+      organizations: org ?? null,
+    };
+  }
+
+  return <ProfileClient profile={profileWithOrg} userEmail={user.email ?? ""} />;
 }

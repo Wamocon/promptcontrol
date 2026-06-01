@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Users, Building2, FileText, Settings, CreditCard, ShieldCheck } from "lucide-react";
+import { Users, Building2, FileText, Settings, CreditCard, ShieldCheck, Bot } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
@@ -53,6 +53,12 @@ const adminSections = [
     icon: Settings,
     color: "text-purple-600 dark:text-purple-400",
     bg: "bg-purple-50 dark:bg-purple-900/20",
+  },
+  {
+    href: "/dashboard/admin/ai-providers" as const,
+    icon: Bot,
+    color: "text-cyan-600 dark:text-cyan-400",
+    bg: "bg-cyan-50 dark:bg-cyan-900/20",
   },
 ];
 
@@ -116,9 +122,10 @@ export function AdminOverviewClient({ stats, recentUsers, recentOrgs }: AdminOve
       </div>
 
       {/* Quick navigation */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-8">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {adminSections.map(({ href, icon: Icon, color, bg }) => {
-          const key = href.split("/").pop() as "users" | "subscriptions" | "settings";
+          const key = href.split("/").pop() as "users" | "subscriptions" | "settings" | "ai-providers";
+          const normalizedKey = key === "ai-providers" ? "aiProviders" : key;
           return (
             <Link
               key={href}
@@ -129,8 +136,8 @@ export function AdminOverviewClient({ stats, recentUsers, recentOrgs }: AdminOve
                 <Icon className={`h-6 w-6 ${color}`} />
               </div>
               <div>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-100">{t(`sections.${key}.title`)}</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">{t(`sections.${key}.description`)}</p>
+                <p className="font-semibold text-zinc-900 dark:text-zinc-100">{t(`sections.${normalizedKey}.title`)}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{t(`sections.${normalizedKey}.description`)}</p>
               </div>
             </Link>
           );

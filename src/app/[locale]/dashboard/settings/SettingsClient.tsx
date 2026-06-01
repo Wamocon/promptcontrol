@@ -2,11 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
-import { Copy, Check, RefreshCw, Zap } from "lucide-react";
+import { Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types";
 
@@ -18,8 +18,6 @@ export function SettingsClient({ profile }: SettingsClientProps) {
   const t = useTranslations("settings");
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [apiKey, setApiKey] = useState(profile?.api_key ?? "");
 
   const plan = profile?.organizations?.plan ?? "free";
 
@@ -34,21 +32,6 @@ export function SettingsClient({ profile }: SettingsClientProps) {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     });
-  }
-
-  async function handleCopyApiKey() {
-    await navigator.clipboard.writeText(apiKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
-  async function handleRegenerateApiKey() {
-    const supabase = createClient();
-    const newKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-    await supabase.from("profiles").update({ api_key: newKey }).eq("id", profile!.id);
-    setApiKey(newKey);
   }
 
   return (
@@ -75,37 +58,6 @@ export function SettingsClient({ profile }: SettingsClientProps) {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-
-      <Card className="mb-5">
-        <CardHeader>
-          <CardTitle>{t("apiKey")}</CardTitle>
-          <CardDescription>{t("apiKeyDescription")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <code className="input-glass flex-1 px-3 py-2.5 text-xs font-mono truncate text-t2">{apiKey}</code>
-            <button
-              onClick={handleCopyApiKey}
-              className="input-glass p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-t3"
-              aria-label="API-Schluessel kopieren"
-              title="API-Schluessel kopieren"
-            >
-              {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-            </button>
-            <button
-              onClick={handleRegenerateApiKey}
-              className="input-glass p-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-t3"
-              aria-label={t("regenerate")}
-              title={t("regenerate")}
-            >
-              <RefreshCw className="h-4 w-4" />
-            </button>
-          </div>
-          <p className="mt-2.5 text-xs text-t4">
-            Verwendung: <code className="text-indigo-500 dark:text-indigo-400">X-Api-Key: {apiKey.substring(0, 8)}...</code>
-          </p>
         </CardContent>
       </Card>
 

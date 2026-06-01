@@ -33,37 +33,49 @@ export default async function DashboardLayout({ children, params }: DashboardLay
   let profile:
     | {
         id?: string;
+        user_id?: string;
+        org_id?: string | null;
         name?: string | null;
         role?: string | null;
-        organizations?: { plan?: string } | null;
       }
     | null = null;
+  let plan: "free" | "pro" = "free";
 
   try {
     const serviceSupabase = await createServiceClientSafe();
     const client = serviceSupabase ?? supabase;
     const { data } = await client
       .from("profiles")
-      .select("*, organizations(*)")
+      .select("id, user_id, org_id, name, role")
       .eq("user_id", user.id)
       .single();
     profile = data;
+
+    if (profile?.org_id) {
+      const { data: org } = await client
+        .from("organizations")
+        .select("plan")
+        .eq("id", profile.org_id)
+        .single();
+      if (org?.plan === "pro") {
+        plan = "pro";
+      }
+    }
   } catch {
     // Profile lookup failed (RLS, schema mismatch, ...). We render the
     // dashboard with a sensible default so the user is not blocked.
     profile = null;
   }
 
-  const plan = (profile?.organizations as { plan?: string } | null)?.plan ?? "free";
-  const isAdmin = profile?.role === "admin";
+  const isAdmin = (profile?.role ?? "").toLowerCase() === "admin";
 
   return (
     <GamificationProvider>
       <div className="flex h-screen flex-col overflow-hidden relative" style={{ background: "var(--background)" }}>
         <CursorSpotlight />
-        <Header userName={profile?.name || user.email?.split("@")[0]} locale={locale} />
+        <Header userName={profile?.name || user.email?.split("@")[0]} locale={locale} isAdmin={isAdmin} />
         <div className="flex flex-1 overflow-hidden relative z-[1]">
-          <Sidebar plan={plan as "free" | "pro"} isAdmin={isAdmin} />
+          <Sidebar plan={plan} isAdmin={isAdmin} />
           <main className="flex-1 overflow-y-auto" style={{ background: "var(--background)" }}>
             {children}
           </main>
