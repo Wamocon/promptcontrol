@@ -24,5 +24,6 @@ export const routing = defineRouting({
     "/legal/agb": "/legal/agb",
     "/dashboard/projects/[id]": "/dashboard/projects/[id]",
     "/dashboard/ab-tests": "/dashboard/ab-tests",
+    "/dashboard/mcp-guide": "/dashboard/mcp-guide",
   },
 });

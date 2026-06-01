@@ -10,6 +10,7 @@ import {
   Zap,
   ShieldCheck,
   FlaskConical,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export function Sidebar({ plan, isAdmin = false }: SidebarProps) {
     { href: "/dashboard/logs" as const, label: t("logs"), icon: ScrollText },
     { href: "/dashboard/ab-tests" as const, label: "A/B Tests", icon: FlaskConical },
     { href: "/dashboard/team" as const, label: t("team"), icon: Users },
+    { href: "/dashboard/mcp-guide" as const, label: t("mcpGuide"), icon: BookOpen },
   ];
 
   return (

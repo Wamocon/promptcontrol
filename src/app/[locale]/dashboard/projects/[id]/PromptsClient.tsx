@@ -24,11 +24,12 @@ import {
   Zap,
   Archive,
   FileEdit,
+  Languages,
+  Pencil,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
 import { Dialog, ConfirmDialog } from "@/components/ui/Dialog";
 import {
   createPrompt,
@@ -48,7 +49,6 @@ interface PromptsClientProps {
 
 type PromptWithCategory = Prompt & { prompt_categories?: PromptCategory | null };
 
-/** Group prompts by category, uncategorized last */
 function groupByCategory(
   prompts: PromptWithCategory[],
   categories: PromptCategory[]
@@ -56,45 +56,31 @@ function groupByCategory(
   const catMap = new Map<string | null, PromptWithCategory[]>();
   catMap.set(null, []);
   for (const cat of categories) catMap.set(cat.id, []);
-
   for (const p of prompts) {
     const key = p.category_id ?? null;
     if (!catMap.has(key)) catMap.set(key, []);
     catMap.get(key)!.push(p);
   }
-
   const catById = new Map(categories.map((c) => [c.id, c]));
   const result: Array<{ category: PromptCategory | null; prompts: PromptWithCategory[] }> = [];
-
   for (const cat of categories) {
-    const ps = catMap.get(cat.id) ?? [];
-    result.push({ category: catById.get(cat.id) ?? null, prompts: ps });
+    result.push({ category: catById.get(cat.id) ?? null, prompts: catMap.get(cat.id) ?? [] });
   }
-
   const uncategorized = catMap.get(null) ?? [];
-  if (uncategorized.length > 0) {
-    result.push({ category: null, prompts: uncategorized });
-  }
-
+  if (uncategorized.length > 0) result.push({ category: null, prompts: uncategorized });
   return result.filter((g) => g.prompts.length > 0);
 }
 
-function statusIcon(status: string) {
-  if (status === "active") return <Zap className="h-3 w-3 text-emerald-500" />;
-  if (status === "archived") return <Archive className="h-3 w-3 text-zinc-400" />;
-  return <FileEdit className="h-3 w-3 text-amber-400" />;
-}
-
-function statusBadge(status: string) {
-  if (status === "active") return <Badge variant="success">Aktiv</Badge>;
-  if (status === "archived") return <Badge variant="default">Archiviert</Badge>;
-  return <Badge variant="warning">Entwurf</Badge>;
+function StatusIcon({ status }: { status: string }) {
+  if (status === "active") return <Zap className="h-3.5 w-3.5 text-emerald-500" />;
+  if (status === "archived") return <Archive className="h-3.5 w-3.5 text-zinc-400" />;
+  return <FileEdit className="h-3.5 w-3.5 text-amber-400" />;
 }
 
 export function PromptsClient({ project, initialPrompts, categories }: PromptsClientProps) {
   const t = useTranslations("prompts");
 
-  const [prompts] = useState(initialPrompts);
+  const [prompts, setPrompts] = useState(initialPrompts);
   const [selectedPrompt, setSelectedPrompt] = useState<PromptWithCategory | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -104,21 +90,20 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(false);
 
-  // AI analysis state
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiProvider, setAiProvider] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Compliance state
   const [complianceResult, setComplianceResult] = useState<{ clean: boolean; issues: string[] } | null>(null);
   const [complianceLoading, setComplianceLoading] = useState(false);
 
-  // Versions panel
   const [showVersions, setShowVersions] = useState(false);
   const [versions, setVersions] = useState<PromptVersion[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
 
-  // Editor state
+  const [translating, setTranslating] = useState(false);
+  const [translationMsg, setTranslationMsg] = useState<string | null>(null);
+
   const [editContent, setEditContent] = useState("");
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -126,7 +111,6 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
   const [editCategoryId, setEditCategoryId] = useState<string>("");
   const [changeNote, setChangeNote] = useState("");
 
-  // Filtered + grouped prompts
   const filteredPrompts = useMemo(() => {
     if (!searchQuery.trim()) return prompts;
     const q = searchQuery.toLowerCase();
@@ -143,7 +127,6 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     [filteredPrompts, categories]
   );
 
-  // Stats
   const activeCount = prompts.filter((p) => p.status === "active").length;
   const draftCount = prompts.filter((p) => p.status === "draft").length;
 
@@ -156,7 +139,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     });
   }
 
-  function selectPrompt(prompt: PromptWithCategory) {
+  function openEditor(prompt: PromptWithCategory) {
     setSelectedPrompt(prompt);
     setEditContent(prompt.content);
     setEditName(prompt.name);
@@ -166,8 +149,14 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     setAiAnalysis(null);
     setAiProvider(null);
     setComplianceResult(null);
+    setTranslationMsg(null);
     setShowVersions(false);
     setVersions([]);
+    setError(null);
+  }
+
+  function closeEditor() {
+    setSelectedPrompt(null);
   }
 
   function handleCreate(e: React.FormEvent<HTMLFormElement>) {
@@ -195,8 +184,27 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     formData.set("change_note", changeNote);
     startTransition(async () => {
       const result = await updatePrompt(selectedPrompt.id, project.id, formData, saveAsVersion);
-      if (result.error) setError(result.error);
-      else setChangeNote("");
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setChangeNote("");
+        setPrompts((prev) =>
+          prev.map((p) =>
+            p.id === selectedPrompt.id
+              ? {
+                  ...p,
+                  name: editName,
+                  description: editDescription,
+                  status: editStatus as Prompt["status"],
+                  category_id: editCategoryId || null,
+                  content: editContent,
+                  updated_at: new Date().toISOString(),
+                  current_version: saveAsVersion ? p.current_version + 1 : p.current_version,
+                }
+              : p
+          )
+        );
+      }
     });
   }
 
@@ -204,8 +212,9 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     if (!deleteId) return;
     startTransition(async () => {
       await deletePrompt(deleteId, project.id);
+      setPrompts((prev) => prev.filter((p) => p.id !== deleteId));
       setDeleteId(null);
-      setSelectedPrompt(null);
+      closeEditor();
     });
   }
 
@@ -226,7 +235,10 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = type === "instruction" ? `${selectedPrompt.slug}.instructions.md` : `${selectedPrompt.slug}.skill.md`;
+    a.download =
+      type === "instruction"
+        ? `${selectedPrompt.slug}.instructions.md`
+        : `${selectedPrompt.slug}.skill.md`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -241,16 +253,15 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
       { pattern: /\b(?:IBAN|iban)[:\s]*[A-Z]{2}\d{2}[A-Z0-9]{1,30}\b/g, label: "IBAN" },
       { pattern: /\b\d{4}[-\s]\d{4}[-\s]\d{4}[-\s]\d{4}\b/g, label: "Kreditkartennummer" },
       { pattern: /\bpassword\s*[:=]\s*\S+/gi, label: "Passwort im Klartext" },
-      { pattern: /\bapi[_\s-]?key\s*[:=]\s*\S+/gi, label: "API-SchlÃ¼ssel" },
+      { pattern: /\bapi[_\s-]?key\s*[:=]\s*\S+/gi, label: "API-Schluessel" },
     ];
     const issues: string[] = [];
     piiPatterns.forEach(({ pattern, label }) => {
       if (pattern.test(editContent)) issues.push(label);
     });
-    setTimeout(() => {
-      setComplianceResult({ clean: issues.length === 0, issues });
-      setComplianceLoading(false);
-    }, 800);
+    await new Promise((r) => setTimeout(r, 600));
+    setComplianceResult({ clean: issues.length === 0, issues });
+    setComplianceLoading(false);
   }
 
   async function handleAiAnalysis() {
@@ -265,12 +276,36 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         body: JSON.stringify({ prompt: editContent, name: editName }),
       });
       const data = await response.json();
-      setAiAnalysis(data.analysis ?? "Analyse nicht verfÃ¼gbar.");
+      setAiAnalysis(data.analysis ?? "Analyse nicht verfuegbar.");
       if (data.provider) setAiProvider(`${data.provider}${data.model ? ` / ${data.model}` : ""}`);
     } catch {
       setAiAnalysis("Fehler bei der KI-Analyse.");
     }
     setAiLoading(false);
+  }
+
+  async function handleTranslate(targetLang: "de" | "en") {
+    if (!editContent) return;
+    setTranslating(true);
+    setTranslationMsg(null);
+    try {
+      const response = await fetch("/api/ai/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent, targetLang }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        setTranslationMsg(t("translationError") + ": " + data.error);
+      } else {
+        setEditContent(data.translatedContent);
+        setTranslationMsg(t("translationDone"));
+        setTimeout(() => setTranslationMsg(null), 3000);
+      }
+    } catch {
+      setTranslationMsg(t("translationError"));
+    }
+    setTranslating(false);
   }
 
   async function loadVersions() {
@@ -299,152 +334,181 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
     });
   }
 
+  // Detect likely source language to show correct translate target
+  const targetLang: "de" | "en" = useMemo(() => {
+    const dePattern = /\b(Sie|das|die|der|ist|und|mit|haben|werden|wenn|bitte)\b/i;
+    return dePattern.test(editContent) ? "en" : "de";
+  }, [editContent]);
+
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* â”€â”€â”€ Left panel: structured prompt library â”€â”€â”€ */}
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Page header */}
       <div
-        className="w-80 shrink-0 border-r flex flex-col"
-        style={{ background: "var(--panel-bg)", borderColor: "var(--panel-border)", backdropFilter: "blur(16px)" }}
+        className="border-b px-6 py-4 flex items-center gap-4 shrink-0"
+        style={{ background: "var(--panel-bg-subtle)", borderColor: "var(--panel-border)" }}
       >
-        {/* Project header */}
-        <div className="border-b px-4 py-3" style={{ borderColor: "var(--panel-border)" }}>
+        <div className="flex-1 min-w-0">
           <Link
             href="/dashboard/projects"
-            className="flex items-center gap-1 text-xs text-t3 hover:text-t1 mb-1.5 transition-colors"
+            className="flex items-center gap-1 text-xs text-t3 hover:text-t1 mb-1 transition-colors w-fit"
           >
-            <ChevronLeft className="h-3 w-3" /> Alle Projekte
+            <ChevronLeft className="h-3 w-3" /> {t("allProjects")}
           </Link>
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-t1 truncate">{project.name}</h2>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-t4">{prompts.length} Prompts</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats bar */}
-        <div className="grid grid-cols-3 border-b divide-x" style={{ borderColor: "var(--panel-border)" }}>
-          <div className="flex flex-col items-center py-2">
-            <span className="text-sm font-bold text-t1">{prompts.length}</span>
-            <span className="text-[10px] text-t4 uppercase tracking-wide">Gesamt</span>
-          </div>
-          <div className="flex flex-col items-center py-2">
-            <span className="text-sm font-bold text-emerald-500">{activeCount}</span>
-            <span className="text-[10px] text-t4 uppercase tracking-wide">Aktiv</span>
-          </div>
-          <div className="flex flex-col items-center py-2">
-            <span className="text-sm font-bold text-amber-400">{draftCount}</span>
-            <span className="text-[10px] text-t4 uppercase tracking-wide">Entwurf</span>
-          </div>
-        </div>
-
-        {/* Search + New */}
-        <div className="px-3 py-2.5 border-b space-y-2" style={{ borderColor: "var(--panel-border)" }}>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-t4 pointer-events-none" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Prompts suchen..."
-              className="input-glass w-full pl-8 text-xs py-1.5"
-            />
-          </div>
-          <Button size="sm" onClick={() => setShowCreate(true)} className="w-full">
-            <Plus className="h-3.5 w-3.5" /> Neuer Prompt
-          </Button>
-        </div>
-
-        {/* Grouped prompt list */}
-        <div className="flex-1 overflow-y-auto">
-          {grouped.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-t4 text-sm gap-2">
-              <FileText className="h-8 w-8" />
-              {searchQuery ? "Keine Ergebnisse" : "Noch keine Prompts"}
-            </div>
-          ) : (
-            grouped.map(({ category, prompts: groupPrompts }) => {
-              const catId = category?.id ?? "__none__";
-              const isCollapsed = collapsedCategories.has(catId);
-              const catColor = category?.color ?? "#71717a";
-
-              return (
-                <div key={catId}>
-                  {/* Category header */}
-                  <button
-                    onClick={() => toggleCategory(catId)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-black/3 dark:hover:bg-white/3 transition-colors sticky top-0 z-10"
-                    style={{ background: "var(--panel-bg-subtle)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--panel-border)" }}
-                  >
-                    <span
-                      className="flex h-2.5 w-2.5 rounded-full shrink-0"
-                      style={{ background: catColor, boxShadow: `0 0 6px ${catColor}60` }}
-                    />
-                    <span className="flex-1 text-xs font-semibold text-t2 uppercase tracking-wider">
-                      {category?.name ?? "Ohne Kategorie"}
-                    </span>
-                    <span className="text-[10px] text-t4 font-medium tabular-nums px-1.5 py-0.5 rounded-full" style={{ background: `${catColor}20`, color: catColor }}>
-                      {groupPrompts.length}
-                    </span>
-                    {isCollapsed ? (
-                      <ChevronRight className="h-3.5 w-3.5 text-t4 shrink-0" />
-                    ) : (
-                      <ChevronDown className="h-3.5 w-3.5 text-t4 shrink-0" />
-                    )}
-                  </button>
-
-                  {/* Prompt cards */}
-                  {!isCollapsed && groupPrompts.map((prompt) => (
-                    <button
-                      key={prompt.id}
-                      onClick={() => selectPrompt(prompt)}
-                      className={`w-full text-left px-3 py-2.5 border-b transition-all ${
-                        selectedPrompt?.id === prompt.id
-                          ? "bg-indigo-500/10"
-                          : "hover:bg-black/3 dark:hover:bg-white/3"
-                      }`}
-                      style={{
-                        borderBottomColor: "var(--panel-border)",
-                        borderLeft: `3px solid ${selectedPrompt?.id === prompt.id ? catColor : "transparent"}`,
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-2 mb-0.5">
-                        <span className="text-sm font-medium text-t1 truncate leading-snug">{prompt.name}</span>
-                        <div className="flex items-center gap-1 shrink-0">
-                          {statusIcon(prompt.status)}
-                        </div>
-                      </div>
-                      {prompt.description && (
-                        <p className="text-xs text-t4 truncate mb-1 leading-snug">{prompt.description}</p>
-                      )}
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-t4 tabular-nums">v{prompt.current_version}</span>
-                        <span className="text-t5">Â·</span>
-                        <span className="text-[10px] text-t4">{formatDate(prompt.updated_at)}</span>
-                        <span className="ml-auto text-[10px] font-mono text-t5 truncate max-w-20">{prompt.slug}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              );
-            })
+          <h1 className="text-lg font-bold text-t1 truncate">{project.name}</h1>
+          {project.description && (
+            <p className="text-xs text-t4 truncate mt-0.5">{project.description}</p>
           )}
+        </div>
+
+        <div className="hidden sm:flex items-center gap-4 text-center">
+          <div>
+            <p className="text-sm font-bold text-t1">{prompts.length}</p>
+            <p className="text-[10px] text-t4 uppercase tracking-wide">{t("total")}</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-emerald-500">{activeCount}</p>
+            <p className="text-[10px] text-t4 uppercase tracking-wide">{t("active")}</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-amber-400">{draftCount}</p>
+            <p className="text-[10px] text-t4 uppercase tracking-wide">{t("draft")}</p>
+          </div>
+        </div>
+
+        <Button onClick={() => setShowCreate(true)}>
+          <Plus className="h-4 w-4" /> {t("new")}
+        </Button>
+      </div>
+
+      {/* Search bar */}
+      <div
+        className="border-b px-6 py-3 shrink-0"
+        style={{ borderColor: "var(--panel-border)" }}
+      >
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-t4 pointer-events-none" />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Prompts suchen..."
+            className="input-glass w-full pl-9 py-2 text-sm"
+          />
         </div>
       </div>
 
-      {/* â”€â”€â”€ Right panel: editor â”€â”€â”€ */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "var(--background)" }}>
-        {selectedPrompt ? (
-          <>
+      {/* Prompt list grouped by category */}
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+        {grouped.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-t4">
+            <FileText className="h-12 w-12 mb-3 opacity-40" />
+            <p className="text-base font-semibold text-t2">
+              {searchQuery ? t("noResults") : t("noPrompts")}
+            </p>
+            {!searchQuery && <p className="text-sm mt-1">{t("emptyDescription")}</p>}
+          </div>
+        ) : (
+          grouped.map(({ category, prompts: groupPrompts }) => {
+            const catId = category?.id ?? "__none__";
+            const isCollapsed = collapsedCategories.has(catId);
+            const catColor = category?.color ?? "#71717a";
+
+            return (
+              <section key={catId}>
+                {/* Category header */}
+                <button
+                  onClick={() => toggleCategory(catId)}
+                  className="w-full flex items-center gap-2.5 mb-4 group"
+                >
+                  <span
+                    className="h-3 w-3 rounded-full shrink-0"
+                    style={{ background: catColor, boxShadow: `0 0 8px ${catColor}60` }}
+                  />
+                  <span className="text-sm font-bold text-t2 uppercase tracking-wider group-hover:text-t1 transition-colors">
+                    {category?.name ?? t("uncategorized")}
+                  </span>
+                  <span
+                    className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: `${catColor}20`, color: catColor }}
+                  >
+                    {groupPrompts.length}
+                  </span>
+                  <div className="flex-1 h-px" style={{ background: `${catColor}20` }} />
+                  {isCollapsed ? (
+                    <ChevronRight className="h-4 w-4 text-t4 shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-t4 shrink-0" />
+                  )}
+                </button>
+
+                {/* Prompt cards */}
+                {!isCollapsed && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {groupPrompts.map((prompt) => (
+                      <button
+                        key={prompt.id}
+                        onClick={() => openEditor(prompt)}
+                        className="panel text-left p-4 rounded-xl flex flex-col gap-2.5 hover:shadow-lg transition-all group cursor-pointer"
+                        style={{ borderLeft: `3px solid ${catColor}` }}
+                      >
+                        {/* Card header */}
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-sm font-semibold text-t1 leading-snug line-clamp-2 flex-1">
+                            {prompt.name}
+                          </span>
+                          <StatusIcon status={prompt.status} />
+                        </div>
+
+                        {/* Description */}
+                        {prompt.description && (
+                          <p className="text-xs text-t3 line-clamp-2 leading-relaxed">
+                            {prompt.description}
+                          </p>
+                        )}
+
+                        {/* Content preview */}
+                        <p className="text-xs text-t4 font-mono line-clamp-2 leading-relaxed bg-black/3 dark:bg-white/3 rounded px-2 py-1.5">
+                          {prompt.content.slice(0, 140)}
+                          {prompt.content.length > 140 ? "..." : ""}
+                        </p>
+
+                        {/* Footer */}
+                        <div className="flex items-center gap-2 mt-auto pt-1 border-t" style={{ borderColor: "var(--panel-border)" }}>
+                          <span className="text-[10px] text-t5 font-mono truncate max-w-28">
+                            {prompt.slug}
+                          </span>
+                          <span className="text-t5">·</span>
+                          <span className="text-[10px] text-t4">v{prompt.current_version}</span>
+                          <span className="text-t5">·</span>
+                          <span className="text-[10px] text-t4">{formatDate(prompt.updated_at)}</span>
+                          <span className="ml-auto flex items-center gap-1 text-[10px] text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Pencil className="h-3 w-3" /> {t("openEditor")}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })
+        )}
+      </div>
+
+      {/* ─── Editor popup dialog ─── */}
+      <Dialog
+        open={!!selectedPrompt}
+        onClose={closeEditor}
+        title={editName}
+        className="max-w-5xl"
+      >
+        {selectedPrompt && (
+          <div className="flex flex-col gap-4 max-h-[76vh] overflow-y-auto pr-1">
             {/* Toolbar */}
-            <div
-              className="flex items-center gap-1.5 border-b px-4 py-2.5 flex-wrap"
-              style={{ background: "var(--panel-bg-subtle)", borderColor: "var(--panel-border)", backdropFilter: "blur(16px)" }}
-            >
-              {/* Category indicator */}
+            <div className="flex items-center gap-1.5 flex-wrap">
               {selectedPrompt.prompt_categories && (
                 <span
-                  className="flex items-center gap-1.5 text-xs px-2 py-1 rounded-full font-medium shrink-0"
+                  className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium shrink-0"
                   style={{
                     background: `${selectedPrompt.prompt_categories.color}15`,
                     color: selectedPrompt.prompt_categories.color,
@@ -455,156 +519,261 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
                 </span>
               )}
 
-              <span className="flex-1 text-sm font-semibold text-t1 truncate">{editName}</span>
+              <div className="flex-1" />
 
-              <button onClick={handleCopy} className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/6 hover:text-t1 transition-colors">
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                {copied ? "Kopiert" : "Kopieren"}
+              {/* DE <> EN translation toggle */}
+              <button
+                onClick={() => handleTranslate(targetLang)}
+                disabled={translating || !editContent}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-violet-500 hover:bg-violet-500/8 disabled:opacity-50 transition-colors"
+                title={targetLang === "de" ? t("translateToDe") : t("translateToEn")}
+              >
+                <Languages className="h-3.5 w-3.5" />
+                {translating
+                  ? t("translating")
+                  : targetLang === "de"
+                  ? t("translateToDe")
+                  : t("translateToEn")}
               </button>
 
-              <button onClick={handleComplianceCheck} disabled={complianceLoading} className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-amber-500 hover:bg-amber-400/8 hover:text-amber-600 transition-colors">
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors"
+              >
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+                {copied ? t("copied") : t("copy")}
+              </button>
+
+              <button
+                onClick={handleComplianceCheck}
+                disabled={complianceLoading}
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-amber-500 hover:bg-amber-400/8 transition-colors"
+              >
                 <Shield className="h-3.5 w-3.5" />
-                {complianceLoading ? "PrÃ¼fe..." : "Compliance"}
+                {complianceLoading ? t("complianceRunning") : t("compliance")}
               </button>
 
-              <button onClick={handleAiAnalysis} disabled={aiLoading} className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-indigo-500 hover:bg-indigo-400/8 hover:text-indigo-600 transition-colors">
+              <button
+                onClick={handleAiAnalysis}
+                disabled={aiLoading}
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-indigo-500 hover:bg-indigo-400/8 transition-colors"
+              >
                 <Brain className="h-3.5 w-3.5" />
-                {aiLoading ? "Analysiert..." : "KI-Analyse"}
+                {aiLoading ? t("aiAnalysisRunning") : t("aiAnalysis")}
               </button>
 
-              <button onClick={handleShowVersions} className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/6 hover:text-t1 transition-colors">
-                <GitBranch className="h-3.5 w-3.5" /> Versionen
+              <button
+                onClick={handleShowVersions}
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors"
+              >
+                <GitBranch className="h-3.5 w-3.5" /> {t("versions")}
               </button>
 
               <div className="relative group">
-                <button className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/6 hover:text-t1 transition-colors">
-                  <Download className="h-3.5 w-3.5" /> Export
+                <button className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors">
+                  <Download className="h-3.5 w-3.5" /> {t("export")}
                 </button>
-                <div className="absolute right-0 top-9 z-10 hidden group-hover:block w-48 panel p-1 shadow-2xl">
-                  <button onClick={() => handleExport("instruction")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors">Als instruction.md</button>
-                  <button onClick={() => handleExport("skill")} className="w-full text-left rounded-lg px-3 py-2 text-sm text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors">Als skill.md</button>
+                <div className="absolute right-0 top-9 z-20 hidden group-hover:block w-52 panel p-1 shadow-2xl">
+                  <button
+                    onClick={() => handleExport("instruction")}
+                    className="w-full text-left rounded-lg px-3 py-2 text-sm text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors"
+                  >
+                    {t("exportInstruction")}
+                  </button>
+                  <button
+                    onClick={() => handleExport("skill")}
+                    className="w-full text-left rounded-lg px-3 py-2 text-sm text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors"
+                  >
+                    {t("exportSkill")}
+                  </button>
                 </div>
               </div>
 
-              <button onClick={() => setDeleteId(selectedPrompt.id)} aria-label="Prompt löschen" className="rounded-lg p-1.5 text-t4 hover:bg-rose-500/10 hover:text-rose-500 transition-colors">
+              <button
+                onClick={() => setDeleteId(selectedPrompt.id)}
+                aria-label={t("deleteConfirmTitle")}
+                className="rounded-lg p-1.5 text-t4 hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+              >
                 <Trash2 className="h-4 w-4" />
               </button>
 
-              <Button size="sm" variant="secondary" onClick={() => handleSave(false)} loading={isPending}>
-                <Save className="h-3.5 w-3.5" /> Speichern
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => handleSave(false)}
+                loading={isPending}
+              >
+                <Save className="h-3.5 w-3.5" /> {t("save")}
               </Button>
               <Button size="sm" onClick={() => handleSave(true)} loading={isPending}>
-                + Version
+                + {t("version")}
               </Button>
             </div>
 
+            {/* Translation message */}
+            {translationMsg && (
+              <div className="rounded-xl px-4 py-2.5 text-sm flex items-center gap-2 border border-violet-500/25 bg-violet-500/8 text-violet-500">
+                <Languages className="h-4 w-4 shrink-0" />
+                {translationMsg}
+                <button
+                  onClick={() => setTranslationMsg(null)}
+                  aria-label="Schliessen"
+                  className="ml-auto opacity-60 hover:opacity-100"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* Compliance result */}
             {complianceResult && (
-              <div className={`mx-4 mt-3 rounded-xl px-4 py-3 text-sm flex items-start gap-2 border ${complianceResult.clean ? "border-emerald-500/25 bg-emerald-500/8 text-emerald-500" : "border-rose-500/25 bg-rose-500/8 text-rose-500"}`}>
+              <div
+                className={`rounded-xl px-4 py-2.5 text-sm flex items-start gap-2 border ${
+                  complianceResult.clean
+                    ? "border-emerald-500/25 bg-emerald-500/8 text-emerald-500"
+                    : "border-rose-500/25 bg-rose-500/8 text-rose-500"
+                }`}
+              >
                 {complianceResult.clean ? (
-                  <><Check className="h-4 w-4 mt-0.5 shrink-0" /> {t("complianceClean")}</>
+                  <>
+                    <Check className="h-4 w-4 mt-0.5 shrink-0" /> {t("complianceClean")}
+                  </>
                 ) : (
-                  <><AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" /> {t("complianceIssues")}: {complianceResult.issues.join(", ")}</>
+                  <>
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    {t("complianceIssues")}: {complianceResult.issues.join(", ")}
+                  </>
                 )}
-                <button onClick={() => setComplianceResult(null)} aria-label="Schließen" className="ml-auto opacity-50 hover:opacity-100"><X className="h-3.5 w-3.5" /></button>
+                <button
+                  onClick={() => setComplianceResult(null)}
+                  aria-label="Schliessen"
+                  className="ml-auto opacity-50 hover:opacity-100"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
             )}
 
             {/* AI analysis result */}
             {aiAnalysis && (
-              <div className="mx-4 mt-3 rounded-xl border border-indigo-500/20 p-4" style={{ background: "rgba(99,102,241,0.07)" }}>
+              <div
+                className="rounded-xl border border-indigo-500/20 p-4"
+                style={{ background: "rgba(99,102,241,0.07)" }}
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <Brain className="h-4 w-4 text-indigo-500" />
                   <span className="text-sm font-semibold text-indigo-500">{t("aiDisclaimer")}</span>
                   {aiProvider && (
-                    <span className="ml-1 text-[10px] text-t4 border border-indigo-500/20 rounded px-1.5 py-0.5">{aiProvider}</span>
+                    <span className="ml-1 text-[10px] text-t4 border border-indigo-500/20 rounded px-1.5 py-0.5">
+                      {aiProvider}
+                    </span>
                   )}
-                  <button onClick={() => setAiAnalysis(null)} aria-label="Schließen" className="ml-auto text-t3 hover:text-t1"><X className="h-3.5 w-3.5" /></button>
+                  <button
+                    onClick={() => setAiAnalysis(null)}
+                    aria-label="Schliessen"
+                    className="ml-auto text-t3 hover:text-t1"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 </div>
                 <p className="text-sm text-t2 whitespace-pre-wrap leading-relaxed">{aiAnalysis}</p>
               </div>
             )}
 
-            {/* Editor */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && <p className="text-sm text-rose-500">{error}</p>}
 
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-                <Select label="Status" value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
-                  <option value="draft">Entwurf</option>
-                  <option value="active">Aktiv</option>
-                  <option value="archived">Archiviert</option>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Beschreibung" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
-                <Select label="Kategorie" value={editCategoryId} onChange={(e) => setEditCategoryId(e.target.value)}>
-                  <option value="">Keine Kategorie</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-t2 uppercase tracking-wide mb-1.5">Prompt-Inhalt</label>
-                <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  rows={16}
-                  className="input-glass font-mono text-sm resize-y min-h-70"
-                  placeholder="Sie sind ein hilfreicher KI-Assistent..."
-                />
-              </div>
-
+            {/* Editor fields */}
+            <div className="grid grid-cols-2 gap-4">
               <Input
-                label="Versions-Notiz (fÃ¼r neue Version)"
-                value={changeNote}
-                onChange={(e) => setChangeNote(e.target.value)}
-                placeholder="Was hat sich geÃ¤ndert?"
+                label={t("name")}
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
               />
+              <Select
+                label={t("status")}
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value)}
+              >
+                <option value="draft">{t("draft")}</option>
+                <option value="active">{t("active")}</option>
+                <option value="archived">{t("archived")}</option>
+              </Select>
+            </div>
 
-              {/* API endpoint */}
-              <div className="panel p-4">
-                <p className="text-xs font-semibold text-t3 uppercase tracking-wider mb-2">REST API Endpunkt</p>
-                <code className="text-xs text-indigo-500 break-all font-mono">
-                  GET {process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/v1/prompts/{selectedPrompt.slug}
-                </code>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label={t("description")}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
+              <Select
+                label={t("category")}
+                value={editCategoryId}
+                onChange={(e) => setEditCategoryId(e.target.value)}
+              >
+                <option value="">{t("uncategorized")}</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </Select>
             </div>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-t4">
-            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: "rgba(99,102,241,0.10)", boxShadow: "0 0 40px rgba(99,102,241,0.15)" }}>
-              <FileText className="h-9 w-9 text-indigo-500" />
+
+            <div>
+              <label className="block text-xs font-medium text-t2 uppercase tracking-wide mb-1.5">
+                {t("content")}
+              </label>
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={14}
+                className="input-glass font-mono text-sm resize-y min-h-64 w-full"
+                placeholder="Sie sind ein hilfreicher KI-Assistent..."
+              />
             </div>
-            <p className="text-base font-semibold text-t2">Prompt auswÃ¤hlen</p>
-            <p className="text-sm text-t4 mt-1">oder neuen Prompt erstellen</p>
-            <div className="mt-6 grid grid-cols-2 gap-3 max-w-xs w-full text-left">
-              {categories.slice(0, 4).map((cat) => (
-                <div key={cat.id} className="panel p-3 rounded-xl flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full shrink-0" style={{ background: cat.color }} />
-                  <span className="text-xs text-t3 truncate">{cat.name}</span>
-                  <span className="ml-auto text-xs text-t4">{prompts.filter((p) => p.category_id === cat.id).length}</span>
-                </div>
-              ))}
+
+            <Input
+              label={t("versionNote")}
+              value={changeNote}
+              onChange={(e) => setChangeNote(e.target.value)}
+              placeholder={t("versionNotePlaceholder")}
+            />
+
+            <div className="panel p-4 rounded-xl">
+              <p className="text-xs font-semibold text-t3 uppercase tracking-wider mb-1.5">
+                {t("restApi")}
+              </p>
+              <code className="text-xs text-indigo-500 break-all font-mono">
+                {"GET "}
+                {process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}
+                {"/api/v1/prompts/"}
+                {selectedPrompt.slug}
+              </code>
             </div>
           </div>
         )}
-      </div>
+      </Dialog>
 
       {/* Versions dialog */}
-      <Dialog open={showVersions} onClose={() => setShowVersions(false)} title="Versionen" className="max-w-lg">
+      <Dialog
+        open={showVersions}
+        onClose={() => setShowVersions(false)}
+        title={t("versions")}
+        className="max-w-lg"
+      >
         {versionsLoading ? (
-          <p className="text-sm text-zinc-500">Laden...</p>
+          <p className="text-sm text-t4">Laden...</p>
         ) : versions.length === 0 ? (
-          <p className="text-sm text-zinc-500">Noch keine Versionen gespeichert.</p>
+          <p className="text-sm text-t4">Noch keine Versionen gespeichert.</p>
         ) : (
           <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
             {versions.map((v) => (
-              <div key={v.id} className="flex items-center gap-3 panel-subtle p-3">
+              <div key={v.id} className="flex items-center gap-3 panel p-3 rounded-xl">
                 <GitBranch className="h-4 w-4 text-indigo-500 shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-t1">Version {v.version}</p>
@@ -612,7 +781,7 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
                   <p className="text-xs text-t4">{formatDate(v.created_at)}</p>
                 </div>
                 <Button size="sm" variant="secondary" onClick={() => handleRollback(v.id)}>
-                  <RotateCcw className="h-3.5 w-3.5" /> Rollback
+                  <RotateCcw className="h-3.5 w-3.5" /> {t("rollback")}
                 </Button>
               </div>
             ))}
@@ -621,20 +790,43 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
       </Dialog>
 
       {/* Create prompt dialog */}
-      <Dialog open={showCreate} onClose={() => setShowCreate(false)} title="Neuer Prompt">
+      <Dialog open={showCreate} onClose={() => setShowCreate(false)} title={t("new")}>
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
-          <Input id="new-name" name="name" label="Name" placeholder="Kunden-Service Prompt" required />
-          <Input id="new-description" name="description" label="Beschreibung" placeholder="Optional" />
-          <Select id="new-category" name="category_id" label="Kategorie">
-            <option value="">Keine Kategorie</option>
+          <Input
+            id="new-name"
+            name="name"
+            label={t("name")}
+            placeholder="Kunden-Service Prompt"
+            required
+          />
+          <Input
+            id="new-description"
+            name="description"
+            label={t("description")}
+            placeholder="Optional"
+          />
+          <Select id="new-category" name="category_id" label={t("category")}>
+            <option value="">{t("uncategorized")}</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
             ))}
           </Select>
-          <Textarea id="new-content" name="content" label="Prompt-Inhalt" rows={6} placeholder="Sie sind ein hilfreicher KI-Assistent..." />
+          <Textarea
+            id="new-content"
+            name="content"
+            label={t("content")}
+            rows={6}
+            placeholder="Sie sind ein hilfreicher KI-Assistent..."
+          />
           <div className="flex justify-end gap-3">
-            <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>Abbrechen</Button>
-            <Button type="submit" loading={isPending}>Erstellen</Button>
+            <Button type="button" variant="ghost" onClick={() => setShowCreate(false)}>
+              Abbrechen
+            </Button>
+            <Button type="submit" loading={isPending}>
+              {t("new")}
+            </Button>
           </div>
         </form>
       </Dialog>
@@ -644,9 +836,9 @@ export function PromptsClient({ project, initialPrompts, categories }: PromptsCl
         open={!!deleteId}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
-        title="Prompt lÃ¶schen"
-        description="Diese Aktion kann nicht rÃ¼ckgÃ¤ngig gemacht werden."
-        confirmLabel="LÃ¶schen"
+        title={t("deleteConfirmTitle")}
+        description={t("deleteConfirmDesc")}
+        confirmLabel={t("deleteConfirmTitle")}
         loading={isPending}
       />
     </div>

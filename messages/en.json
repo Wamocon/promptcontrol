@@ -10,7 +10,8 @@
     "admin": "Administration",
     "logout": "Sign out",
     "login": "Sign in",
-    "register": "Sign up"
+    "register": "Sign up",
+    "mcpGuide": "MCP Guide"
   },
   "landing": {
     "hero": {
@@ -182,7 +183,26 @@
     "aiAnalysisRunning": "AI is analyzing prompt...",
     "aiDisclaimer": "AI-generated analysis",
     "copy": "Copy",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "translateToDe": "Ins Deutsche übersetzen",
+    "translateToEn": "Translate to English",
+    "translating": "Translating...",
+    "translationDone": "Translation complete",
+    "translationError": "Translation failed",
+    "versionNote": "Version note (for new version)",
+    "versionNotePlaceholder": "What changed?",
+    "allProjects": "All projects",
+    "selectPrompt": "Select a prompt",
+    "selectPromptHint": "or create a new prompt",
+    "noResults": "No results",
+    "noPrompts": "No prompts yet",
+    "uncategorized": "Uncategorized",
+    "total": "Total",
+    "deleteConfirmTitle": "Delete prompt",
+    "deleteConfirmDesc": "This action cannot be undone.",
+    "restApi": "REST API endpoint",
+    "openEditor": "Open editor",
+    "closeEditor": "Close editor"
   },
   "logs": {
     "title": "Logs",

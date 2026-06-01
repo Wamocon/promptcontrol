@@ -10,7 +10,8 @@
     "admin": "Administration",
     "logout": "Abmelden",
     "login": "Anmelden",
-    "register": "Registrieren"
+    "register": "Registrieren",
+    "mcpGuide": "MCP-Anleitung"
   },
   "landing": {
     "hero": {
@@ -182,7 +183,26 @@
     "aiAnalysisRunning": "KI analysiert Prompt...",
     "aiDisclaimer": "KI-generierte Analyse",
     "copy": "Kopieren",
-    "copied": "Kopiert!"
+    "copied": "Kopiert!",
+    "translateToDe": "Ins Deutsche übersetzen",
+    "translateToEn": "Translate to English",
+    "translating": "Übersetze...",
+    "translationDone": "Übersetzung fertig",
+    "translationError": "Übersetzung fehlgeschlagen",
+    "versionNote": "Versions-Notiz (für neue Version)",
+    "versionNotePlaceholder": "Was hat sich geändert?",
+    "allProjects": "Alle Projekte",
+    "selectPrompt": "Prompt auswählen",
+    "selectPromptHint": "oder neuen Prompt erstellen",
+    "noResults": "Keine Ergebnisse",
+    "noPrompts": "Noch keine Prompts",
+    "uncategorized": "Ohne Kategorie",
+    "total": "Gesamt",
+    "deleteConfirmTitle": "Prompt löschen",
+    "deleteConfirmDesc": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "restApi": "REST API Endpunkt",
+    "openEditor": "Editor öffnen",
+    "closeEditor": "Editor schließen"
   },
   "logs": {
     "title": "Logs",

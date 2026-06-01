@@ -56,7 +56,7 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
       { id: "openai/gpt-4o",                        label: "GPT-4o",              description: "Beste OpenAI Qualität" },
       { id: "meta-llama/llama-3.3-70b-instruct",    label: "Llama 3.3 70B",       description: "Open-Source Alternative" },
     ],
-    defaultModel: "google/gemma-4-31b-it:free",
+    defaultModel: "meta-llama/llama-3.3-70b-instruct",
   },
 
   groq: {
