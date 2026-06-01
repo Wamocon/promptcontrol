@@ -15,7 +15,6 @@ import {
   Search,
 } from "lucide-react";
 import { useState } from "react";
-import { XpDisplay } from "@/components/gamification/XpDisplay";
 
 interface HeaderProps {
   userName?: string;
@@ -79,9 +78,6 @@ export function Header({ userName, locale, isAdmin = false }: HeaderProps) {
           <span>Suchen...</span>
           <span className="kbd ml-2">⌘K</span>
         </button>
-
-        {/* Gamification XP/Level/Streak */}
-        <XpDisplay />
 
         <div className="flex items-center gap-1">
         {/* Language switcher */}

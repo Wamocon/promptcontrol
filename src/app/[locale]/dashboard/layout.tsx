@@ -4,9 +4,6 @@ import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { AiGuideChat } from "@/components/AiGuideChat";
 import { CommandPalette } from "@/components/CommandPalette";
-import { CursorSpotlight } from "@/components/effects/CursorSpotlight";
-import { GamificationProvider } from "@/components/gamification/GamificationProvider";
-import { AchievementToast } from "@/components/gamification/AchievementToast";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -70,20 +67,16 @@ export default async function DashboardLayout({ children, params }: DashboardLay
   const isAdmin = (profile?.role ?? "").toLowerCase() === "admin";
 
   return (
-    <GamificationProvider>
-      <div className="flex h-screen flex-col overflow-hidden relative" style={{ background: "var(--background)" }}>
-        <CursorSpotlight />
-        <Header userName={profile?.name || user.email?.split("@")[0]} locale={locale} isAdmin={isAdmin} />
-        <div className="flex flex-1 overflow-hidden relative z-[1]">
-          <Sidebar plan={plan} isAdmin={isAdmin} />
-          <main className="flex-1 overflow-y-auto" style={{ background: "var(--background)" }}>
-            {children}
-          </main>
-        </div>
-        <AiGuideChat />
-        <CommandPalette locale={locale} />
-        <AchievementToast />
+    <div className="flex h-screen flex-col overflow-hidden relative" style={{ background: "var(--background)" }}>
+      <Header userName={profile?.name || user.email?.split("@")[0]} locale={locale} isAdmin={isAdmin} />
+      <div className="flex flex-1 overflow-hidden relative z-[1]">
+        <Sidebar plan={plan} isAdmin={isAdmin} />
+        <main className="flex-1 overflow-y-auto" style={{ background: "var(--background)" }}>
+          {children}
+        </main>
       </div>
-    </GamificationProvider>
+      <AiGuideChat />
+      <CommandPalette locale={locale} />
+    </div>
   );
 }
