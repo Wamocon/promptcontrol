@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import JSZip from "jszip";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { slugify, parseSkillMarkdown } from "@/lib/utils";
+import { autoChat } from "@/lib/ai/client";
 
 const BUCKET = "skill-files";
 
@@ -261,6 +262,82 @@ export async function deleteSkillFile(fileId: string) {
   if (error) return { error: error.message };
   revalidatePath("/dashboard/skills");
   return { error: null };
+}
+
+/**
+ * Laesst die KI Namen, Beschreibung und Inhalt eines Skills aufbereiten:
+ * klarerer Titel, praegnante Ein-Satz-Beschreibung, sauber formatierter
+ * Inhalt. Fachliche Aussagen bleiben erhalten, nur Form und Klarheit
+ * werden verbessert. Speichert das Ergebnis als neue Version.
+ */
+export async function polishSkillWithAI(skillId: string) {
+  const ctx = await requireProfile();
+  if ("error" in ctx) return { error: ctx.error };
+  const { supabase, profile } = ctx;
+
+  const { data: skill } = await supabase
+    .from("skills")
+    .select("id, name, description, content, current_version")
+    .eq("id", skillId)
+    .single();
+  if (!skill) return { error: "Skill nicht gefunden" };
+
+  const systemPrompt =
+    "Du bist ein technischer Redakteur bei WAMOCON. Du bereitest Eintraege einer internen " +
+    "Skills-Bibliothek auf. Ueberarbeite den gegebenen Skill: 1) ein kurzer, klarer Name " +
+    "(max. 60 Zeichen), 2) eine praegnante Ein-Satz-Beschreibung, die erklaert, wann dieser " +
+    "Skill genutzt werden soll (max. 200 Zeichen), 3) den Inhalt sauber formatiert (klare " +
+    "Ueberschriften, Listen, keine Redundanzen), aber fachlich unveraendert, es duerfen keine " +
+    "Anweisungen oder Informationen verloren gehen. Schreibe in gepflegtem Deutsch ohne " +
+    "Gedankenstriche im Fliesstext, gliedere stattdessen mit Kommas oder Satztrennung. " +
+    "Antworte ausschliesslich in exakt diesem Format, ohne zusaetzliche Erklaerungen:\n" +
+    "NAME: <name>\nBESCHREIBUNG: <beschreibung>\nINHALT:\n<vollstaendiger ueberarbeiteter Inhalt>";
+
+  const userPrompt = `Name: ${skill.name}\nBeschreibung: ${skill.description}\nInhalt:\n${skill.content}`;
+
+  let text: string;
+  try {
+    const result = await autoChat(
+      [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      { maxTokens: 6000, temperature: 0.3 }
+    );
+    text = result.text;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "KI nicht erreichbar" };
+  }
+
+  const nameMatch = text.match(/NAME:\s*(.+)/);
+  const descMatch = text.match(/BESCHREIBUNG:\s*(.+)/);
+  const contentMatch = text.match(/INHALT:\s*([\s\S]*)/);
+
+  if (!nameMatch || !descMatch || !contentMatch) {
+    return { error: "KI-Antwort konnte nicht geparst werden" };
+  }
+
+  const newName = nameMatch[1].trim().slice(0, 200);
+  const newDescription = descMatch[1].trim().slice(0, 2000);
+  const newContent = contentMatch[1].trim();
+  const newVersion = skill.current_version + 1;
+
+  const { error } = await supabase
+    .from("skills")
+    .update({ name: newName, description: newDescription, content: newContent, current_version: newVersion })
+    .eq("id", skillId);
+  if (error) return { error: error.message };
+
+  await supabase.from("skill_versions").insert({
+    skill_id: skillId,
+    version: newVersion,
+    content: newContent,
+    change_note: "KI-Aufbereitung",
+    created_by: profile.id,
+  });
+
+  revalidatePath("/dashboard/skills");
+  return { error: null, name: newName, description: newDescription, content: newContent };
 }
 
 /**

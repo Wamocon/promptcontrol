@@ -20,6 +20,8 @@ import {
   Archive,
   FileEdit,
   Tag,
+  Sparkles,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Select } from "@/components/ui/Input";
@@ -33,6 +35,7 @@ import {
   uploadSkillFile,
   deleteSkillFile,
   importSkillMd,
+  polishSkillWithAI,
 } from "./actions";
 import { formatDate } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -81,6 +84,10 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
+
+  const [polishingId, setPolishingId] = useState<string | null>(null);
+  const [bulkPolish, setBulkPolish] = useState<{ done: number; total: number; failed: number } | null>(null);
+  const bulkPolishStopRef = useRef(false);
 
   // router.refresh() (nach Datei-Upload, Import, Rollback) liefert neue
   // Server-Props, aber useState() liest sie nur beim ersten Mount. Hier
@@ -276,6 +283,47 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
     loadVersions();
   }
 
+  async function handlePolish(skillId: string) {
+    setPolishingId(skillId);
+    setError(null);
+    const result = await polishSkillWithAI(skillId);
+    setPolishingId(null);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    setSkills((prev) =>
+      prev.map((s) =>
+        s.id === skillId
+          ? { ...s, name: result.name!, description: result.description!, content: result.content!, current_version: s.current_version + 1 }
+          : s
+      )
+    );
+    if (selectedSkill?.id === skillId) {
+      setEditName(result.name!);
+      setEditDescription(result.description!);
+      setEditContent(result.content!);
+    }
+  }
+
+  async function handleBulkPolish() {
+    bulkPolishStopRef.current = false;
+    const targets = skills.map((s) => s.id);
+    setBulkPolish({ done: 0, total: targets.length, failed: 0 });
+    let failed = 0;
+    for (let i = 0; i < targets.length; i++) {
+      if (bulkPolishStopRef.current) break;
+      const result = await polishSkillWithAI(targets[i]);
+      if (result.error) failed++;
+      setBulkPolish({ done: i + 1, total: targets.length, failed });
+    }
+    router.refresh();
+  }
+
+  function stopBulkPolish() {
+    bulkPolishStopRef.current = true;
+  }
+
   function handleRollback(versionId: string) {
     if (!selectedSkill) return;
     startTransition(async () => {
@@ -300,11 +348,47 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
           <Button variant="secondary" onClick={() => setShowImport(true)}>
             <FileUp className="h-4 w-4" /> {t("import")}
           </Button>
+          <Button
+            variant="secondary"
+            onClick={handleBulkPolish}
+            disabled={!!bulkPolish && bulkPolish.done < bulkPolish.total}
+          >
+            <Sparkles className="h-4 w-4" /> {t("polishAll")}
+          </Button>
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4" /> {t("new")}
           </Button>
         </div>
       </div>
+
+      {/* Bulk-Aufbereitung Fortschritt */}
+      {bulkPolish && (
+        <div className="mb-6 panel p-4 rounded-xl flex items-center gap-4">
+          <Sparkles className="h-5 w-5 text-indigo-500 shrink-0" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between text-sm mb-1.5">
+              <span className="text-t2 font-medium">
+                {bulkPolish.done < bulkPolish.total
+                  ? t("polishProgress", { done: bulkPolish.done, total: bulkPolish.total })
+                  : t("polishDone", { total: bulkPolish.total, failed: bulkPolish.failed })}
+              </span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/5 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-indigo-500 transition-all"
+                style={{ width: `${(bulkPolish.done / Math.max(bulkPolish.total, 1)) * 100}%` }}
+              />
+            </div>
+          </div>
+          {bulkPolish.done < bulkPolish.total ? (
+            <Button size="sm" variant="ghost" onClick={stopBulkPolish}>{tc("cancel")}</Button>
+          ) : (
+            <button onClick={() => setBulkPolish(null)} className="text-t4 hover:text-t1 transition-colors">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Search + category filter chips */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -419,6 +503,14 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
             {/* Toolbar */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <div className="flex-1" />
+              <button
+                onClick={() => handlePolish(selectedSkill.id)}
+                disabled={polishingId === selectedSkill.id}
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-indigo-500 hover:bg-indigo-400/8 disabled:opacity-50 transition-colors"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                {polishingId === selectedSkill.id ? t("polishRunning") : t("polish")}
+              </button>
               <a
                 href={`/api/v1/skills/${selectedSkill.slug}/download`}
                 className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t2 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors"

@@ -86,7 +86,7 @@ export async function chatCompletion(
 function isTransientError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;
   const msg = err.message;
-  return /429|500|503|rate.?limit|overloaded|timeout|unavailable/i.test(msg);
+  return /429|500|503|rate.?limit|overloaded|timeout|unavailable|no_db_connection|no connected db/i.test(msg);
 }
 
 /** Convenience: auto-selects active provider and runs chat.
