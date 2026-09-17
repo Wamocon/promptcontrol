@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import { useState, useTransition } from "react";
-import { UserPlus, Crown, Mail } from "lucide-react";
+import { UserPlus, Crown, Mail, Link2, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -19,9 +20,24 @@ interface TeamClientProps {
 
 export function TeamClient({ currentProfile, members, invitations }: TeamClientProps) {
   const t = useTranslations("team");
+  const params = useParams();
+  const locale = (params.locale as string) || "de";
   const [showInvite, setShowInvite] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
+
+  function acceptUrl(token: string) {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return `${origin}/${locale}/auth/accept-invite/${token}`;
+  }
+
+  function copyLink(token: string) {
+    navigator.clipboard.writeText(acceptUrl(token));
+    setCopiedToken(token);
+    setTimeout(() => setCopiedToken(null), 2000);
+  }
 
   const isAdmin = currentProfile?.role === "admin";
 
@@ -40,14 +56,15 @@ export function TeamClient({ currentProfile, members, invitations }: TeamClientP
 
     startTransition(async () => {
       const supabase = createClient();
-      const { error } = await supabase.from("team_invitations").insert({
-        org_id: currentProfile?.org_id,
-        email,
-        role,
-      });
+      const { data: created, error } = await supabase
+        .from("team_invitations")
+        .insert({ org_id: currentProfile?.org_id, email, role })
+        .select()
+        .single();
 
-      if (!error) {
-        setSuccessMsg(`Einladung an ${email} gesendet.`);
+      if (!error && created) {
+        setSuccessMsg(`Einladung für ${email} angelegt. Es wird keine E-Mail verschickt, den Link unten kopieren und weitergeben.`);
+        setInviteLink(acceptUrl(created.token));
         setShowInvite(false);
         (e.target as HTMLFormElement).reset();
       }
@@ -71,7 +88,20 @@ export function TeamClient({ currentProfile, members, invitations }: TeamClientP
 
       {successMsg && (
         <div className="mb-5 rounded-xl border border-emerald-400/20 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-500">
-          {successMsg}
+          <p>{successMsg}</p>
+          {inviteLink && (
+            <div className="mt-2 flex items-center gap-2">
+              <code className="flex-1 truncate rounded-lg bg-black/10 dark:bg-white/10 px-2 py-1 text-xs">
+                {inviteLink}
+              </code>
+              <button
+                onClick={() => navigator.clipboard.writeText(inviteLink)}
+                className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+              >
+                Kopieren
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -114,6 +144,17 @@ export function TeamClient({ currentProfile, members, invitations }: TeamClientP
                   <p className="text-xs text-t3">Läuft ab: {formatDate(inv.expires_at)}</p>
                 </div>
                 <Badge variant={roleColors[inv.role]}>{t(`roles.${inv.role}`)}</Badge>
+                <button
+                  onClick={() => copyLink(inv.token)}
+                  className="shrink-0 flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-t3 hover:bg-black/5 dark:hover:bg-white/5 hover:text-t1 transition-colors"
+                >
+                  {copiedToken === inv.token ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : (
+                    <Link2 className="h-3.5 w-3.5" />
+                  )}
+                  {copiedToken === inv.token ? "Kopiert" : "Link"}
+                </button>
               </div>
             ))}
           </div>

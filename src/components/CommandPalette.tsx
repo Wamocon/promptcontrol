@@ -19,6 +19,7 @@ import {
   Plus,
   Zap,
   ChevronRight,
+  Wrench,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -81,6 +82,7 @@ export function CommandPalette({ locale }: CommandPaletteProps) {
       // Navigation
       { id: "nav-dashboard", label: "Dashboard", icon: LayoutDashboard, group: "navigation", shortcut: ["g", "d"], onSelect: () => nav("/dashboard"), keywords: "home start übersicht" },
       { id: "nav-projects", label: "Projekte", icon: FolderOpen, group: "navigation", shortcut: ["g", "p"], onSelect: () => nav("/dashboard/projects"), keywords: "prompts ordner" },
+      { id: "nav-skills", label: "Skills-Bibliothek", icon: Wrench, group: "navigation", shortcut: ["g", "k"], onSelect: () => nav("/dashboard/skills"), keywords: "skills bibliothek library kategorie" },
       { id: "nav-logs", label: "Logs", icon: ScrollText, group: "navigation", shortcut: ["g", "l"], onSelect: () => nav("/dashboard/logs"), keywords: "api aufrufe history" },
       { id: "nav-abtests", label: "A/B Tests", icon: FlaskConical, group: "navigation", onSelect: () => nav("/dashboard/ab-tests"), keywords: "vergleich variante experiment" },
       { id: "nav-team", label: "Team", icon: Users, group: "navigation", shortcut: ["g", "t"], onSelect: () => nav("/dashboard/team"), keywords: "mitglieder einladen rollen" },
@@ -91,6 +93,7 @@ export function CommandPalette({ locale }: CommandPaletteProps) {
       // Actions
       { id: "act-new-project", label: "Neues Projekt erstellen", icon: Plus, group: "actions", shortcut: ["n", "p"], onSelect: () => nav("/dashboard/projects?new=1"), keywords: "anlegen create" },
       { id: "act-new-prompt", label: "Neuer Prompt", icon: Plus, group: "actions", shortcut: ["n", "n"], onSelect: () => nav("/dashboard/projects?newPrompt=1") },
+      { id: "act-new-skill", label: "Neuen Skill erstellen", icon: Plus, group: "actions", onSelect: () => nav("/dashboard/skills?new=1") },
       { id: "act-invite", label: "Team-Mitglied einladen", icon: Users, group: "actions", onSelect: () => nav("/dashboard/team?invite=1") },
 
       // AI

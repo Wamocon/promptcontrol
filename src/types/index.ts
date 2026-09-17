@@ -1,5 +1,6 @@
 export type UserRole = "admin" | "pm" | "developer" | "trainee";
 export type PromptStatus = "active" | "draft" | "archived";
+export type SkillStatus = "active" | "draft" | "archived";
 export type PlanType = "free" | "pro";
 export type SubscriptionStatus = "active" | "cancelled" | "past_due";
 
@@ -103,6 +104,49 @@ export interface AbTest {
   updated_at: string;
   prompt_a?: Prompt;
   prompt_b?: Prompt;
+}
+
+export interface SkillCategory {
+  id: string;
+  org_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+}
+
+export interface SkillFile {
+  id: string;
+  skill_id: string;
+  path: string;
+  storage_path: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
+}
+
+export interface Skill {
+  id: string;
+  org_id: string;
+  name: string;
+  slug: string;
+  description: string;
+  content: string;
+  category_id: string | null;
+  status: SkillStatus;
+  current_version: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SkillVersion {
+  id: string;
+  skill_id: string;
+  version: number;
+  content: string;
+  change_note: string | null;
+  created_by: string;
+  created_at: string;
 }
 
 export interface TeamInvitation {

@@ -19,11 +19,13 @@ export const routing = defineRouting({
     "/dashboard/admin/stats": "/dashboard/admin/stats",
     "/auth/login": "/auth/login",
     "/auth/register": "/auth/register",
+    "/auth/accept-invite/[token]": "/auth/accept-invite/[token]",
     "/legal/impressum": "/legal/impressum",
     "/legal/datenschutz": "/legal/datenschutz",
     "/legal/agb": "/legal/agb",
     "/dashboard/projects/[id]": "/dashboard/projects/[id]",
     "/dashboard/ab-tests": "/dashboard/ab-tests",
     "/dashboard/mcp-guide": "/dashboard/mcp-guide",
+    "/dashboard/skills": "/dashboard/skills",
   },
 });

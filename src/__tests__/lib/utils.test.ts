@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cn, formatDate, formatCost, slugify } from "@/lib/utils";
+import { cn, formatDate, formatCost, slugify, buildSkillMarkdown, parseSkillMarkdown } from "@/lib/utils";
 
 describe("cn()", () => {
   it("merges class names", () => {
@@ -104,5 +104,32 @@ describe("slugify()", () => {
 
   it("handles unicode chars", () => {
     expect(slugify("Ünité")).toBe("nit");
+  });
+});
+
+describe("buildSkillMarkdown() / parseSkillMarkdown()", () => {
+  it("round-trips name, description and content", () => {
+    const md = buildSkillMarkdown({
+      name: "Code Review Checkliste",
+      description: "Prueft PRs auf haeufige Fehler",
+      content: "# Schritte\n\n1. Tests pruefen\n2. Linting pruefen",
+    });
+    const parsed = parseSkillMarkdown(md);
+    expect(parsed.name).toBe("code-review-checkliste");
+    expect(parsed.description).toBe("Prueft PRs auf haeufige Fehler");
+    expect(parsed.content).toContain("# Schritte");
+    expect(parsed.content).toContain("1. Tests pruefen");
+  });
+
+  it("escapes double quotes in the description", () => {
+    const md = buildSkillMarkdown({ name: "x", description: 'Sagt "Hallo"', content: "Inhalt" });
+    expect(md).toContain('Sagt \\"Hallo\\"');
+  });
+
+  it("parseSkillMarkdown falls back to raw content when there is no frontmatter", () => {
+    const parsed = parseSkillMarkdown("Nur Inhalt, kein Frontmatter.");
+    expect(parsed.name).toBe("");
+    expect(parsed.description).toBe("");
+    expect(parsed.content).toBe("Nur Inhalt, kein Frontmatter.");
   });
 });

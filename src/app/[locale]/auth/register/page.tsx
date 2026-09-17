@@ -8,7 +8,14 @@ import { useState, useTransition } from "react";
 import { register } from "../actions";
 import { useParams } from "next/navigation";
 
-export default function RegisterPage() {
+interface RegisterPageProps {
+  /** Gesetzt, wenn die Registrierung über einen Team-Einladungslink läuft (/auth/accept-invite/[token]). */
+  inviteToken?: string;
+  lockedEmail?: string;
+  orgName?: string;
+}
+
+export default function RegisterPage({ inviteToken, lockedEmail, orgName }: RegisterPageProps = {}) {
   const t = useTranslations("auth.register");
   const params = useParams();
   const locale = (params.locale as string) || "de";
@@ -46,7 +53,9 @@ export default function RegisterPage() {
             PC
           </div>
           <h1 className="text-2xl font-bold text-t1">{t("title")}</h1>
-          <p className="mt-1.5 text-sm text-t3">{t("subtitle")}</p>
+          <p className="mt-1.5 text-sm text-t3">
+            {inviteToken && orgName ? `Einladung zu ${orgName}` : t("subtitle")}
+          </p>
         </div>
 
         <div className="panel p-7 shadow-2xl">
@@ -56,6 +65,7 @@ export default function RegisterPage() {
                 {error}
               </div>
             )}
+            {inviteToken && <input type="hidden" name="invite_token" value={inviteToken} />}
             <Input
               id="name"
               name="name"
@@ -72,6 +82,8 @@ export default function RegisterPage() {
               label={t("email")}
               placeholder="name@firma.de"
               autoComplete="email"
+              defaultValue={lockedEmail}
+              readOnly={!!lockedEmail}
               required
             />
             <Input

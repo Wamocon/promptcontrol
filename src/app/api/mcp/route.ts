@@ -62,6 +62,45 @@ const TOOLS = [
       required: ["query"],
     },
   },
+  {
+    name: "list_skills",
+    description:
+      "List all active skills in the shared org-wide skill library. Returns slug, name, description, and category. Use this to discover which reusable skills exist before writing new instructions from scratch.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        category: { type: "string", description: "Optional: filter by category name" },
+      },
+    },
+  },
+  {
+    name: "get_skill",
+    description:
+      "Retrieve the full Markdown content of a skill by its slug, ready to follow as instructions. Mentions attached files if the skill has any (fetch them via the download endpoint).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "The skill slug" },
+      },
+      required: ["slug"],
+    },
+  },
+  {
+    name: "search_skills",
+    description: "Search the shared skill library by name or description.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search query" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "list_skill_categories",
+    description: "List all skill categories in the organization (e.g. Entwicklung, Test).",
+    inputSchema: { type: "object", properties: {} },
+  },
 ];
 
 export async function POST(request: NextRequest) {
@@ -166,6 +205,83 @@ export async function POST(request: NextRequest) {
             text: JSON.stringify(prompts ?? [], null, 2),
           },
         ],
+      });
+    }
+
+    if (name === "list_skills") {
+      let query = supabase
+        .from("skills")
+        .select("slug, name, description, status, skill_categories(name)")
+        .eq("org_id", profile.org_id)
+        .eq("status", "active");
+
+      if (args?.category) {
+        const { data: cat } = await supabase
+          .from("skill_categories")
+          .select("id")
+          .eq("org_id", profile.org_id)
+          .ilike("name", args.category)
+          .single();
+        if (cat) query = query.eq("category_id", cat.id);
+      }
+
+      const { data: skills } = await query;
+      return NextResponse.json({
+        content: [{ type: "text", text: JSON.stringify(skills ?? [], null, 2) }],
+      });
+    }
+
+    if (name === "get_skill") {
+      const { data: skill } = await supabase
+        .from("skills")
+        .select("*, files:skill_files(path)")
+        .eq("org_id", profile.org_id)
+        .eq("slug", args.slug)
+        .single();
+
+      if (!skill) {
+        return NextResponse.json({
+          content: [{ type: "text", text: `Skill '${args.slug}' not found.` }],
+          isError: true,
+        });
+      }
+
+      const filesNote =
+        skill.files && skill.files.length > 0
+          ? `\n\n*Zusatzdateien (${skill.files.map((f: { path: string }) => f.path).join(", ")}) verfügbar über GET /api/v1/skills/${skill.slug}/download*`
+          : "";
+
+      return NextResponse.json({
+        content: [
+          {
+            type: "text",
+            text: `# ${skill.name}\n\n${skill.description ? `*${skill.description}*\n\n` : ""}${skill.content}${filesNote}`,
+          },
+        ],
+      });
+    }
+
+    if (name === "search_skills") {
+      const { data: skills } = await supabase
+        .from("skills")
+        .select("slug, name, description, content")
+        .eq("org_id", profile.org_id)
+        .eq("status", "active")
+        .or(`name.ilike.%${args.query}%,description.ilike.%${args.query}%`);
+
+      return NextResponse.json({
+        content: [{ type: "text", text: JSON.stringify(skills ?? [], null, 2) }],
+      });
+    }
+
+    if (name === "list_skill_categories") {
+      const { data: categories } = await supabase
+        .from("skill_categories")
+        .select("name, color")
+        .eq("org_id", profile.org_id);
+
+      return NextResponse.json({
+        content: [{ type: "text", text: JSON.stringify(categories ?? [], null, 2) }],
       });
     }
 

@@ -11,7 +11,8 @@
     "logout": "Sign out",
     "login": "Sign in",
     "register": "Sign up",
-    "mcpGuide": "MCP Guide"
+    "mcpGuide": "MCP Guide",
+    "skills": "Skills"
   },
   "landing": {
     "hero": {
@@ -203,6 +204,43 @@
     "restApi": "REST API endpoint",
     "openEditor": "Open editor",
     "closeEditor": "Close editor"
+  },
+  "skills": {
+    "title": "Skills",
+    "subtitle": "The organization's shared skill library, searchable by category, usable directly in chat via MCP.",
+    "new": "New Skill",
+    "create": "Create Skill",
+    "empty": "No skills yet",
+    "emptyDescription": "Create the first skill or import an existing SKILL.md.",
+    "searchPlaceholder": "Search skills...",
+    "allCategories": "All Categories",
+    "categories": "Categories",
+    "categoryName": "Category name",
+    "noCategories": "No categories yet",
+    "name": "Name",
+    "description": "Description",
+    "content": "Skill content",
+    "category": "Category",
+    "uncategorized": "Uncategorized",
+    "status": "Status",
+    "active": "Active",
+    "draft": "Draft",
+    "archived": "Archived",
+    "version": "Version",
+    "versions": "Versions",
+    "noVersions": "No versions saved yet.",
+    "rollback": "Roll back to this version",
+    "versionNote": "Version note (for new version)",
+    "versionNotePlaceholder": "What changed?",
+    "files": "Attachments",
+    "noFiles": "No attachments",
+    "upload": "Upload",
+    "download": "Download",
+    "import": "Import",
+    "importDescription": "Upload a SKILL.md or a ZIP containing SKILL.md plus attachments.",
+    "mcpTool": "MCP tool call",
+    "deleteConfirmTitle": "Delete skill",
+    "deleteConfirmDesc": "This action cannot be undone."
   },
   "logs": {
     "title": "Logs",

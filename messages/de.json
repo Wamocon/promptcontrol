@@ -11,7 +11,8 @@
     "logout": "Abmelden",
     "login": "Anmelden",
     "register": "Registrieren",
-    "mcpGuide": "MCP-Anleitung"
+    "mcpGuide": "MCP-Anleitung",
+    "skills": "Skills"
   },
   "landing": {
     "hero": {
@@ -203,6 +204,43 @@
     "restApi": "REST API Endpunkt",
     "openEditor": "Editor öffnen",
     "closeEditor": "Editor schließen"
+  },
+  "skills": {
+    "title": "Skills",
+    "subtitle": "Die gemeinsame Skill-Bibliothek der Organisation, durchsuchbar nach Kategorie, direkt per MCP im Chat nutzbar.",
+    "new": "Neuer Skill",
+    "create": "Skill erstellen",
+    "empty": "Noch keine Skills",
+    "emptyDescription": "Erstellen Sie den ersten Skill oder importieren Sie eine bestehende SKILL.md.",
+    "searchPlaceholder": "Skills suchen...",
+    "allCategories": "Alle Kategorien",
+    "categories": "Kategorien",
+    "categoryName": "Kategoriename",
+    "noCategories": "Noch keine Kategorien angelegt",
+    "name": "Name",
+    "description": "Beschreibung",
+    "content": "Skill-Inhalt",
+    "category": "Kategorie",
+    "uncategorized": "Ohne Kategorie",
+    "status": "Status",
+    "active": "Aktiv",
+    "draft": "Entwurf",
+    "archived": "Archiviert",
+    "version": "Version",
+    "versions": "Versionen",
+    "noVersions": "Noch keine Versionen gespeichert.",
+    "rollback": "Rollback auf diese Version",
+    "versionNote": "Versions-Notiz (für neue Version)",
+    "versionNotePlaceholder": "Was hat sich geändert?",
+    "files": "Zusatzdateien",
+    "noFiles": "Keine Zusatzdateien",
+    "upload": "Hochladen",
+    "download": "Herunterladen",
+    "import": "Importieren",
+    "importDescription": "SKILL.md oder ZIP mit SKILL.md + Zusatzdateien hochladen.",
+    "mcpTool": "MCP-Tool-Aufruf",
+    "deleteConfirmTitle": "Skill löschen",
+    "deleteConfirmDesc": "Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "logs": {
     "title": "Logs",

@@ -31,3 +31,36 @@ export function slugify(text: string) {
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/** Baut den Markdown-Text eines Skills im SKILL.md-Format (YAML-Frontmatter + Inhalt). */
+export function buildSkillMarkdown({
+  name,
+  description,
+  content,
+}: {
+  name: string;
+  description: string;
+  content: string;
+}) {
+  return `---\nname: ${slugify(name) || name}\ndescription: "${(description || name).replace(/"/g, '\\"')}"\n---\n\n${content}\n`;
+}
+
+/** Kehrt buildSkillMarkdown() um: liest eine SKILL.md und trennt Frontmatter von Inhalt. */
+export function parseSkillMarkdown(raw: string): { name: string; description: string; content: string } {
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (!match) {
+    return { name: "", description: "", content: raw.trim() };
+  }
+  const [, frontmatter, body] = match;
+  let name = "";
+  let description = "";
+  for (const line of frontmatter.split(/\r?\n/)) {
+    const idx = line.indexOf(":");
+    if (idx === -1) continue;
+    const key = line.slice(0, idx).trim().toLowerCase();
+    const value = line.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
+    if (key === "name") name = value;
+    if (key === "description") description = value;
+  }
+  return { name, description, content: body.trim() };
+}
