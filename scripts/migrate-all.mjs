@@ -18,9 +18,10 @@ if (!process.env.SUPABASE_DB_URL) {
   process.exit(1);
 }
 
+const useSSL = process.env.SUPABASE_DB_SSL !== "false";
 const client = new Client({
   connectionString: process.env.SUPABASE_DB_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: useSSL ? { rejectUnauthorized: false } : false,
 });
 
 const force = process.argv.includes("--force");
