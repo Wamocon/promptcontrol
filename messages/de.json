@@ -239,6 +239,11 @@
     "import": "Importieren",
     "importDescription": "SKILL.md oder ZIP mit SKILL.md + Zusatzdateien hochladen.",
     "mcpTool": "MCP-Tool-Aufruf",
+    "polish": "Mit KI aufbereiten",
+    "polishRunning": "KI bereitet auf...",
+    "polishAll": "Alle mit KI aufbereiten",
+    "polishProgress": "KI bereitet auf: {done} von {total}",
+    "polishDone": "Fertig: {total} bearbeitet, {failed} fehlgeschlagen",
     "deleteConfirmTitle": "Skill löschen",
     "deleteConfirmDesc": "Diese Aktion kann nicht rückgängig gemacht werden."
   },

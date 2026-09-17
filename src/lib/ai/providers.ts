@@ -67,10 +67,10 @@ export const PROVIDERS: Record<ProviderId, ProviderDef> = {
     baseUrl: "https://api.groq.com/openai/v1",
     apiKeyEnv: "GROQ_API_KEY",
     models: [
-      { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B",       description: "Vielseitig, sehr schnell" },
-      { id: "llama-3.1-8b-instant",    label: "Llama 3.1 8B Instant", description: "Blitzschnell, einfache Tasks" },
+      { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B",  description: "Vielseitig, sehr schnell" },
+      { id: "openai/gpt-oss-20b",  label: "GPT-OSS 20B",   description: "Blitzschnell, einfache Tasks" },
     ],
-    defaultModel: "llama-3.3-70b-versatile",
+    defaultModel: "openai/gpt-oss-120b",
   },
 };
 
