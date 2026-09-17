@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 // Test the TypeScript type definitions for correctness
-import type { UserRole, PromptStatus, PlanType, SubscriptionStatus } from "@/types";
+import type { UserRole, PromptStatus, SkillStatus, PlanType, SubscriptionStatus } from "@/types";
 
 describe("TypeScript type definitions", () => {
   it("UserRole covers all expected values", () => {
@@ -15,6 +15,11 @@ describe("TypeScript type definitions", () => {
 
   it("PromptStatus covers all expected values", () => {
     const statuses: PromptStatus[] = ["active", "draft", "archived"];
+    expect(statuses).toHaveLength(3);
+  });
+
+  it("SkillStatus covers all expected values", () => {
+    const statuses: SkillStatus[] = ["active", "draft", "archived"];
     expect(statuses).toHaveLength(3);
   });
 

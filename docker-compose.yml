@@ -1,0 +1,20 @@
+# Betrieb der App auf sokrates2, getrennt vom Supabase-Stack unter
+# /home/wamocon/supabase-promptcontrol/. Eigenes Subnetz, um mit den
+# bestehenden Docker-Netzen auf dem Host (172.17-172.20.0.0/16) nicht zu
+# kollidieren.
+services:
+  promptcontrol:
+    build: .
+    image: promptcontrol:latest
+    env_file: .env.production
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - promptcontrol
+
+networks:
+  promptcontrol:
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16

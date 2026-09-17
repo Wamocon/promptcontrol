@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   FlaskConical,
   BookOpen,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export function Sidebar({ plan, isAdmin = false }: SidebarProps) {
   const navItems = [
     { href: "/dashboard" as const, label: t("dashboard"), icon: LayoutDashboard },
     { href: "/dashboard/projects" as const, label: t("projects"), icon: FolderOpen },
+    { href: "/dashboard/skills" as const, label: t("skills"), icon: Wrench },
     { href: "/dashboard/logs" as const, label: t("logs"), icon: ScrollText },
     { href: "/dashboard/ab-tests" as const, label: "A/B Tests", icon: FlaskConical },
     { href: "/dashboard/team" as const, label: t("team"), icon: Users },

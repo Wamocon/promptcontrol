@@ -81,7 +81,30 @@ export default async function McpGuidePage() {
 
 @procon get_prompt customer-service-de
 
-@procon search_prompts onboarding`;
+@procon search_prompts onboarding
+
+@procon list_skills
+
+@procon get_skill code-review-checkliste`;
+
+  const metaSkillMd = `---
+name: promptcontrol-bibliothek
+description: "Bevor eine neue Anleitung von Grund auf geschrieben wird: pruefen, ob ein passender Skill bereits in der geteilten ProCon-Bibliothek existiert. Bei Aufgaben zu Entwicklung, Test oder anderen wiederkehrenden Themen zuerst hier nachsehen."
+---
+
+Diese Firma pflegt eine gemeinsame Skill-Bibliothek in ProCon, erreichbar ueber
+den bereits konfigurierten MCP-Server "procon".
+
+1. Zuerst \`list_skills\` (optional mit \`category\`) oder \`search_skills\`
+   aufrufen, um passende Skills zu finden.
+2. Dann \`get_skill(slug)\` aufrufen, um den vollstaendigen Inhalt zu laden,
+   und die darin enthaltenen Anweisungen befolgen.
+3. Enthaelt ein Skill Zusatzdateien (Scripts, Vorlagen), werden diese unter
+   \`/api/v1/skills/{slug}/download\` als ZIP bereitgestellt.
+
+Diese Datei bleibt absichtlich kurz: das eigentliche Wissen liegt vollstaendig
+in ProCon, nicht lokal auf diesem Rechner.
+`;
 
   const restExample = `# Prompt abrufen (kein MCP-Client erforderlich)
 curl -H "X-Api-Key: IHR_API_SCHLÜSSEL" \\
@@ -242,6 +265,30 @@ curl -H "X-Api-Key: IHR_API_SCHLÜSSEL" \\
           </p>
           <CodeBlock code={restExample} lang="bash" />
         </Step>
+
+        {/* Step 6: Skills-Bibliothek */}
+        <Step number={6} title="Skills-Bibliothek nutzen">
+          <p>
+            Die Skills-Bibliothek funktioniert über denselben MCP-Server wie Prompts, es ist keine
+            zweite Einrichtung nötig. Damit Claude die Bibliothek überhaupt in Betracht zieht, reicht
+            eine einzige, sehr kurze lokale Datei, ein &quot;Meta-Skill&quot;, der nur auf die Bibliothek
+            verweist. Das eigentliche Wissen bleibt vollständig in ProCon.
+          </p>
+          <a
+            href={`data:text/markdown;charset=utf-8,${encodeURIComponent(metaSkillMd)}`}
+            download="SKILL.md"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-600 transition-colors"
+          >
+            <BookOpen className="h-4 w-4" /> Meta-Skill SKILL.md herunterladen
+          </a>
+          <p className="mt-2">
+            Datei ablegen unter{" "}
+            <code className="text-xs bg-black/5 dark:bg-white/8 rounded px-1.5 py-0.5">
+              ~/.claude/skills/promptcontrol-bibliothek/SKILL.md
+            </code>
+            . Diese eine Datei ändert sich nie, auch wenn im Team neue Skills dazukommen.
+          </p>
+        </Step>
       </div>
 
       {/* Available tools */}
@@ -263,6 +310,22 @@ curl -H "X-Api-Key: IHR_API_SCHLÜSSEL" \\
             {
               tool: "search_prompts",
               desc: "Prompts nach Stichwort durchsuchen (Name, Beschreibung, Inhalt).",
+            },
+            {
+              tool: "list_skills",
+              desc: "Alle aktiven Skills der geteilten Bibliothek abrufen. Optional nach Kategorie filtern.",
+            },
+            {
+              tool: "get_skill",
+              desc: "Einen einzelnen Skill per Slug abrufen, inkl. Hinweis auf Zusatzdateien.",
+            },
+            {
+              tool: "search_skills",
+              desc: "Skills nach Stichwort durchsuchen (Name, Beschreibung).",
+            },
+            {
+              tool: "list_skill_categories",
+              desc: "Alle Skill-Kategorien der Organisation abrufen (z.B. Entwicklung, Test).",
             },
           ].map(({ tool, desc }) => (
             <div
