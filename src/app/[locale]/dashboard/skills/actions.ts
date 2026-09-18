@@ -282,6 +282,16 @@ export async function polishSkillWithAI(skillId: string) {
     .single();
   if (!skill) return { error: "Skill nicht gefunden" };
 
+  const MAX_POLISH_CONTENT_LENGTH = 20_000;
+  if (skill.content.length > MAX_POLISH_CONTENT_LENGTH) {
+    return {
+      error:
+        `Skill ist mit ${skill.content.length.toLocaleString("de-DE")} Zeichen zu lang fuer die ` +
+        `automatische KI-Aufbereitung (Limit: ${MAX_POLISH_CONTENT_LENGTH.toLocaleString("de-DE")} Zeichen). ` +
+        "Bitte manuell bearbeiten oder in kleinere Teile aufteilen.",
+    };
+  }
+
   const { data: categories } = await supabase
     .from("skill_categories")
     .select("id, name, color, org_id, created_at")
