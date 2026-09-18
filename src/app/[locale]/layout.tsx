@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -16,6 +16,22 @@ export const metadata: Metadata = {
   description:
     "ProCon ist die spezialisierte Verwaltungsplattform für KI-Prompts in Ihrem Unternehmen.",
   icons: { icon: "/favicon.svg" },
+};
+
+// viewportFit "cover" ist Voraussetzung dafuer, dass env(safe-area-inset-*)
+// ueberhaupt Werte liefert (Notch, Home-Indicator). maximumScale und
+// userScalable werden bewusst nicht gesetzt, das wuerde das Zoomen fuer
+// Menschen mit Sehbehinderung verhindern (WCAG 1.4.4) und iOS ignoriert es
+// ohnehin.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0f" },
+  ],
 };
 
 interface LocaleLayoutProps {

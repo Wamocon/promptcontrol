@@ -70,13 +70,14 @@ export function Header({ userName, locale, isAdmin = false }: HeaderProps) {
             const evt = new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: true });
             window.dispatchEvent(evt);
           }}
-          className="hidden md:flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs transition-colors hover:bg-black/5 dark:hover:bg-white/6 magnetic"
-          style={{ background: "var(--panel-bg-subtle)", color: "var(--text-3)" }}
-          title="Befehlspalette offnen"
+          className="flex items-center gap-2 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/6 magnetic touch-manipulation max-md:grid max-md:size-11 max-md:place-items-center md:bg-[var(--panel-bg-subtle)] md:px-3 md:py-1.5 md:text-xs"
+          style={{ color: "var(--text-3)" }}
+          aria-label="Suche öffnen"
+          title="Befehlspalette öffnen"
         >
-          <Search className="h-3.5 w-3.5" />
-          <span>Suchen...</span>
-          <span className="kbd ml-2">⌘K</span>
+          <Search className="h-4 w-4 md:h-3.5 md:w-3.5" />
+          <span className="hidden md:inline">Suchen...</span>
+          <span className="kbd ml-2 hidden md:inline">⌘K</span>
         </button>
 
         <div className="flex items-center gap-1">
