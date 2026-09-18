@@ -70,11 +70,13 @@ export default async function DashboardLayout({ children, params }: DashboardLay
   return (
     <div className="flex h-dvh flex-col overflow-hidden relative" style={{ background: "var(--background)" }}>
       <Header userName={profile?.name || user.email?.split("@")[0]} locale={locale} isAdmin={isAdmin} />
-      <div className="flex flex-1 overflow-hidden relative z-[1]">
+      {/* Bewusst ohne z-index: ein eigener Stacking-Context hier wuerde
+          Dialoge unter der unteren Navigationsleiste einsperren */}
+      <div className="flex flex-1 overflow-hidden relative">
         <Sidebar plan={plan} isAdmin={isAdmin} />
         {/* Unten Platz fuer die mobile Navigationsleiste, sonst verdeckt sie den letzten Eintrag */}
         <main
-          className="flex-1 overflow-y-auto pb-tabbar md:pb-0"
+          className="min-w-0 flex-1 overflow-y-auto pb-tabbar md:pb-0"
           style={{ background: "var(--background)" }}
         >
           {children}

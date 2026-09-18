@@ -341,7 +341,9 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
           <h1 className="text-xl sm:text-2xl font-bold text-t1">{t("title")}</h1>
           <p className="mt-1.5 text-sm text-t3">{t("subtitle")}</p>
         </div>
-        <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:overflow-visible sm:pb-0">
+        {/* min-w-0 ist noetig, sonst verhindert min-width:auto des Flex-Kindes
+            das Abschneiden und die ganze Seite scrollt seitlich */}
+        <div className="flex w-full min-w-0 items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:overflow-visible sm:pb-0">
           <Button variant="secondary" onClick={() => setShowCategories(true)}>
             <Tag className="h-4 w-4" /> {t("categories")}
           </Button>
@@ -403,7 +405,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
           />
         </div>
         {/* Auf schmalen Bildschirmen horizontal scrollbar statt umbrechend */}
-        <div className="flex w-full gap-1.5 overflow-x-auto pb-1 sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0">
+        <div className="flex w-full min-w-0 gap-1.5 overflow-x-auto pb-1 sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button
             onClick={() => setCategoryFilter("all")}
             className={`shrink-0 text-xs font-medium px-3 py-2 rounded-full border transition-colors touch-manipulation ${
@@ -456,7 +458,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
             <button
               key={skill.id}
               onClick={() => openEditor(skill)}
-              className="group text-left card-hover panel p-4 sm:p-5 touch-manipulation"
+              className="group min-w-0 text-left card-hover panel p-4 sm:p-5 touch-manipulation"
               style={{ borderLeft: skill.category ? `3px solid ${skill.category.color}` : undefined }}
             >
               <div className="flex items-start justify-between mb-3 gap-2">
@@ -473,7 +475,9 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
               </div>
 
               {skill.description && (
-                <p className="text-sm text-t3 mb-3 line-clamp-2">{skill.description}</p>
+                // break-words, sonst sprengen lange Pfade und URLs ohne
+                // Umbruchpunkt die Rasterspalte
+                <p className="text-sm text-t3 mb-3 line-clamp-2 break-words">{skill.description}</p>
               )}
 
               <div className="flex items-center gap-2 flex-wrap text-xs text-t4">

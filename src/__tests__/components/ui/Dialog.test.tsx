@@ -36,22 +36,34 @@ describe("Dialog", () => {
     expect(screen.getByText("child content")).toBeInTheDocument();
   });
 
+  // Der Dialog wird per Portal an den body gehaengt, deshalb wird hier
+  // ueber document.body statt ueber den Render-Container gesucht.
   it("calls onClose when backdrop is clicked", () => {
     const onClose = vi.fn();
-    const { container } = render(
-      <Dialog open={true} onClose={onClose} title="Test" />
-    );
-    // outer div > backdrop div (first child)
-    const backdrop = container.firstElementChild!.firstElementChild!;
+    render(<Dialog open={true} onClose={onClose} title="Test" />);
+    const wrapper = document.body.querySelector('[role="dialog"]')!;
+    const backdrop = wrapper.firstElementChild!;
     fireEvent.click(backdrop);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("applies custom className to dialog panel", () => {
-    const { container } = render(
-      <Dialog open={true} onClose={() => {}} title="Test" className="my-custom" />
-    );
-    expect(container.querySelector(".my-custom")).toBeInTheDocument();
+    render(<Dialog open={true} onClose={() => {}} title="Test" className="my-custom" />);
+    expect(document.body.querySelector(".my-custom")).toBeInTheDocument();
+  });
+
+  it("closes on Escape key", () => {
+    const onClose = vi.fn();
+    render(<Dialog open={true} onClose={onClose} title="Test" />);
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("locks background scrolling while open", () => {
+    const { unmount } = render(<Dialog open={true} onClose={() => {}} title="Test" />);
+    expect(document.body.style.overflow).toBe("hidden");
+    unmount();
+    expect(document.body.style.overflow).not.toBe("hidden");
   });
 });
 

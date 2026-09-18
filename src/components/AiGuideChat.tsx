@@ -310,7 +310,10 @@ export function AiGuideChat() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    // Auf dem Handy oberhalb der unteren Navigationsleiste, sonst verdeckt
+    // der Knopf den Eintrag "Mehr".
+    // z-40 statt z-50, damit geoeffnete Dialoge darueber liegen
+    <div className="fixed right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] z-40 flex flex-col items-end gap-3 md:right-6 md:bottom-6">
       {/* Chat panel */}
       {isOpen && (
         <div
