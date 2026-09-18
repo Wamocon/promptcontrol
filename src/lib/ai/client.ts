@@ -10,6 +10,10 @@ export interface ChatMessage {
 export interface ChatOptions {
   maxTokens?: number;
   temperature?: number;
+  /** Overrides the default per-provider timeout (ms). Use for calls with a
+   *  large maxTokens where generation legitimately takes longer than the
+   *  default fail-fast window. */
+  timeoutMs?: number;
 }
 
 /** Reads active provider + model from admin_settings, falls back to SOKRATES */
@@ -78,8 +82,9 @@ export async function chatCompletion(
     throw new Error(`API key not configured for provider: ${provider.label}`);
   }
 
-  // Sokrates is a local-network server – use shorter timeout to fail fast
-  const timeoutMs = providerId === "sokrates" ? 10_000 : 30_000;
+  // Sokrates is a local-network server – use shorter timeout to fail fast,
+  // unless the caller explicitly needs more room (e.g. large maxTokens).
+  const timeoutMs = options.timeoutMs ?? (providerId === "sokrates" ? 10_000 : 30_000);
 
   const doRequest = () =>
     fetch(`${provider.baseUrl}/chat/completions`, {
