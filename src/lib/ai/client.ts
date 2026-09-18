@@ -37,6 +37,33 @@ export async function getActiveProvider(): Promise<{ provider: ProviderId; model
   return { provider: "sokrates", model: PROVIDERS.sokrates.defaultModel };
 }
 
+/** Parses a provider's rate-limit reset hint into a wait duration (ms).
+ *  Tries the standard `Retry-After` header (seconds) first, then GroQ's
+ *  `x-ratelimit-reset-tokens`/`-requests` format ("2m52.8s", "600ms", "7.66s"). */
+function parseRetryDelayMs(response: Response): number {
+  const retryAfter = response.headers.get("retry-after");
+  if (retryAfter) {
+    const sec = Number(retryAfter);
+    if (!Number.isNaN(sec) && sec > 0) return Math.min(sec * 1000, 65_000);
+  }
+
+  const reset =
+    response.headers.get("x-ratelimit-reset-tokens") ??
+    response.headers.get("x-ratelimit-reset-requests");
+  if (reset) {
+    const match = reset.match(/^(?:(\d+)m)?(?:([\d.]+)s)?(?:([\d.]+)ms)?$/);
+    if (match) {
+      const minutes = Number(match[1] ?? 0);
+      const seconds = Number(match[2] ?? 0);
+      const millis = Number(match[3] ?? 0);
+      const totalMs = minutes * 60_000 + seconds * 1000 + millis;
+      if (totalMs > 0) return Math.min(totalMs, 65_000);
+    }
+  }
+
+  return 5_000;
+}
+
 /** Core chat completion – OpenAI-compatible for all 3 providers */
 export async function chatCompletion(
   providerId: ProviderId,
@@ -54,21 +81,32 @@ export async function chatCompletion(
   // Sokrates is a local-network server – use shorter timeout to fail fast
   const timeoutMs = providerId === "sokrates" ? 10_000 : 30_000;
 
-  const response = await fetch(`${provider.baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      ...(provider.extraHeaders ?? {}),
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: options.maxTokens ?? 600,
-      temperature: options.temperature ?? 0.3,
-    }),
-    signal: AbortSignal.timeout(timeoutMs),
-  });
+  const doRequest = () =>
+    fetch(`${provider.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        ...(provider.extraHeaders ?? {}),
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: options.maxTokens ?? 600,
+        temperature: options.temperature ?? 0.3,
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+
+  let response = await doRequest();
+
+  // Rate-limited: wait for the provider's own reset hint and retry once,
+  // instead of immediately cascading to a possibly-unavailable fallback.
+  if (response.status === 429) {
+    const delayMs = parseRetryDelayMs(response);
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    response = await doRequest();
+  }
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => "Unknown error");
@@ -128,10 +166,14 @@ export async function autoChat(
     if (provider !== "openrouter") {
       const orKey = process.env["OPENROUTER_API_KEY"];
       if (orKey) {
-        // Use a paid model to avoid free-tier rate limits
-        const orModel = "meta-llama/llama-3.3-70b-instruct";
-        const text = await chatCompletion("openrouter", orModel, messages, options);
-        return { text: text ?? "Keine Antwort erhalten.", provider: "openrouter", model: orModel };
+        try {
+          // Use a paid model to avoid free-tier rate limits
+          const orModel = "meta-llama/llama-3.3-70b-instruct";
+          const text = await chatCompletion("openrouter", orModel, messages, options);
+          return { text: text ?? "Keine Antwort erhalten.", provider: "openrouter", model: orModel };
+        } catch {
+          // OpenRouter also failed - surface the original, most informative error below
+        }
       }
     }
 
