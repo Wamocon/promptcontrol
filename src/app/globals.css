@@ -639,3 +639,37 @@ html:not(.dark) [class*="hover:bg-white"] {
   }
   .magnetic, .tilt-card { transition: none !important; }
 }
+
+/* =========================================================
+   Mobile: Safe Areas und Touch
+   Tailwind v4 bringt keine eigenen Safe-Area-Utilities mit,
+   deshalb hier als @utility definiert. Immer mit Fallback,
+   env() liefert auf dem Desktop keinen Wert.
+   ========================================================= */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+@utility px-safe {
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+}
+@utility pb-safe-4 {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+/* Hoehe der Bottom-Navigation plus Safe Area, als Freiraum unter dem Inhalt */
+@utility pb-tabbar {
+  padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* iOS zoomt beim Fokussieren automatisch hinein, sobald die Schrift
+   kleiner als 16px ist. Das verhindert man nicht mit maximum-scale,
+   sondern mit einer Mindestschriftgroesse auf den Feldern selbst. */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

@@ -11,8 +11,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", loading, children, disabled, ...props }, ref) => {
+    // touch-manipulation entfernt die 300ms-Verzoegerung und das Doppeltipp-Zoom,
+    // pointer-coarse hebt die Trefferflaeche auf Touchgeraeten auf 44px.
     const base =
-      "inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:pointer-events-none disabled:opacity-50";
+      "inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors touch-manipulation pointer-coarse:min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:pointer-events-none disabled:opacity-50";
 
     const variants = {
       primary: "btn-procon",

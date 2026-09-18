@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClientSafe, createServiceClientSafe } from "@/lib/supabase/server";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { AiGuideChat } from "@/components/AiGuideChat";
 import { CommandPalette } from "@/components/CommandPalette";
 
@@ -67,16 +68,21 @@ export default async function DashboardLayout({ children, params }: DashboardLay
   const isAdmin = (profile?.role ?? "").toLowerCase() === "admin";
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden relative" style={{ background: "var(--background)" }}>
+    <div className="flex h-dvh flex-col overflow-hidden relative" style={{ background: "var(--background)" }}>
       <Header userName={profile?.name || user.email?.split("@")[0]} locale={locale} isAdmin={isAdmin} />
       <div className="flex flex-1 overflow-hidden relative z-[1]">
         <Sidebar plan={plan} isAdmin={isAdmin} />
-        <main className="flex-1 overflow-y-auto" style={{ background: "var(--background)" }}>
+        {/* Unten Platz fuer die mobile Navigationsleiste, sonst verdeckt sie den letzten Eintrag */}
+        <main
+          className="flex-1 overflow-y-auto pb-tabbar md:pb-0"
+          style={{ background: "var(--background)" }}
+        >
           {children}
         </main>
       </div>
       <AiGuideChat />
       <CommandPalette locale={locale} />
+      <MobileTabBar isAdmin={isAdmin} />
     </div>
   );
 }

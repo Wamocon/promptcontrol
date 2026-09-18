@@ -334,14 +334,14 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
   }
 
   return (
-    <div className="p-6 animate-fade-in-up">
+    <div className="p-4 sm:p-6 animate-fade-in-up">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-t1">{t("title")}</h1>
+      <div className="mb-5 sm:mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-t1">{t("title")}</h1>
           <p className="mt-1.5 text-sm text-t3">{t("subtitle")}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:overflow-visible sm:pb-0">
           <Button variant="secondary" onClick={() => setShowCategories(true)}>
             <Tag className="h-4 w-4" /> {t("categories")}
           </Button>
@@ -391,8 +391,8 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
       )}
 
       {/* Search + category filter chips */}
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="relative max-w-xs flex-1 min-w-48">
+      <div className="mb-5 sm:mb-6 flex flex-wrap items-center gap-3">
+        <div className="relative w-full min-w-48 sm:max-w-xs sm:flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-t4 pointer-events-none" />
           <input
             type="search"
@@ -402,10 +402,11 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
             className="input-glass w-full pl-9 py-2 text-sm"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        {/* Auf schmalen Bildschirmen horizontal scrollbar statt umbrechend */}
+        <div className="flex w-full gap-1.5 overflow-x-auto pb-1 sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button
             onClick={() => setCategoryFilter("all")}
-            className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+            className={`shrink-0 text-xs font-medium px-3 py-2 rounded-full border transition-colors touch-manipulation ${
               categoryFilter === "all"
                 ? "bg-indigo-500/15 border-indigo-500/30 text-indigo-500"
                 : "border-[color:var(--panel-border)] text-t3 hover:text-t1"
@@ -417,7 +418,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
             <button
               key={cat.id}
               onClick={() => setCategoryFilter(cat.id)}
-              className="text-xs font-medium px-3 py-1.5 rounded-full border transition-colors"
+              className="shrink-0 text-xs font-medium px-3 py-2 rounded-full border transition-colors touch-manipulation"
               style={{
                 background: categoryFilter === cat.id ? `${cat.color}20` : "transparent",
                 borderColor: categoryFilter === cat.id ? `${cat.color}50` : "var(--panel-border)",
@@ -450,12 +451,12 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
           )}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredSkills.map((skill) => (
             <button
               key={skill.id}
               onClick={() => openEditor(skill)}
-              className="group text-left card-hover panel p-5"
+              className="group text-left card-hover panel p-4 sm:p-5 touch-manipulation"
               style={{ borderLeft: skill.category ? `3px solid ${skill.category.color}` : undefined }}
             >
               <div className="flex items-start justify-between mb-3 gap-2">
@@ -541,7 +542,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
             {error && <p className="text-sm text-rose-500">{error}</p>}
 
             {/* Fields */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label={t("name")} value={editName} onChange={(e) => setEditName(e.target.value)} />
               <Select label={t("status")} value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>
                 <option value="draft">{t("draft")}</option>
@@ -550,7 +551,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label={t("description")}
                 value={editDescription}

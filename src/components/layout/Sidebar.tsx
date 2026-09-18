@@ -2,18 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import {
-  LayoutDashboard,
-  FolderOpen,
-  ScrollText,
-  Users,
-  Zap,
-  ShieldCheck,
-  FlaskConical,
-  BookOpen,
-  Wrench,
-} from "lucide-react";
+import { Zap, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NAV_ITEMS } from "@/lib/nav";
 
 interface SidebarProps {
   plan: "free" | "pro";
@@ -24,15 +15,14 @@ export function Sidebar({ plan, isAdmin = false }: SidebarProps) {
   const t = useTranslations("nav");
   const pathname = usePathname();
 
-  const navItems = [
-    { href: "/dashboard" as const, label: t("dashboard"), icon: LayoutDashboard },
-    { href: "/dashboard/projects" as const, label: t("projects"), icon: FolderOpen },
-    { href: "/dashboard/skills" as const, label: t("skills"), icon: Wrench },
-    { href: "/dashboard/logs" as const, label: t("logs"), icon: ScrollText },
-    { href: "/dashboard/ab-tests" as const, label: "A/B Tests", icon: FlaskConical },
-    { href: "/dashboard/team" as const, label: t("team"), icon: Users },
-    { href: "/dashboard/mcp-guide" as const, label: t("mcpGuide"), icon: BookOpen },
-  ];
+  // Profil und Admin haben eigene Einstiege (Nutzermenue bzw. Admin-Block unten)
+  const navItems = NAV_ITEMS.filter(
+    (item) => !item.adminOnly && item.href !== "/dashboard/profile"
+  ).map((item) => ({
+    href: item.href,
+    label: item.labelKey ? t(item.labelKey) : item.fallbackLabel,
+    icon: item.icon,
+  }));
 
   return (
     <aside

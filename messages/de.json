@@ -12,7 +12,11 @@
     "login": "Anmelden",
     "register": "Registrieren",
     "mcpGuide": "MCP-Anleitung",
-    "skills": "Skills"
+    "skills": "Skills",
+    "more": "Mehr",
+    "search": "Suche",
+    "close": "Schließen",
+    "mainNavigation": "Hauptnavigation"
   },
   "landing": {
     "hero": {
@@ -133,7 +137,18 @@
     "recentActivity": "Letzte Aktivitäten",
     "quickActions": "Schnellaktionen",
     "newPrompt": "Neuer Prompt",
-    "newProject": "Neues Projekt"
+    "newProject": "Neues Projekt",
+    "totalSkills": "Skills",
+    "totalCategories": "Kategorien",
+    "recentSkills": "Zuletzt geänderte Skills",
+    "skillsByCategory": "Skills nach Kategorie",
+    "noSkills": "Noch keine Skills vorhanden",
+    "openSkills": "Skills öffnen",
+    "newSkill": "Neuer Skill",
+    "importSkill": "Skill importieren",
+    "inviteMember": "Mitglied einladen",
+    "mcpSetup": "MCP einrichten",
+    "showAll": "Alle anzeigen"
   },
   "projects": {
     "title": "Projekte",

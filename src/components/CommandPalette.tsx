@@ -20,6 +20,7 @@ import {
   Zap,
   ChevronRight,
   Wrench,
+  X,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -168,19 +169,19 @@ export function CommandPalette({ locale }: CommandPaletteProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[12vh] px-4"
+      className="fixed inset-0 z-[100] flex items-start justify-center max-md:pt-0 md:pt-[12vh] max-md:px-0 md:px-4"
       onClick={() => setOpen(false)}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-md animate-fade-in-up" />
 
-      {/* Palette */}
+      {/* Palette: auf dem Handy Vollbild, ab md die zentrierte Karte */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden gradient-border"
+        className="relative w-full overflow-hidden shadow-2xl gradient-border max-md:h-dvh max-md:max-w-none max-md:rounded-none md:max-w-xl md:rounded-2xl"
         style={{ animation: "slide-up 0.22s cubic-bezier(0.22, 1, 0.36, 1) both" }}
       >
-        <div className="glass-card rounded-2xl">
+        <div className="glass-card max-md:flex max-md:h-full max-md:flex-col max-md:rounded-none max-md:pt-safe md:rounded-2xl">
           {/* Input */}
           <div className="flex items-center gap-3 px-4 py-3.5 border-b" style={{ borderColor: "var(--panel-border)" }}>
             <Search className="h-4 w-4 text-indigo-500 shrink-0" />
@@ -194,11 +195,19 @@ export function CommandPalette({ locale }: CommandPaletteProps) {
               className="flex-1 bg-transparent text-sm focus:outline-none"
               style={{ color: "var(--text-1)" }}
             />
-            <span className="kbd">ESC</span>
+            <span className="kbd hidden md:inline">ESC</span>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Schließen"
+              className="grid size-11 shrink-0 place-items-center rounded-xl touch-manipulation md:hidden"
+              style={{ color: "var(--text-3)" }}
+            >
+              <X className="size-5" aria-hidden />
+            </button>
           </div>
 
           {/* List */}
-          <div ref={listRef} className="max-h-[400px] overflow-y-auto py-2">
+          <div ref={listRef} className="overflow-y-auto overscroll-contain py-2 max-md:flex-1 md:max-h-[400px]">
             {flatList.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <Zap className="h-6 w-6 mx-auto mb-2 text-indigo-500 opacity-50" />
