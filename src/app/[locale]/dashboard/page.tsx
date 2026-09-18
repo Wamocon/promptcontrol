@@ -161,8 +161,8 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 mb-6 sm:mb-8">
         {stats.map(({ label, value, icon: Icon, color, bg, glow, href }) => (
           <Link key={label} href={href} className="card-hover glass-card p-4 sm:p-5 block">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-[10px] sm:text-xs font-medium text-t4 uppercase tracking-wider truncate">{label}</p>
+            <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
+              <p className="min-w-0 text-[10px] sm:text-xs font-medium text-t4 uppercase tracking-wider truncate">{label}</p>
               <div className={`rounded-xl p-2 shrink-0 ${color}`} style={{ background: bg, boxShadow: `0 0 20px ${glow}` }}>
                 <Icon className="h-4 w-4" />
               </div>
@@ -172,7 +172,11 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+      {/* grid-cols-1 als Basis ist Pflicht: ohne explizite Spaltenzahl
+          verwendet CSS Grid implizit "auto"-Spuren statt minmax(0,1fr),
+          die sich am Inhalt statt am Container orientieren, dadurch
+          entsteht der horizontale Overflow. */}
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
         {/* Zuletzt geaenderte Skills */}
         <div className="glass-card p-5 sm:p-6">
           <div className="mb-4 sm:mb-5 flex items-center justify-between gap-2">
@@ -193,7 +197,7 @@ export default async function DashboardPage() {
                 <Link
                   key={skill.id}
                   href="/dashboard/skills"
-                  className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5"
+                  className="flex min-w-0 items-center justify-between gap-3 rounded-xl px-3 py-2.5"
                   style={{ background: "var(--panel-bg-subtle)" }}
                 >
                   <div className="min-w-0">
@@ -201,9 +205,13 @@ export default async function DashboardPage() {
                     <p className="text-xs text-t4 mt-0.5 truncate">{formatDate(skill.updated_at)}</p>
                   </div>
                   {skill.category && (
+                    // max-w + truncate, sonst zwingt shrink-0 bei langen
+                    // Kategorienamen (z.B. "Copilot-Instructions") die ganze
+                    // Zeile in die Breite statt selbst nachzugeben
                     <span
-                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0"
+                      className="max-w-[40%] shrink-0 truncate text-[10px] font-semibold px-2 py-0.5 rounded-full"
                       style={{ background: `${skill.category.color}20`, color: skill.category.color }}
+                      title={skill.category.name}
                     >
                       {skill.category.name}
                     </span>
@@ -258,11 +266,11 @@ export default async function DashboardPage() {
             <Link
               key={label}
               href={href}
-              className="card-hover flex flex-col items-center gap-2.5 rounded-xl p-4 sm:p-5 text-center"
+              className="card-hover flex min-w-0 flex-col items-center gap-2.5 rounded-xl p-4 sm:p-5 text-center"
               style={{ background: "var(--panel-bg-subtle)", border: "1px solid var(--panel-border)" }}
             >
-              <Icon className={`h-6 w-6 sm:h-7 sm:w-7 ${color}`} />
-              <span className="text-xs sm:text-sm font-medium text-t2">{label}</span>
+              <Icon className={`h-6 w-6 sm:h-7 sm:w-7 shrink-0 ${color}`} />
+              <span className="text-xs sm:text-sm font-medium text-t2 truncate max-w-full">{label}</span>
             </Link>
           ))}
         </div>
