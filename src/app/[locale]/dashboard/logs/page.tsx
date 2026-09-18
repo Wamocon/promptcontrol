@@ -31,7 +31,7 @@ export default async function LogsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         {[
           { label: "API-Aufrufe", value: totalCalls, icon: Activity, color: "text-indigo-400", bg: "rgba(99,102,241,0.12)", glow: "rgba(99,102,241,0.22)" },
           { label: "Ø Latenz", value: `${avgLatency}ms`, icon: Clock, color: "text-cyan-400", bg: "rgba(34,211,238,0.12)", glow: "rgba(34,211,238,0.22)" },
