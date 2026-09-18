@@ -172,8 +172,9 @@ export async function autoChat(
       const orKey = process.env["OPENROUTER_API_KEY"];
       if (orKey) {
         try {
-          // Use a paid model to avoid free-tier rate limits
-          const orModel = "meta-llama/llama-3.3-70b-instruct";
+          // Free-tier model: the configured OpenRouter account has no paid
+          // credits, so a paid model would fail with HTTP 402.
+          const orModel = PROVIDERS.openrouter.defaultModel;
           const text = await chatCompletion("openrouter", orModel, messages, options);
           return { text: text ?? "Keine Antwort erhalten.", provider: "openrouter", model: orModel };
         } catch {
