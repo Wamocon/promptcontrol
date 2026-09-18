@@ -295,7 +295,14 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
     setSkills((prev) =>
       prev.map((s) =>
         s.id === skillId
-          ? { ...s, name: result.name!, description: result.description!, content: result.content!, current_version: s.current_version + 1 }
+          ? {
+              ...s,
+              name: result.name!,
+              description: result.description!,
+              content: result.content!,
+              current_version: s.current_version + 1,
+              ...(result.category ? { category_id: result.category.id, category: result.category } : {}),
+            }
           : s
       )
     );
@@ -303,6 +310,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
       setEditName(result.name!);
       setEditDescription(result.description!);
       setEditContent(result.content!);
+      if (result.category) setEditCategoryId(result.category.id);
     }
   }
 
@@ -555,19 +563,22 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
               </Select>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label={t("description")}
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-              />
-              <Select label={t("category")} value={editCategoryId} onChange={(e) => setEditCategoryId(e.target.value)}>
-                <option value="">{t("uncategorized")}</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </Select>
-            </div>
+            {/* Beschreibung als Textarea statt Input: manche importierten
+                Skills haben mehrere hundert Zeichen lange Beschreibungen,
+                in einem einzeiligen Feld waere das nur per Scrollen lesbar. */}
+            <Textarea
+              label={t("description")}
+              value={editDescription}
+              onChange={(e) => setEditDescription(e.target.value)}
+              rows={3}
+            />
+
+            <Select label={t("category")} value={editCategoryId} onChange={(e) => setEditCategoryId(e.target.value)}>
+              <option value="">{t("uncategorized")}</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </Select>
 
             <div>
               <label className="block text-xs font-medium text-t2 uppercase tracking-wide mb-1.5">
@@ -658,7 +669,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
           {error && <p className="text-sm text-rose-400">{error}</p>}
           <Input id="new-name" name="name" label={t("name")} placeholder="Code-Review-Checkliste" required />
-          <Input id="new-description" name="description" label={t("description")} placeholder={tc("or") + " " + tc("cancel")} />
+          <Textarea id="new-description" name="description" label={t("description")} rows={3} />
           <Select id="new-category" name="category_id" label={t("category")}>
             <option value="">{t("uncategorized")}</option>
             {categories.map((cat) => (

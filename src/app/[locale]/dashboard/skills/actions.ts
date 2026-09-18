@@ -277,21 +277,32 @@ export async function polishSkillWithAI(skillId: string) {
 
   const { data: skill } = await supabase
     .from("skills")
-    .select("id, name, description, content, current_version")
+    .select("id, name, description, content, current_version, category_id")
     .eq("id", skillId)
     .single();
   if (!skill) return { error: "Skill nicht gefunden" };
+
+  const { data: categories } = await supabase
+    .from("skill_categories")
+    .select("id, name, color, org_id, created_at")
+    .eq("org_id", profile.org_id)
+    .order("name");
+  const categoryNames = (categories ?? []).map((c) => c.name);
 
   const systemPrompt =
     "Du bist ein technischer Redakteur bei WAMOCON. Du bereitest Eintraege einer internen " +
     "Skills-Bibliothek auf. Ueberarbeite den gegebenen Skill: 1) ein kurzer, klarer Name " +
     "(max. 60 Zeichen), 2) eine praegnante Ein-Satz-Beschreibung, die erklaert, wann dieser " +
-    "Skill genutzt werden soll (max. 200 Zeichen), 3) den Inhalt sauber formatiert (klare " +
+    "Skill genutzt werden soll (max. 200 Zeichen), 3) die am besten passende Kategorie aus der " +
+    "vorgegebenen Liste, keine neue erfinden, 4) den Inhalt sauber formatiert (klare " +
     "Ueberschriften, Listen, keine Redundanzen), aber fachlich unveraendert, es duerfen keine " +
     "Anweisungen oder Informationen verloren gehen. Schreibe in gepflegtem Deutsch ohne " +
     "Gedankenstriche im Fliesstext, gliedere stattdessen mit Kommas oder Satztrennung. " +
-    "Antworte ausschliesslich in exakt diesem Format, ohne zusaetzliche Erklaerungen:\n" +
-    "NAME: <name>\nBESCHREIBUNG: <beschreibung>\nINHALT:\n<vollstaendiger ueberarbeiteter Inhalt>";
+    "Verfuegbare Kategorien (exakt so uebernehmen, keine neue Kategorie erfinden): " +
+    categoryNames.join(", ") +
+    ". Antworte ausschliesslich in exakt diesem Format, ohne zusaetzliche Erklaerungen:\n" +
+    "NAME: <name>\nBESCHREIBUNG: <beschreibung>\nKATEGORIE: <ein Name exakt aus der Liste>\n" +
+    "INHALT:\n<vollstaendiger ueberarbeiteter Inhalt>";
 
   const userPrompt = `Name: ${skill.name}\nBeschreibung: ${skill.description}\nInhalt:\n${skill.content}`;
 
@@ -311,6 +322,7 @@ export async function polishSkillWithAI(skillId: string) {
 
   const nameMatch = text.match(/NAME:\s*(.+)/);
   const descMatch = text.match(/BESCHREIBUNG:\s*(.+)/);
+  const categoryMatch = text.match(/KATEGORIE:\s*(.+)/);
   const contentMatch = text.match(/INHALT:\s*([\s\S]*)/);
 
   if (!nameMatch || !descMatch || !contentMatch) {
@@ -322,9 +334,25 @@ export async function polishSkillWithAI(skillId: string) {
   const newContent = contentMatch[1].trim();
   const newVersion = skill.current_version + 1;
 
+  // Kategorie nur uebernehmen, wenn die KI exakt einen Namen aus der
+  // vorgegebenen Liste getroffen hat. Ein Freitext-Treffer wuerde die
+  // saubere Kategorien-Liste sonst mit Varianten aufblaehen.
+  const matchedCategory = categoryMatch
+    ? (categories ?? []).find(
+        (c) => c.name.toLowerCase() === categoryMatch[1].trim().toLowerCase()
+      )
+    : undefined;
+  const newCategoryId = matchedCategory?.id ?? skill.category_id;
+
   const { error } = await supabase
     .from("skills")
-    .update({ name: newName, description: newDescription, content: newContent, current_version: newVersion })
+    .update({
+      name: newName,
+      description: newDescription,
+      content: newContent,
+      current_version: newVersion,
+      category_id: newCategoryId,
+    })
     .eq("id", skillId);
   if (error) return { error: error.message };
 
@@ -337,7 +365,13 @@ export async function polishSkillWithAI(skillId: string) {
   });
 
   revalidatePath("/dashboard/skills");
-  return { error: null, name: newName, description: newDescription, content: newContent };
+  return {
+    error: null,
+    name: newName,
+    description: newDescription,
+    content: newContent,
+    category: matchedCategory ?? null,
+  };
 }
 
 /**
