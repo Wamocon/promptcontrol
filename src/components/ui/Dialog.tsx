@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 
 type DialogSize = "sm" | "md" | "lg";
+
+/** Der Mount-Zustand aendert sich nie, es wird also nichts abonniert. */
+function subscribeNoop() {
+  return () => {};
+}
 
 const sizeClasses: Record<DialogSize, string> = {
   sm: "max-w-lg",
@@ -26,6 +32,13 @@ interface DialogProps {
 }
 
 export function Dialog({ open, onClose, title, description, children, className, size = "sm" }: DialogProps) {
+  // Der Dialog wird per Portal an den body gehaengt. Ohne das landet er im
+  // Stacking-Context der Seiten-Einblendanimation (transform erzeugt einen
+  // eigenen Context) und liegt dann unter der unteren Navigationsleiste.
+  // Das Portal darf erst nach der Hydration greifen, deshalb dasselbe
+  // useSyncExternalStore-Muster wie im DSGVO-Banner.
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
+
   // Escape schliesst den Dialog, und solange er offen ist scrollt der
   // Hintergrund nicht mit (auf dem Handy sonst besonders stoerend).
   useEffect(() => {
@@ -42,11 +55,11 @@ export function Dialog({ open, onClose, title, description, children, className,
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   const isLg = size === "lg";
 
-  return (
+  return createPortal(
     <div
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center",
@@ -92,7 +105,8 @@ export function Dialog({ open, onClose, title, description, children, className,
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
