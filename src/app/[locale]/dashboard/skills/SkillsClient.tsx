@@ -286,7 +286,20 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
   async function handlePolish(skillId: string) {
     setPolishingId(skillId);
     setError(null);
-    const result = await polishSkillWithAI(skillId);
+    let result: Awaited<ReturnType<typeof polishSkillWithAI>>;
+    try {
+      result = await polishSkillWithAI(skillId);
+    } catch (err) {
+      setPolishingId(null);
+      setError(
+        err instanceof Error && /Server Action/.test(err.message)
+          ? "Die Seite wurde seit dem letzten Neuladen aktualisiert. Bitte Seite neu laden (F5) und erneut versuchen."
+          : err instanceof Error
+            ? err.message
+            : "KI-Aufbereitung fehlgeschlagen"
+      );
+      return;
+    }
     setPolishingId(null);
     if (result.error) {
       setError(result.error);
@@ -319,11 +332,24 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
     const targets = skills.map((s) => s.id);
     setBulkPolish({ done: 0, total: targets.length, failed: 0 });
     let failed = 0;
+    let staleAction = false;
     for (let i = 0; i < targets.length; i++) {
       if (bulkPolishStopRef.current) break;
-      const result = await polishSkillWithAI(targets[i]);
-      if (result.error) failed++;
+      try {
+        const result = await polishSkillWithAI(targets[i]);
+        if (result.error) failed++;
+      } catch (err) {
+        failed++;
+        if (err instanceof Error && /Server Action/.test(err.message)) {
+          staleAction = true;
+        }
+      }
       setBulkPolish({ done: i + 1, total: targets.length, failed });
+    }
+    if (staleAction) {
+      setError(
+        "Die Seite wurde seit dem letzten Neuladen aktualisiert. Bitte Seite neu laden (F5) und die Sammel-Aufbereitung erneut starten."
+      );
     }
     router.refresh();
   }
