@@ -313,7 +313,7 @@ export async function polishSkillWithAI(skillId: string) {
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      { maxTokens: 6000, temperature: 0.3 }
+      { maxTokens: 4000, temperature: 0.3 }
     );
     text = result.text;
   } catch (err) {
