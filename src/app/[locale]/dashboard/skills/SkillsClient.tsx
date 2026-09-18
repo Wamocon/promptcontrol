@@ -295,7 +295,14 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
     setSkills((prev) =>
       prev.map((s) =>
         s.id === skillId
-          ? { ...s, name: result.name!, description: result.description!, content: result.content!, current_version: s.current_version + 1 }
+          ? {
+              ...s,
+              name: result.name!,
+              description: result.description!,
+              content: result.content!,
+              current_version: s.current_version + 1,
+              ...(result.category ? { category_id: result.category.id, category: result.category } : {}),
+            }
           : s
       )
     );
@@ -303,6 +310,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
       setEditName(result.name!);
       setEditDescription(result.description!);
       setEditContent(result.content!);
+      if (result.category) setEditCategoryId(result.category.id);
     }
   }
 
