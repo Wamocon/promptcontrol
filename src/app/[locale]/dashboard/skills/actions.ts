@@ -353,6 +353,22 @@ export async function polishSkillWithAI(skillId: string) {
   const newName = nameMatch[1].trim().slice(0, 200);
   const newDescription = descMatch[1].trim().slice(0, 2000);
   const newContent = contentMatch[1].trim();
+
+  // Zweite Absicherung neben der finishReason-Pruefung oben: selbst bei
+  // einer vollstaendigen Antwort (finishReason "stop") kann eine KI den
+  // Inhalt eigenmaechtig zusammenfassen, obwohl die Anweisung war, nichts
+  // zu verlieren. Alles unter 90% der Originallaenge gilt als Datenverlust
+  // und wird verworfen statt gespeichert.
+  const MIN_RETENTION_RATIO = 0.9;
+  if (newContent.length < skill.content.length * MIN_RETENTION_RATIO) {
+    return {
+      error:
+        `KI-Antwort ist mit ${newContent.length} von ${skill.content.length} Zeichen deutlich kuerzer ` +
+        `als das Original (unter ${Math.round(MIN_RETENTION_RATIO * 100)}%), moeglicher Informationsverlust. ` +
+        "Nicht gespeichert.",
+    };
+  }
+
   const newVersion = skill.current_version + 1;
 
   // Kategorie nur uebernehmen, wenn die KI exakt einen Namen aus der
