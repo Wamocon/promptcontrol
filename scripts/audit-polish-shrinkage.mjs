@@ -25,7 +25,7 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { db: { schema: SCHEMA } });
 
-const { data: skills, error: skillsErr } = await supabase.from("skills").select("id, slug, name");
+const { data: skills, error: skillsErr } = await supabase.from("skills").select("id, slug, name, content");
 if (skillsErr) {
   console.error("Fehler:", skillsErr.message);
   process.exit(1);
@@ -56,14 +56,16 @@ for (const skill of skills) {
   if (polishIndex <= 0) continue; // keine Aufbereitung oder keine Vorversion vorhanden
 
   const before = vs[polishIndex - 1];
-  const after = vs[polishIndex];
   const beforeLen = before.content.length;
-  const afterLen = after.content.length;
+  // Aktueller Live-Inhalt zaehlt, nicht die historische Version direkt nach
+  // der Aufbereitung - eine zwischenzeitliche Wiederherstellung soll hier
+  // nicht mehr als Problem auftauchen.
+  const currentLen = skill.content.length;
   if (beforeLen === 0) continue;
-  const pctChange = ((afterLen - beforeLen) / beforeLen) * 100;
+  const pctChange = ((currentLen - beforeLen) / beforeLen) * 100;
 
   if (pctChange <= -THRESHOLD_PCT) {
-    results.push({ slug: skill.slug, name: skill.name, beforeLen, afterLen, pctChange });
+    results.push({ slug: skill.slug, name: skill.name, beforeLen, afterLen: currentLen, pctChange });
   }
 }
 

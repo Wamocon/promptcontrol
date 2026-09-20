@@ -61,26 +61,26 @@ for (const skill of skills) {
   if (polishIndex <= 0) continue;
 
   const before = vs[polishIndex - 1];
-  const after = vs[polishIndex];
   const beforeLen = before.content.length;
-  const afterLen = after.content.length;
   if (beforeLen === 0) continue;
-  const pctChange = ((afterLen - beforeLen) / beforeLen) * 100;
-  if (pctChange > -THRESHOLD_PCT) continue;
 
-  // Aktueller Inhalt koennte neuer sein als "after" (z.B. wmc-branding
-  // wurde bereits manuell restauriert), nicht blind ueberschreiben, wenn
-  // der jetzige Inhalt schon laenger ist als die Vor-Aufbereitung-Version.
+  // Gegen den AKTUELLEN Live-Inhalt vergleichen, nicht gegen die historische
+  // Version direkt nach der ersten Aufbereitung: manche Skills wurden ein
+  // zweites Mal aufbereitet und dabei zusaetzlich gekuerzt (z.B. gtm-ai-gtm:
+  // erste Aufbereitung -27% - unter der Schwelle -, zweite Aufbereitung
+  // zusaetzlich gekuerzt, in Summe -60%). Ein Vergleich nur gegen die erste
+  // Nachher-Version haette das uebersehen.
   const { data: current } = await supabase
     .from("skills")
     .select("content")
     .eq("id", skill.id)
     .single();
-  if (current && current.content.length >= beforeLen * 0.9) {
-    console.log(`UEBERSPRUNGEN "${skill.slug}": aktueller Inhalt bereits ${current.content.length} Zeichen, keine Wiederherstellung noetig.`);
-    skipped++;
-    continue;
-  }
+  if (!current) continue;
+  const currentLen = current.content.length;
+  const pctChange = ((currentLen - beforeLen) / beforeLen) * 100;
+  if (pctChange > -THRESHOLD_PCT) continue;
+
+  const afterLen = currentLen;
 
   const newVersion = skill.current_version + 1;
   const { error: updateErr } = await supabase
