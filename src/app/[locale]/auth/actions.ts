@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 
 export async function login(formData: FormData, locale: string) {
@@ -75,22 +75,47 @@ export async function register(formData: FormData, locale: string) {
         .update({ accepted_at: new Date().toISOString() })
         .eq("id", invite.id);
     } else {
-      // Kein Einladungslink: wie bisher eine neue Organisation anlegen.
-      const orgSlug = slugify(orgName) + "-" + Date.now().toString(36);
-      const { data: org } = await supabase
+      // Kein Einladungslink: diese Instanz gehoert genau einer Organisation.
+      // Existiert sie schon, tritt der neue Nutzer ihr als Mitglied bei,
+      // statt eine weitere, isolierte Organisation anzulegen (frueherer
+      // Bug: jede Selbstregistrierung erzeugte eine eigene Organisation).
+      // Nur wenn die Instanz noch komplett leer ist, wird eine neue
+      // Organisation samt Admin-Rolle angelegt (Erstregistrierung). Die
+      // Sichtbarkeit bestehender Organisationen ist per RLS auf eigene
+      // Mitglieder beschraenkt, daher hier der Service-Client.
+      const service = await createServiceClient();
+      const { data: existingOrg } = await service
         .from("organizations")
-        .insert({ name: orgName, slug: orgSlug })
-        .select()
-        .single();
+        .select("id")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
 
-      if (org) {
+      if (existingOrg) {
         await supabase.from("profiles").insert({
           user_id: data.user.id,
-          org_id: org.id,
+          org_id: existingOrg.id,
           name,
           email,
-          role: "admin",
+          role: "member",
         });
+      } else {
+        const orgSlug = slugify(orgName) + "-" + Date.now().toString(36);
+        const { data: org } = await supabase
+          .from("organizations")
+          .insert({ name: orgName, slug: orgSlug })
+          .select()
+          .single();
+
+        if (org) {
+          await supabase.from("profiles").insert({
+            user_id: data.user.id,
+            org_id: org.id,
+            name,
+            email,
+            role: "admin",
+          });
+        }
       }
     }
   }
