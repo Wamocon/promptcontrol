@@ -63,13 +63,14 @@ export async function register(formData: FormData, locale: string) {
   if (data.user) {
     if (invite) {
       // Bestehender Organisation beitreten statt eine neue anzulegen.
-      await supabase.from("profiles").insert({
+      const { error: profileErr } = await supabase.from("profiles").insert({
         user_id: data.user.id,
         org_id: invite.org_id,
         name,
         email,
         role: invite.role,
       });
+      if (profileErr) return { error: profileErr.message };
       await supabase
         .from("team_invitations")
         .update({ accepted_at: new Date().toISOString() })
@@ -92,30 +93,31 @@ export async function register(formData: FormData, locale: string) {
         .maybeSingle();
 
       if (existingOrg) {
-        await supabase.from("profiles").insert({
+        const { error: profileErr } = await supabase.from("profiles").insert({
           user_id: data.user.id,
           org_id: existingOrg.id,
           name,
           email,
-          role: "member",
+          role: "trainee",
         });
+        if (profileErr) return { error: profileErr.message };
       } else {
         const orgSlug = slugify(orgName) + "-" + Date.now().toString(36);
-        const { data: org } = await supabase
+        const { data: org, error: orgErr } = await supabase
           .from("organizations")
           .insert({ name: orgName, slug: orgSlug })
           .select()
           .single();
+        if (orgErr) return { error: orgErr.message };
 
-        if (org) {
-          await supabase.from("profiles").insert({
-            user_id: data.user.id,
-            org_id: org.id,
-            name,
-            email,
-            role: "admin",
-          });
-        }
+        const { error: profileErr } = await supabase.from("profiles").insert({
+          user_id: data.user.id,
+          org_id: org.id,
+          name,
+          email,
+          role: "admin",
+        });
+        if (profileErr) return { error: profileErr.message };
       }
     }
   }
