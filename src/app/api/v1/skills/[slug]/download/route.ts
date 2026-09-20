@@ -84,15 +84,11 @@ export async function GET(
 
   const files = (skill.files ?? []) as { path: string; storage_path: string; content_type: string }[];
 
-  if (files.length === 0) {
-    return new NextResponse(markdown, {
-      headers: {
-        "Content-Type": "text/markdown; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${skill.slug}.md"`,
-      },
-    });
-  }
-
+  // Immer als ZIP mit SKILL.md ausliefern, auch ohne Zusatzdateien: Claude
+  // Code/Claude Desktop erwarten einen Ordner mit einer Datei, die exakt
+  // "SKILL.md" heisst, nicht eine lose Datei mit beliebigem Namen. Wird das
+  // ZIP normal entpackt (z.B. Windows "Alle extrahieren"), entsteht direkt
+  // ein Ordner mit korrektem Namen und SKILL.md darin, einsatzbereit.
   const zip = new JSZip();
   zip.file("SKILL.md", markdown);
   for (const f of files) {
