@@ -81,6 +81,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
   const [showVersions, setShowVersions] = useState(false);
   const [versions, setVersions] = useState<SkillVersion[]>([]);
   const [versionsLoading, setVersionsLoading] = useState(false);
+  const [versionsError, setVersionsError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -136,6 +137,7 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
     setChangeNote("");
     setShowVersions(false);
     setVersions([]);
+    setVersionsError(null);
     setError(null);
   }
 
@@ -268,13 +270,19 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
   async function loadVersions() {
     if (!selectedSkill) return;
     setVersionsLoading(true);
+    setVersionsError(null);
     const supabase = createClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("skill_versions")
       .select("*")
       .eq("skill_id", selectedSkill.id)
       .order("version", { ascending: false });
-    setVersions((data as SkillVersion[]) ?? []);
+    if (error) {
+      setVersionsError(error.message);
+      setVersions([]);
+    } else {
+      setVersions((data as SkillVersion[]) ?? []);
+    }
     setVersionsLoading(false);
   }
 
@@ -669,6 +677,8 @@ export function SkillsClient({ initialSkills, categories: initialCategories }: S
       <Dialog open={showVersions} onClose={() => setShowVersions(false)} title={t("versions")} className="max-w-lg">
         {versionsLoading ? (
           <p className="text-sm text-t4">{tc("loading")}</p>
+        ) : versionsError ? (
+          <p className="text-sm text-rose-500">{versionsError}</p>
         ) : versions.length === 0 ? (
           <p className="text-sm text-t4">{t("noVersions")}</p>
         ) : (

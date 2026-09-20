@@ -323,8 +323,19 @@ export async function polishSkillWithAI(skillId: string) {
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      { maxTokens: 4000, temperature: 0.3, timeoutMs: 90_000 }
+      { maxTokens: 8000, temperature: 0.3, timeoutMs: 180_000 }
     );
+    // finishReason "length" means the response was cut off by max_tokens
+    // mid-generation. Saving that would silently truncate the skill's
+    // content (this happened to 52 skills during the first bulk run: some
+    // lost up to 98% of their content). Fail loudly instead of guessing.
+    if (result.finishReason && result.finishReason !== "stop") {
+      return {
+        error:
+          `KI-Antwort wurde abgeschnitten (Grund: ${result.finishReason}), Inhalt waere unvollstaendig. ` +
+          "Nicht gespeichert. Skill ist vermutlich zu lang, bitte manuell kuerzen oder aufteilen.",
+      };
+    }
     text = result.text;
   } catch (err) {
     return { error: err instanceof Error ? err.message : "KI nicht erreichbar" };
