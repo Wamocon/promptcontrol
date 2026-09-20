@@ -68,13 +68,19 @@ function parseRetryDelayMs(response: Response): number {
   return 5_000;
 }
 
+export interface ChatCompletionResult {
+  content: string | null;
+  /** "stop" = complete; "length" = cut off by max_tokens, likely truncated. */
+  finishReason: string | null;
+}
+
 /** Core chat completion – OpenAI-compatible for all 3 providers */
 export async function chatCompletion(
   providerId: ProviderId,
   model: string,
   messages: ChatMessage[],
   options: ChatOptions = {}
-): Promise<string | null> {
+): Promise<ChatCompletionResult> {
   const provider = PROVIDERS[providerId];
   const apiKey = process.env[provider.apiKeyEnv];
 
@@ -119,9 +125,12 @@ export async function chatCompletion(
   }
 
   const data = await response.json() as {
-    choices?: Array<{ message?: { content?: string } }>;
+    choices?: Array<{ message?: { content?: string }; finish_reason?: string }>;
   };
-  return data.choices?.[0]?.message?.content ?? null;
+  return {
+    content: data.choices?.[0]?.message?.content ?? null,
+    finishReason: data.choices?.[0]?.finish_reason ?? null,
+  };
 }
 
 /** Returns true when the error looks like a transient rate-limit / server error
@@ -144,12 +153,12 @@ function isTransientError(err: unknown): boolean {
 export async function autoChat(
   messages: ChatMessage[],
   options?: ChatOptions
-): Promise<{ text: string; provider: ProviderId; model: string }> {
+): Promise<{ text: string; provider: ProviderId; model: string; finishReason: string | null }> {
   const { provider, model } = await getActiveProvider();
 
   try {
-    const text = await chatCompletion(provider, model, messages, options);
-    return { text: text ?? "Keine Antwort erhalten.", provider, model };
+    const result = await chatCompletion(provider, model, messages, options);
+    return { text: result.content ?? "Keine Antwort erhalten.", provider, model, finishReason: result.finishReason };
   } catch (primaryErr) {
     if (!isTransientError(primaryErr)) throw primaryErr;
 
@@ -159,8 +168,13 @@ export async function autoChat(
       if (groqKey) {
         try {
           const fallbackModel = PROVIDERS.groq.defaultModel;
-          const text = await chatCompletion("groq", fallbackModel, messages, options);
-          return { text: text ?? "Keine Antwort erhalten.", provider: "groq", model: fallbackModel };
+          const result = await chatCompletion("groq", fallbackModel, messages, options);
+          return {
+            text: result.content ?? "Keine Antwort erhalten.",
+            provider: "groq",
+            model: fallbackModel,
+            finishReason: result.finishReason,
+          };
         } catch {
           // GroQ also failed - try OpenRouter next
         }
@@ -175,8 +189,13 @@ export async function autoChat(
           // Free-tier model: the configured OpenRouter account has no paid
           // credits, so a paid model would fail with HTTP 402.
           const orModel = PROVIDERS.openrouter.defaultModel;
-          const text = await chatCompletion("openrouter", orModel, messages, options);
-          return { text: text ?? "Keine Antwort erhalten.", provider: "openrouter", model: orModel };
+          const result = await chatCompletion("openrouter", orModel, messages, options);
+          return {
+            text: result.content ?? "Keine Antwort erhalten.",
+            provider: "openrouter",
+            model: orModel,
+            finishReason: result.finishReason,
+          };
         } catch {
           // OpenRouter also failed - surface the original, most informative error below
         }
