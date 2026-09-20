@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { updateOrganizationPlan } from "./actions";
 
 type PlanType = "free" | "pro";
 type SubStatus = "active" | "cancelled" | "past_due" | "trialing" | null;
@@ -42,6 +42,7 @@ export function SubscriptionsClient({ organizations: initialOrgs }: Subscription
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPlan, setEditPlan] = useState<PlanType>("free");
   const [editStatus, setEditStatus] = useState<SubStatus>("active");
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const filtered = orgs.filter(
@@ -61,21 +62,19 @@ export function SubscriptionsClient({ organizations: initialOrgs }: Subscription
   }
 
   function saveSubscription(orgId: string) {
+    setError(null);
     startTransition(async () => {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("organizations")
-        .update({ plan: editPlan, subscription_status: editStatus })
-        .eq("id", orgId);
-
-      if (!error) {
-        setOrgs((prev) =>
-          prev.map((o) =>
-            o.id === orgId ? { ...o, plan: editPlan, subscription_status: editStatus } : o
-          )
-        );
-        setEditingId(null);
+      const result = await updateOrganizationPlan(orgId, editPlan, editStatus);
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      setOrgs((prev) =>
+        prev.map((o) =>
+          o.id === orgId ? { ...o, plan: editPlan, subscription_status: editStatus } : o
+        )
+      );
+      setEditingId(null);
     });
   }
 
@@ -95,6 +94,8 @@ export function SubscriptionsClient({ organizations: initialOrgs }: Subscription
           <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t("subscriptions.title")}</h1>
         </div>
       </div>
+
+      {error && <p className="mb-4 text-sm text-rose-500">{error}</p>}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">

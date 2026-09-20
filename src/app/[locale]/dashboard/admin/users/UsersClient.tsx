@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { updateUserRole, updateUserOrganization, deleteUserProfile } from "./actions";
 
 type UserRole = "admin" | "pm" | "developer" | "trainee";
 
@@ -17,12 +17,19 @@ interface User {
   name: string;
   email: string;
   role: UserRole;
+  org_id: string;
   created_at: string;
   organizations?: { name: string; plan: string } | null;
 }
 
+interface OrgOption {
+  id: string;
+  name: string;
+}
+
 interface UsersClientProps {
   users: User[];
+  organizations: OrgOption[];
 }
 
 const roleOptions: UserRole[] = ["admin", "pm", "developer", "trainee"];
@@ -37,12 +44,14 @@ function getRoleBadge(role: string) {
   return <Badge variant={map[role] ?? "default"}>{role}</Badge>;
 }
 
-export function UsersClient({ users: initialUsers }: UsersClientProps) {
+export function UsersClient({ users: initialUsers, organizations }: UsersClientProps) {
   const t = useTranslations("admin");
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState(initialUsers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editRole, setEditRole] = useState<UserRole>("developer");
+  const [editOrgId, setEditOrgId] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const filtered = users.filter(
@@ -54,6 +63,7 @@ export function UsersClient({ users: initialUsers }: UsersClientProps) {
   function startEdit(user: User) {
     setEditingId(user.id);
     setEditRole(user.role);
+    setEditOrgId(user.org_id);
   }
 
   function cancelEdit() {
@@ -61,27 +71,50 @@ export function UsersClient({ users: initialUsers }: UsersClientProps) {
   }
 
   function saveRole(userId: string) {
+    setError(null);
     startTransition(async () => {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from("profiles")
-        .update({ role: editRole })
-        .eq("id", userId);
-
-      if (!error) {
-        setUsers((prev) =>
-          prev.map((u) => (u.id === userId ? { ...u, role: editRole } : u))
-        );
-        setEditingId(null);
+      const original = users.find((u) => u.id === userId);
+      const roleResult = await updateUserRole(userId, editRole);
+      if (roleResult.error) {
+        setError(roleResult.error);
+        return;
       }
+      const orgChanged = original && original.org_id !== editOrgId;
+      if (orgChanged) {
+        const orgResult = await updateUserOrganization(userId, editOrgId);
+        if (orgResult.error) {
+          setError(orgResult.error);
+          return;
+        }
+      }
+      const newOrg = organizations.find((o) => o.id === editOrgId);
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId
+            ? {
+                ...u,
+                role: editRole,
+                org_id: editOrgId,
+                organizations: orgChanged && newOrg
+                  ? { name: newOrg.name, plan: u.organizations?.plan ?? "free" }
+                  : u.organizations,
+              }
+            : u
+        )
+      );
+      setEditingId(null);
     });
   }
 
   function deleteUser(userId: string) {
     if (!confirm(t("users.confirmDelete"))) return;
+    setError(null);
     startTransition(async () => {
-      const supabase = createClient();
-      await supabase.from("profiles").delete().eq("id", userId);
+      const result = await deleteUserProfile(userId);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
       setUsers((prev) => prev.filter((u) => u.id !== userId));
     });
   }
@@ -102,6 +135,8 @@ export function UsersClient({ users: initialUsers }: UsersClientProps) {
           <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t("users.title")}</h1>
         </div>
       </div>
+
+      {error && <p className="mb-4 text-sm text-rose-500">{error}</p>}
 
       <Card className="mb-4">
         <div className="relative">
@@ -150,9 +185,23 @@ export function UsersClient({ users: initialUsers }: UsersClientProps) {
                     )}
                   </td>
                   <td className="py-3 text-zinc-600 dark:text-zinc-400">
-                    {user.organizations?.name ?? "-"}
-                    {user.organizations?.plan === "pro" && (
-                      <Badge variant="pro" className="ml-2">Pro</Badge>
+                    {editingId === user.id ? (
+                      <select
+                        value={editOrgId}
+                        onChange={(e) => setEditOrgId(e.target.value)}
+                        className="rounded-lg border border-indigo-400 bg-white px-2 py-1 text-xs dark:bg-zinc-800 dark:text-zinc-100"
+                      >
+                        {organizations.map((o) => (
+                          <option key={o.id} value={o.id}>{o.name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <>
+                        {user.organizations?.name ?? "-"}
+                        {user.organizations?.plan === "pro" && (
+                          <Badge variant="pro" className="ml-2">Pro</Badge>
+                        )}
+                      </>
                     )}
                   </td>
                   <td className="py-3 text-zinc-500 dark:text-zinc-400 text-xs">{formatDate(user.created_at)}</td>
